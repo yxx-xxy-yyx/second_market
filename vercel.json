@@ -1,0 +1,9 @@
+{
+  "installCommand": "cd SecondMarket-Vue && npm ci",
+  "buildCommand": "cd SecondMarket-Vue && npm run build",
+  "outputDirectory": "SecondMarket-Vue/dist",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://second-market.onrender.com/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
