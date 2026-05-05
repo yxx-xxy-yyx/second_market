@@ -1,0 +1,53 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: second_market
+      MYSQL_USER: second_market
+      MYSQL_PASSWORD: second_market
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../SecondMarket-backend/SecondMarket-backend/database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+      - ../SecondMarket-backend/SecondMarket-backend/database/seed_demo_products_per_school.sql:/docker-entrypoint-initdb.d/02-seed-demo.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  backend:
+    build:
+      context: ../SecondMarket-backend/SecondMarket-backend
+      dockerfile: Dockerfile
+    environment:
+      DB_URL: jdbc:mysql://db:3306/second_market?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+      DB_USERNAME: second_market
+      DB_PASSWORD: second_market
+      SERVER_BASE_URL: http://localhost/api
+      PROJECT_FILE_UPLOAD_PATH: /data/uploads/
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  db_data:
+  uploads:

@@ -1,0 +1,104 @@
+:root {
+  --primary-color: #06B6D4;
+  --secondary-color: #8B5CF6;
+  --success-color: #22C55E;
+  --warning-color: #F59E0B;
+  --danger-color: #EF4444;
+  --info-color: #94A3B8;
+  
+  --text-primary: #0F172A;
+  --text-regular: #334155;
+  --text-secondary: #64748B;
+  --text-placeholder: #94A3B8;
+  
+  --bg-color: #F6F8FA;
+  --bg-white: #FFFFFF;
+  --border-color: #E2E8F0;
+  --border-light: #EEF2F7;
+  
+  --card-radius: 12px;
+  --button-radius: 5px;
+  --input-radius: 4px;
+  
+  --card-shadow: 0 2px 16px rgba(15, 23, 42, 0.06);
+  --card-shadow-hover: 0 8px 22px rgba(15, 23, 42, 0.10);
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-xxl: 24px;
+  
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  
+  --transition-fast: 0.2s;
+  --transition-base: 0.3s;
+  --transition-slow: 0.5s;
+
+  --el-color-primary: var(--primary-color);
+  --el-color-primary-light-3: rgba(6, 182, 212, 0.70);
+  --el-color-primary-light-5: rgba(6, 182, 212, 0.45);
+  --el-color-primary-light-7: rgba(6, 182, 212, 0.24);
+  --el-color-primary-light-9: rgba(6, 182, 212, 0.10);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  margin: 0;
+  padding: 0;
+}
+
+.card-common {
+  background: var(--bg-white);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-base);
+}
+
+.card-common:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.btn-common {
+  border-radius: var(--button-radius);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-common:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 576px) {
+  .page-container {
+    padding: var(--spacing-sm);
+  }
+}
+
