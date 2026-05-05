@@ -8,4 +8,4 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/project-backend-1.0.0.jar ./app.jar
 EXPOSE 8001
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["sh","-c","java -Dserver.address=0.0.0.0 -Dserver.port=${PORT:-8001} -Dserver.servlet.context-path=/api -jar /app/app.jar"]
