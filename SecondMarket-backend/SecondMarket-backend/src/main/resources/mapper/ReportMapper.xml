@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.ReportMapper">
+
+    <resultMap id="ReportWithDetailsResult" type="com.echoofmemories.project.entity.Report">
+        <id property="id" column="id"/>
+        <result property="reporterId" column="reporter_id"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="reason" column="reason"/>
+        <result property="status" column="status"/>
+        <result property="handleResult" column="handle_result"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="reporterNickname" column="reporter_nickname"/>
+        <result property="reporterAvatar" column="reporter_avatar"/>
+        <result property="targetName" column="target_name"/>
+    </resultMap>
+
+    <select id="selectReportPageWithDetails" resultMap="ReportWithDetailsResult">
+        SELECT 
+            rp.*,
+            u.nickname AS reporter_nickname,
+            u.avatar AS reporter_avatar,
+            CASE 
+                WHEN rp.target_type = 1 THEN p.title
+                WHEN rp.target_type = 2 THEN tu.nickname
+                ELSE NULL
+            END AS target_name
+        FROM report rp
+        LEFT JOIN sys_user u ON rp.reporter_id = u.id
+        LEFT JOIN product p ON rp.target_type = 1 AND rp.target_id = p.id
+        LEFT JOIN sys_user tu ON rp.target_type = 2 AND rp.target_id = tu.id
+        WHERE rp.deleted = 0
+        <if test="status != null">
+            AND rp.status = #{status}
+        </if>
+        ORDER BY rp.create_time DESC
+    </select>
+
+</mapper>
+

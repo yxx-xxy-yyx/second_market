@@ -1,0 +1,88 @@
+server:
+  port: 8001
+  servlet:
+    context-path: /api
+
+# 数据源配置
+spring:
+  application:
+    name: second-market-backend
+  
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:second_market}
+    password: ${DB_PASSWORD:second_market}
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/second_market?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}
+    
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+      
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+    
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
+# MyBatis Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.echoofmemories.project.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: AUTO
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# 日志配置
+logging:
+  level:
+    com.echoofmemories.project: debug
+    org.springframework.web: info
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
+    
+# Knife4j Swagger 配置
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+    enable-swagger-models: true
+    enable-document-manage: true
+    swagger-model-name: 实体类列表
+    
+# 自定义配置
+project:
+  jwt:
+    secret: ${JWT_SECRET:echoofmemories2025}
+    expire-time: 600000  # 10分钟
+  file:
+    upload-path: ${PROJECT_FILE_UPLOAD_PATH:${user.dir}/uploads/}
+    max-size: 100MB
+    allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt
+  server:
+    base-url: ${SERVER_BASE_URL:http://localhost:8001/api}
+
+# AI功能配置
+ai:
+  enabled: ${AI_ENABLED:true}
+  api:
+    base-url: ${AI_BASE_URL:https://api.siliconflow.cn/v1/chat/completions}
+    api-key: ${AI_API_KEY:}
+    model: ${AI_MODEL:Qwen/Qwen2-VL-72B-Instruct}
+    max-tokens: ${AI_MAX_TOKENS:4096}
+    temperature: ${AI_TEMPERATURE:0.7}
+    timeout: ${AI_TIMEOUT:6000000}
+  # 功能配置
+  features:
+    rate-limit: ${AI_RATE_LIMIT:3}                                # 每分钟请求限制
+    content-filter: ${AI_CONTENT_FILTER:true}                            # 内容过滤开关

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.SchoolMapper">
+
+    <!-- 前端学校下拉框（根据语言返回名称） -->
+    <select id="selectSchoolOptions" resultType="com.echoofmemories.project.entity.School">
+        SELECT
+            id,
+            school_code,
+            name_zh,
+            name_ko,
+            name_en,
+            city_zh,
+            city_ko,
+            city_en,
+            logo_url,
+            status
+        FROM school
+        WHERE deleted = 0
+        AND status = 1
+    </select>
+</mapper>
