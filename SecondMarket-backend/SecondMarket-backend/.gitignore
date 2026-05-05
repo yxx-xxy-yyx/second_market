@@ -1,0 +1,39 @@
+# IDEA 配置文件
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Maven 编译输出
+target/
+classes/
+resources/
+
+# Maven 本地缓存文件
+Maven_*.xml
+compiler.xml
+encodings.xml
+jarRepositories.xml
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+*.tmp
+*.bak
+*.swp
+
+# 配置文件（可选，如果你不想提交本地配置）
+application-dev.yml
+application-local.yml
+
+# OS 系统文件
+.DS_Store
+Thumbs.db
+
+# 忽略 VS Code 配置文件夹
+.vscode/
+
+uploads/
