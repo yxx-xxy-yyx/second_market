@@ -1,0 +1,19 @@
+.vercel/
+.vercelignore
+
+# Frontend
+SecondMarket-Vue/node_modules/
+SecondMarket-Vue/dist/
+SecondMarket-Vue/.env*
+
+# Backend
+SecondMarket-backend/SecondMarket-backend/target/
+SecondMarket-backend/SecondMarket-backend/uploads/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+__MACOSX/
+.vscode/
+.idea/
+
