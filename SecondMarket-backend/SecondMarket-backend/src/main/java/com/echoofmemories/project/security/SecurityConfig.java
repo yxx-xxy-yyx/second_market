@@ -59,7 +59,7 @@ public class SecurityConfig {
                         http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
                 } else {
                         http.authorizeHttpRequests(authz -> authz
-                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                                         .requestMatchers("/health", "/api/health").permitAll()
                                         .requestMatchers("/auth/**", "/api/auth/**").permitAll()
@@ -92,7 +92,7 @@ public class SecurityConfig {
                                                         "/api/user/admin/**")
                                         .hasRole("ADMIN")
 
-                                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                                        .antMatchers(HttpMethod.GET, "/**").permitAll()
                                         .anyRequest().authenticated());
                 }
 
