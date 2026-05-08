@@ -61,10 +61,10 @@ public class SecurityConfig {
                         http.authorizeHttpRequests(authz -> authz
                                         .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                                        .requestMatchers("/health", "/api/health").permitAll()
-                                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+                                        .antMatchers("/health", "/api/health").permitAll()
+                                        .antMatchers("/auth/**", "/api/auth/**").permitAll()
 
-                                        .requestMatchers(
+                                        .antMatchers(
                                                         "/doc.html",
                                                         "/webjars/**",
                                                         "/v2/api-docs",
@@ -74,16 +74,16 @@ public class SecurityConfig {
                                                         "/favicon.ico")
                                         .permitAll()
 
-                                        .requestMatchers(
+                                        .antMatchers(
                                                         "/uploads/**",
                                                         "/api/uploads/**",
                                                         "/file/download/**",
                                                         "/api/file/download/**")
                                         .permitAll()
 
-                                        .requestMatchers("/security-demo/public", "/api/security-demo/public").permitAll()
+                                        .antMatchers("/security-demo/public", "/api/security-demo/public").permitAll()
 
-                                        .requestMatchers(
+                                        .antMatchers(
                                                         "/admin/**",
                                                         "/api/admin/**",
                                                         "/role/**",
