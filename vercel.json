@@ -1,5 +1,5 @@
 {
-  "installCommand": "cd SecondMarket-Vue && npm ci",
+  "installCommand": "cd SecondMarket-Vue && npm ci --include=dev",
   "buildCommand": "cd SecondMarket-Vue && npm run build",
   "outputDirectory": "SecondMarket-Vue/dist",
   "rewrites": [

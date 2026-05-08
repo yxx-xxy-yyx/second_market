@@ -1,5 +1,6 @@
 server:
-  port: 8001
+  address: 0.0.0.0
+  port: ${PORT:8001}
   servlet:
     context-path: /api
 
@@ -10,9 +11,9 @@ spring:
   
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME:second_market}
-    password: ${DB_PASSWORD:second_market}
-    url: ${DB_URL:jdbc:mysql://127.0.0.1:3306/second_market?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:second_market}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:second_market}}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:mysql://127.0.0.1:3306/second_market?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}}
     
   servlet:
     multipart:

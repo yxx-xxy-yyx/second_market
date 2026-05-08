@@ -1,14 +1,17 @@
 package com.echoofmemories.project.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
@@ -24,6 +27,10 @@ public class SecurityConfig {
 
         private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
         private final CorsConfigurationSource corsConfigurationSource;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+        @Value("${project.security.permit-all:${SECURITY_PERMIT_ALL:true}}")
+        private boolean permitAll;
 
         /**
          * 安全过滤器链配置
@@ -46,12 +53,50 @@ public class SecurityConfig {
                                 // 配置会话管理为无状态
                                 .sessionManagement()
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                                .and()
+                                .and();
 
-                                // 开发模式：注释掉权限验证，允许所有接口访问
-                                .authorizeHttpRequests(authz -> authz
-                                                // 开发模式：所有接口都允许访问
-                                                .anyRequest().permitAll());
+                if (permitAll) {
+                        http.authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+                } else {
+                        http.authorizeHttpRequests(authz -> authz
+                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                                        .requestMatchers("/health", "/api/health").permitAll()
+                                        .requestMatchers("/auth/**", "/api/auth/**").permitAll()
+
+                                        .requestMatchers(
+                                                        "/doc.html",
+                                                        "/webjars/**",
+                                                        "/v2/api-docs",
+                                                        "/v3/api-docs/**",
+                                                        "/swagger-resources/**",
+                                                        "/configuration/**",
+                                                        "/favicon.ico")
+                                        .permitAll()
+
+                                        .requestMatchers(
+                                                        "/uploads/**",
+                                                        "/api/uploads/**",
+                                                        "/file/download/**",
+                                                        "/api/file/download/**")
+                                        .permitAll()
+
+                                        .requestMatchers("/security-demo/public", "/api/security-demo/public").permitAll()
+
+                                        .requestMatchers(
+                                                        "/admin/**",
+                                                        "/api/admin/**",
+                                                        "/role/**",
+                                                        "/api/role/**",
+                                                        "/user/admin/**",
+                                                        "/api/user/admin/**")
+                                        .hasRole("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+                                        .anyRequest().authenticated());
+                }
+
+                http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
                 // 原权限配置（已注释，生产环境需要恢复）
                 // .authorizeHttpRequests(authz -> authz
