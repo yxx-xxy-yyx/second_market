@@ -2,7 +2,7 @@ services:
   - type: web
     name: secondmarket-backend
     env: docker
-    rootDir: SecondMarket-backend/SecondMarket-backend
+    rootDir: .
     dockerfilePath: Dockerfile
     healthCheckPath: /api/health
     envVars:
