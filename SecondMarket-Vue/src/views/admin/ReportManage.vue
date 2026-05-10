@@ -1,7 +1,7 @@
 <template>
   <div class="report-manage">
     <div class="page-header">
-      <h2 class="page-title">举报管理</h2>
+      <h2 class="page-title">{{ $t('ReportManage.title') }}</h2>
     </div>
 
     <el-row :gutter="20">
@@ -10,116 +10,116 @@
         <el-card class="filter-card" shadow="hover">
           <div class="status-filter">
             <el-radio-group v-model="statusFilter" @change="handleStatusChange">
-              <el-radio-button label="">全部</el-radio-button>
-              <el-radio-button label="pending">待处理</el-radio-button>
-              <el-radio-button label="handled">已处理</el-radio-button>
-              <el-radio-button label="rejected">已驳回</el-radio-button>
+              <el-radio-button label="">{{ $t('ReportManage.filter.all') }}</el-radio-button>
+              <el-radio-button label="pending">{{ $t('ReportManage.status.pending') }}</el-radio-button>
+              <el-radio-button label="handled">{{ $t('ReportManage.status.handled') }}</el-radio-button>
+              <el-radio-button label="rejected">{{ $t('ReportManage.status.rejected') }}</el-radio-button>
             </el-radio-group>
           </div>
         </el-card>
 
         <el-card class="table-card" shadow="hover" style="margin-top: 20px;">
-      <el-table
-        v-loading="loading"
-        :data="reportList"
-        stripe
-        style="width: 100%"
-      >
-        <el-table-column prop="id" label="ID" width="80" />
-        
-        <el-table-column label="举报类型" width="120">
-          <template #default="{ row }">
-            <div class="type-cell">
-              <el-icon :size="18" :color="row.type === 'product' ? '#409eff' : '#f56c6c'">
-                <component :is="row.type === 'product' ? 'ShoppingBag' : 'User'" />
-              </el-icon>
-              <span>{{ row.type === 'product' ? '商品举报' : '用户举报' }}</span>
-            </div>
-          </template>
-        </el-table-column>
+          <el-table
+            v-loading="loading"
+            :data="reportList"
+            stripe
+            style="width: 100%"
+          >
+            <el-table-column prop="id" :label="$t('ReportManage.id')" width="80" />
+            
+            <el-table-column :label="$t('ReportManage.reportType')" width="120">
+              <template #default="{ row }">
+                <div class="type-cell">
+                  <el-icon :size="18" :color="row.type === 'product' ? '#409eff' : '#f56c6c'">
+                    <component :is="row.type === 'product' ? 'ShoppingBag' : 'User'" />
+                  </el-icon>
+                  <span>{{ $t(getTypeTextKey(row.type)) }}</span>
+                </div>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="举报对象" width="200" show-overflow-tooltip>
-          <template #default="{ row }">
-            <div class="target-cell">
-              <img 
-                v-if="row.type === 'product' && row.targetImage" 
-                :src="row.targetImage" 
-                class="target-image"
-                @error="handleImageError"
-              />
-              <div class="target-info">
-                <div class="target-name">{{ row.targetName }}</div>
-                <div class="target-desc" v-if="row.targetDesc">{{ row.targetDesc }}</div>
-              </div>
-            </div>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('ReportManage.target')" width="200" show-overflow-tooltip>
+              <template #default="{ row }">
+                <div class="target-cell">
+                  <img 
+                    v-if="row.type === 'product' && row.targetImage" 
+                    :src="row.targetImage" 
+                    class="target-image"
+                    @error="handleImageError"
+                  />
+                  <div class="target-info">
+                    <div class="target-name">{{ row.targetName }}</div>
+                    <div class="target-desc" v-if="row.targetDesc">{{ row.targetDesc }}</div>
+                  </div>
+                </div>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="举报人" width="120">
-          <template #default="{ row }">
-            {{ row.reporterName }}
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('ReportManage.reporter')" width="120">
+              <template #default="{ row }">
+                {{ row.reporterName }}
+              </template>
+            </el-table-column>
 
-        <el-table-column label="举报原因" min-width="200" show-overflow-tooltip>
-          <template #default="{ row }">
-            {{ row.reason }}
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('ReportManage.reason')" min-width="200" show-overflow-tooltip>
+              <template #default="{ row }">
+                {{ row.reason }}
+              </template>
+            </el-table-column>
 
-        <el-table-column label="举报时间" width="160">
-          <template #default="{ row }">
-            {{ formatDate(row.createTime) }}
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('ReportManage.reportTime')" width="160">
+              <template #default="{ row }">
+                {{ formatDate(row.createTime) }}
+              </template>
+            </el-table-column>
 
-        <el-table-column label="状态" width="100">
-          <template #default="{ row }">
-            <el-tag :type="getStatusType(row.status)" size="small">
-              {{ getStatusText(row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
+            <el-table-column :label="$t('ReportManage.status')" width="100">
+              <template #default="{ row }">
+                <el-tag :type="getStatusType(row.status)" size="small">
+                  {{ $t(getStatusTextKey(row.status)) }}
+                </el-tag>
+              </template>
+            </el-table-column>
 
-        <el-table-column label="操作" width="260" fixed="right">
-          <template #default="{ row }">
-            <el-button type="primary" size="small" @click="handleViewDetail(row)" :icon="View">
-              详情
-            </el-button>
-            <el-button 
-              v-if="row.status === 'pending'"
-              type="success" 
-              size="small" 
-              @click="handleProcess(row)" 
-              :icon="Select"
-            >
-              处理
-            </el-button>
-            <el-button 
-              v-if="row.status === 'pending'"
-              type="warning" 
-              size="small" 
-              @click="handleReject(row)" 
-              :icon="Close"
-            >
-              驳回
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            <el-table-column :label="$t('ReportManage.actions')" width="260" fixed="right">
+              <template #default="{ row }">
+                <el-button type="primary" size="small" @click="handleViewDetail(row)" :icon="View">
+                  {{ $t('ReportManage.detail') }}
+                </el-button>
+                <el-button 
+                  v-if="row.status === 'pending'"
+                  type="success" 
+                  size="small" 
+                  @click="handleProcess(row)" 
+                  :icon="Select"
+                >
+                  {{ $t('ReportManage.process') }}
+                </el-button>
+                <el-button 
+                  v-if="row.status === 'pending'"
+                  type="warning" 
+                  size="small" 
+                  @click="handleReject(row)" 
+                  :icon="Close"
+                >
+                  {{ $t('ReportManage.reject') }}
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
 
-      <div class="pagination">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
-      </div>
-    </el-card>
+          <div class="pagination">
+            <el-pagination
+              v-model:current-page="pagination.page"
+              v-model:page-size="pagination.size"
+              :page-sizes="[10, 20, 50, 100]"
+              :total="pagination.total"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+            />
+          </div>
+        </el-card>
       </el-col>
 
       <!-- 右侧统计卡片区 30% -->
@@ -130,26 +130,26 @@
             <template #header>
               <div class="card-header">
                 <el-icon><TrendCharts /></el-icon>
-                <span>举报统计</span>
+                <span>{{ $t('ReportManage.statistics') }}</span>
               </div>
             </template>
             <div class="stat-item">
-              <div class="stat-label">待处理</div>
+              <div class="stat-label">{{ $t('ReportManage.stats.pending') }}</div>
               <div class="stat-value pending">{{ stats.pending || 0 }}</div>
             </div>
             <el-divider />
             <div class="stat-item">
-              <div class="stat-label">已处理</div>
+              <div class="stat-label">{{ $t('ReportManage.stats.handled') }}</div>
               <div class="stat-value success">{{ stats.handled || 0 }}</div>
             </div>
             <el-divider />
             <div class="stat-item">
-              <div class="stat-label">已驳回</div>
+              <div class="stat-label">{{ $t('ReportManage.stats.rejected') }}</div>
               <div class="stat-value danger">{{ stats.rejected || 0 }}</div>
             </div>
             <el-divider />
             <div class="stat-item">
-              <div class="stat-label">总举报数</div>
+              <div class="stat-label">{{ $t('ReportManage.stats.total') }}</div>
               <div class="stat-value info">{{ stats.total || 0 }}</div>
             </div>
           </el-card>
@@ -159,14 +159,14 @@
             <template #header>
               <div class="card-header">
                 <el-icon><PieChart /></el-icon>
-                <span>类型分布</span>
+                <span>{{ $t('ReportManage.typeDistribution') }}</span>
               </div>
             </template>
             <div class="type-stats">
               <div class="type-item">
                 <el-icon :size="24" color="#409eff"><ShoppingBag /></el-icon>
                 <div class="type-info">
-                  <div class="type-label">商品举报</div>
+                  <div class="type-label">{{ $t('ReportManage.productReport') }}</div>
                   <div class="type-value">{{ stats.productReports || 0 }}</div>
                 </div>
               </div>
@@ -174,7 +174,7 @@
               <div class="type-item">
                 <el-icon :size="24" color="#f56c6c"><User /></el-icon>
                 <div class="type-info">
-                  <div class="type-label">用户举报</div>
+                  <div class="type-label">{{ $t('ReportManage.userReport') }}</div>
                   <div class="type-value">{{ stats.userReports || 0 }}</div>
                 </div>
               </div>
@@ -186,56 +186,57 @@
             <template #header>
               <div class="card-header">
                 <el-icon><Operation /></el-icon>
-                <span>快速操作</span>
+                <span>{{ $t('ReportManage.quickActions') }}</span>
               </div>
             </template>
             <el-button type="primary" plain style="width: 100%; margin-bottom: 12px;" @click="statusFilter = 'pending'; handleStatusChange()">
               <el-icon><Warning /></el-icon>
-              查看待处理
+              {{ $t('ReportManage.quick.viewPending') }}
             </el-button>
             <el-button type="success" plain style="width: 100%; margin-bottom: 12px;" @click="statusFilter = 'handled'; handleStatusChange()">
               <el-icon><CircleCheck /></el-icon>
-              查看已处理
+              {{ $t('ReportManage.quick.viewHandled') }}
             </el-button>
             <el-button plain style="width: 100%;" @click="statusFilter = ''; handleStatusChange()">
               <el-icon><Refresh /></el-icon>
-              刷新列表
+              {{ $t('ReportManage.quick.refresh') }}
             </el-button>
           </el-card>
         </div>
       </el-col>
     </el-row>
 
+    <!-- 举报详情对话框 -->
     <el-dialog
       v-model="detailVisible"
-      title="举报详情"
+      :title="$t('ReportManage.detailTitle')"
       width="700px"
     >
       <div class="report-detail" v-if="currentReport">
         <div class="detail-section">
-          <h4>举报信息</h4>
+          <h4>{{ $t('ReportManage.detailInfo') }}</h4>
           <el-descriptions :column="2" border>
-            <el-descriptions-item label="举报ID">{{ currentReport.id }}</el-descriptions-item>
-            <el-descriptions-item label="举报类型">
+            <el-descriptions-item :label="$t('ReportManage.id')">{{ currentReport.id }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('ReportManage.reportType')">
               <el-tag :type="currentReport.type === 'product' ? 'primary' : 'danger'" size="small">
-                {{ currentReport.type === 'product' ? '商品举报' : '用户举报' }}
+                {{ $t(getTypeTextKey(currentReport.type)) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="举报人">{{ currentReport.reporterName }}</el-descriptions-item>
-            <el-descriptions-item label="举报时间">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
-            <el-descriptions-item label="状态" :span="2">
+            <el-descriptions-item :label="$t('ReportManage.reporter')">{{ currentReport.reporterName }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('ReportManage.reportTime')">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('ReportManage.status')" :span="2">
               <el-tag :type="getStatusType(currentReport.status)" size="small">
-                {{ getStatusText(currentReport.status) }}
+                {{ $t(getStatusTextKey(currentReport.status)) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="举报原因" :span="2">
+            <el-descriptions-item :label="$t('ReportManage.reason')" :span="2">
               <div class="reason-text">{{ currentReport.reason }}</div>
             </el-descriptions-item>
           </el-descriptions>
         </div>
 
         <div class="detail-section">
-          <h4>被举报对象信息</h4>
+          <h4>{{ $t('ReportManage.targetInfo') }}</h4>
           <el-card class="target-card">
             <div class="target-info">
               <div class="target-image-container">
@@ -275,10 +276,10 @@
               </div>
               <div class="target-content">
                 <div class="target-name">{{ currentReport.targetName }}</div>
-                <div class="target-desc">{{ currentReport.targetDesc || '暂无描述' }}</div>
+                <div class="target-desc">{{ currentReport.targetDesc || $t('ReportManage.noDescription') }}</div>
                 <div class="target-type">
                   <el-tag :type="currentReport.type === 'product' ? 'primary' : 'danger'" size="small">
-                    {{ currentReport.type === 'product' ? '商品举报' : '用户举报' }}
+                    {{ $t(getTypeTextKey(currentReport.type)) }}
                   </el-tag>
                 </div>
               </div>
@@ -287,61 +288,63 @@
         </div>
 
         <div class="detail-section" v-if="currentReport.handleResult">
-          <h4>处理结果</h4>
+          <h4>{{ $t('ReportManage.processResult') }}</h4>
           <el-card class="result-card">
             <div class="result-text">{{ currentReport.handleResult }}</div>
-            <div class="result-time">处理时间：{{ formatDate(currentReport.handleTime) }}</div>
+            <div class="result-time">{{ $t('ReportManage.processTime') }}：{{ formatDate(currentReport.handleTime) }}</div>
           </el-card>
         </div>
       </div>
     </el-dialog>
 
+    <!-- 处理举报对话框 -->
     <el-dialog
       v-model="processVisible"
-      title="处理举报"
+      :title="$t('ReportManage.processTitle')"
       width="500px"
     >
-      <el-form :model="processForm" :rules="processRules" ref="processFormRef" label-width="100px">
-        <el-form-item label="处理结果" prop="result">
+      <el-form :model="processForm" :rules="processRules" ref="processFormRef" :label-width="$t('ReportManage.labelWidth')">
+        <el-form-item :label="$t('ReportManage.processResult')" prop="result">
           <el-input
             v-model="processForm.result"
             type="textarea"
             :rows="5"
-            placeholder="请输入处理结果"
+            :placeholder="$t('ReportManage.placeholder.processResult')"
             maxlength="500"
             show-word-limit
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="processVisible = false">取消</el-button>
+        <el-button @click="processVisible = false">{{ $t('ReportManage.cancel') }}</el-button>
         <el-button type="primary" @click="confirmProcess" :loading="processing">
-          确定
+          {{ $t('ReportManage.confirm') }}
         </el-button>
       </template>
     </el-dialog>
 
+    <!-- 驳回举报对话框 -->
     <el-dialog
       v-model="rejectVisible"
-      title="驳回举报"
+      :title="$t('ReportManage.rejectTitle')"
       width="500px"
     >
-      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" label-width="100px">
-        <el-form-item label="驳回原因" prop="reason">
+      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" :label-width="$t('ReportManage.labelWidth')">
+        <el-form-item :label="$t('ReportManage.rejectReason')" prop="reason">
           <el-input
             v-model="rejectForm.reason"
             type="textarea"
             :rows="5"
-            placeholder="请输入驳回原因"
+            :placeholder="$t('ReportManage.placeholder.rejectReason')"
             maxlength="500"
             show-word-limit
           />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="rejectVisible = false">取消</el-button>
+        <el-button @click="rejectVisible = false">{{ $t('ReportManage.cancel') }}</el-button>
         <el-button type="warning" @click="confirmReject" :loading="rejecting">
-          确定
+          {{ $t('ReportManage.confirm') }}
         </el-button>
       </template>
     </el-dialog>
@@ -349,7 +352,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   View,
@@ -365,6 +369,8 @@ import {
   Refresh
 } from '@element-plus/icons-vue'
 import { formatImageUrl } from '@/utils/url'
+
+const { t } = useI18n()
 
 const loading = ref(false)
 const processing = ref(false)
@@ -401,20 +407,31 @@ const rejectForm = reactive({
   reason: ''
 })
 
-const processRules = {
+// 表单校验规则（响应式）
+const processRules = computed(() => ({
   result: [
-    { required: true, message: '请输入处理结果', trigger: 'blur' },
-    { min: 10, message: '处理结果不能少于10个字符', trigger: 'blur' }
+    { required: true, message: t('ReportManage.rules.resultRequired'), trigger: 'blur' },
+    { min: 10, message: t('ReportManage.rules.resultMinLength'), trigger: 'blur' }
   ]
-}
+}))
 
-const rejectRules = {
+const rejectRules = computed(() => ({
   reason: [
-    { required: true, message: '请输入驳回原因', trigger: 'blur' },
-    { min: 10, message: '驳回原因不能少于10个字符', trigger: 'blur' }
+    { required: true, message: t('ReportManage.rules.reasonRequired'), trigger: 'blur' },
+    { min: 10, message: t('ReportManage.rules.reasonMinLength'), trigger: 'blur' }
   ]
+}))
+
+// 类型翻译键映射
+const getTypeTextKey = (type) => {
+  const map = {
+    product: 'ReportManage.type.product',
+    user: 'ReportManage.type.user'
+  }
+  return map[type] || type
 }
 
+// 状态标签类型
 const getStatusType = (status) => {
   const typeMap = {
     pending: 'warning',
@@ -424,13 +441,14 @@ const getStatusType = (status) => {
   return typeMap[status] || 'info'
 }
 
-const getStatusText = (status) => {
-  const textMap = {
-    pending: '待处理',
-    handled: '已处理',
-    rejected: '已驳回'
+// 状态翻译键映射
+const getStatusTextKey = (status) => {
+  const map = {
+    pending: 'ReportManage.status.pending',
+    handled: 'ReportManage.status.handled',
+    rejected: 'ReportManage.status.rejected'
   }
-  return textMap[status] || status
+  return map[status] || status
 }
 
 const formatDate = (date) => {
@@ -555,7 +573,7 @@ const getReportList = async () => {
     }
   } catch (error) {
     console.error('获取举报列表失败:', error)
-    ElMessage.error('获取举报列表失败')
+    ElMessage.error(t('ReportManage.fetchFail'))
   } finally {
     loading.value = false
   }
@@ -601,7 +619,7 @@ const confirmProcess = async () => {
     
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    ElMessage.success('处理成功')
+    ElMessage.success(t('ReportManage.processSuccess'))
     processVisible.value = false
     
     const index = reportList.value.findIndex(item => item.id === currentReport.value.id)
@@ -613,7 +631,7 @@ const confirmProcess = async () => {
   } catch (error) {
     if (error !== false) {
       console.error('处理失败:', error)
-      ElMessage.error('处理失败')
+      ElMessage.error(t('ReportManage.processFail'))
     }
   } finally {
     processing.value = false
@@ -627,7 +645,7 @@ const confirmReject = async () => {
     
     await new Promise(resolve => setTimeout(resolve, 1000))
     
-    ElMessage.success('驳回成功')
+    ElMessage.success(t('ReportManage.rejectSuccess'))
     rejectVisible.value = false
     
     const index = reportList.value.findIndex(item => item.id === currentReport.value.id)
@@ -639,7 +657,7 @@ const confirmReject = async () => {
   } catch (error) {
     if (error !== false) {
       console.error('驳回失败:', error)
-      ElMessage.error('驳回失败')
+      ElMessage.error(t('ReportManage.rejectFail'))
     }
   } finally {
     rejecting.value = false

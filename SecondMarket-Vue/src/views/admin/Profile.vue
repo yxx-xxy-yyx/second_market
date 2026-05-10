@@ -1,187 +1,127 @@
 <template>
   <div class="admin-profile">
     <div class="page-header">
-      <h1 class="page-title">个人资料</h1>
-      <p class="page-subtitle">管理您的个人信息和账户设置</p>
+      <h1 class="page-title">{{ $t('Users.profileTitle') }}</h1>
+      <p class="page-subtitle">{{ $t('Users.profileSubtitle') }}</p>
     </div>
 
     <el-row :gutter="20">
       <el-col :span="8">
-        <el-card class="profile-card" header="头像设置">
+        <el-card class="profile-card" :header="$t('Users.avatarSettings')">
           <div class="avatar-section">
             <div class="avatar-wrapper">
-              <AvatarUpload 
-                v-model="profileForm.avatar"
-                :size="120"
-                @success="handleAvatarSuccess"
-                @error="handleAvatarError"
-              />
+              <AvatarUpload v-model="profileForm.avatar" :size="120" @success="handleAvatarSuccess"
+                @error="handleAvatarError" />
             </div>
             <div class="avatar-info">
               <div class="username">{{ profileForm.username }}</div>
               <div class="user-role">
                 <el-tag type="danger" size="small">
-                  管理员
+                  {{ $t('Users.role.admin') }}
                 </el-tag>
               </div>
             </div>
           </div>
         </el-card>
-        
-        <el-card class="stats-card" header="账户统计" style="margin-top: 20px;">
+
+        <el-card class="stats-card" :header="$t('Users.accountStats')" style="margin-top: 20px;">
           <div class="stats-list">
             <div class="stats-item">
-              <span class="stats-label">注册时间</span>
+              <span class="stats-label">{{ $t('Users.registerTime') }}</span>
               <span class="stats-value">{{ profileForm.createTime }}</span>
             </div>
             <div class="stats-item">
-              <span class="stats-label">账户状态</span>
+              <span class="stats-label">{{ $t('Users.accountStatus') }}</span>
               <span class="stats-value">
                 <el-tag :type="profileForm.status === 1 ? 'success' : 'danger'" size="small">
-                  {{ profileForm.status === 1 ? '正常' : '禁用' }}
+                  {{ profileForm.status === 1 ? $t('Users.status.normal') : $t('Users.status.disabled') }}
                 </el-tag>
               </span>
             </div>
           </div>
         </el-card>
       </el-col>
-      
+
       <el-col :span="16">
-        <el-card class="form-card" header="基本信息">
-          <el-form
-            ref="profileFormRef"
-            :model="profileForm"
-            :rules="profileRules"
-            label-width="100px"
-            size="large"
-          >
+        <el-card class="form-card" :header="$t('Users.basicInfo')">
+          <el-form ref="profileFormRef" :model="profileForm" :rules="profileRules" label-width="100px" size="large">
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="用户名" prop="username">
-                  <el-input 
-                    v-model="profileForm.username" 
-                    disabled 
-                    placeholder="用户名不可修改"
-                  />
+                <el-form-item :label="$t('Users.username')" prop="username">
+                  <el-input v-model="profileForm.username" disabled :placeholder="$t('Users.usernameDisabled')" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="昵称" prop="nickname">
-                  <el-input 
-                    v-model="profileForm.nickname" 
-                    placeholder="请输入昵称"
-                    clearable
-                  />
+                <el-form-item :label="$t('Users.nickname')" prop="nickname">
+                  <el-input v-model="profileForm.nickname" :placeholder="$t('Users.nicknamePlaceholder')" clearable />
                 </el-form-item>
               </el-col>
             </el-row>
-            
+
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="邮箱" prop="email">
-                  <el-input 
-                    v-model="profileForm.email" 
-                    placeholder="请输入邮箱地址"
-                    clearable
-                  />
+                <el-form-item :label="$t('Users.email')" prop="email">
+                  <el-input v-model="profileForm.email" :placeholder="$t('Users.emailPlaceholder')" clearable />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="手机号" prop="phone">
-                  <el-input 
-                    v-model="profileForm.phone" 
-                    placeholder="请输入手机号"
-                    clearable
-                  />
+                <el-form-item :label="$t('Users.phone')" prop="phone">
+                  <el-input v-model="profileForm.phone" :placeholder="$t('Users.phonePlaceholder')" clearable />
                 </el-form-item>
               </el-col>
             </el-row>
-            
+
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="性别" prop="gender">
-                  <el-select v-model="profileForm.gender" placeholder="请选择性别" style="width: 100%">
-                    <el-option label="男" value="male" />
-                    <el-option label="女" value="female" />
-                    <el-option label="保密" value="secret" />
+                <el-form-item :label="$t('Users.genders')" prop="gender">
+                  <el-select v-model="profileForm.gender" :placeholder="$t('Users.genderPlaceholder')"
+                    style="width: 100%">
+                    <el-option :label="$t('Users.gender.male')" value="male" />
+                    <el-option :label="$t('Users.gender.female')" value="female" />
+                    <el-option :label="$t('Users.gender.secret')" value="secret" />
                   </el-select>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="生日" prop="birthday">
-                  <el-date-picker
-                    v-model="profileForm.birthday"
-                    type="date"
-                    placeholder="请选择生日"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    style="width: 100%"
-                  />
+                <el-form-item :label="$t('Users.birthday')" prop="birthday">
+                  <el-date-picker v-model="profileForm.birthday" type="date"
+                    :placeholder="$t('Users.birthdayPlaceholder')" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+                    style="width: 100%" />
                 </el-form-item>
               </el-col>
             </el-row>
-            
+
             <el-form-item>
-              <el-button 
-                type="primary" 
-                @click="handleSave" 
-                :loading="saving"
-                class="save-btn"
-              >
-                {{ saving ? '保存中...' : '保存信息' }}
+              <el-button type="primary" @click="handleSave" :loading="saving" class="save-btn">
+                {{ saving ? $t('Users.saving') : $t('Users.saveInfo') }}
               </el-button>
               <el-button @click="handleReset" class="ml-10">
-                重置
+                {{ $t('Users.reset') }}
               </el-button>
             </el-form-item>
           </el-form>
         </el-card>
-        
-        <el-card class="password-card" header="修改密码" style="margin-top: 20px;">
-          <el-form
-            ref="passwordFormRef"
-            :model="passwordForm"
-            :rules="passwordRules"
-            label-width="100px"
-            size="large"
-          >
-            <el-form-item label="当前密码" prop="currentPassword">
-              <el-input
-                v-model="passwordForm.currentPassword"
-                type="password"
-                placeholder="请输入当前密码"
-                show-password
-                clearable
-              />
+
+        <el-card class="password-card" :header="$t('Users.changePassword')" style="margin-top: 20px;">
+          <el-form ref="passwordFormRef" :model="passwordForm" :rules="passwordRules" label-width="100px" size="large">
+            <el-form-item :label="$t('Users.currentPassword')" prop="currentPassword">
+              <el-input v-model="passwordForm.currentPassword" type="password"
+                :placeholder="$t('Users.currentPasswordPlaceholder')" show-password clearable />
             </el-form-item>
-            
-            <el-form-item label="新密码" prop="newPassword">
-              <el-input
-                v-model="passwordForm.newPassword"
-                type="password"
-                placeholder="请输入新密码"
-                show-password
-                clearable
-              />
+
+            <el-form-item :label="$t('Users.newPassword')" prop="newPassword">
+              <el-input v-model="passwordForm.newPassword" type="password"
+                :placeholder="$t('Users.newPasswordPlaceholder')" show-password clearable />
             </el-form-item>
-            
-            <el-form-item label="确认密码" prop="confirmPassword">
-              <el-input
-                v-model="passwordForm.confirmPassword"
-                type="password"
-                placeholder="请再次输入新密码"
-                show-password
-                clearable
-              />
+
+            <el-form-item :label="$t('Users.confirmPassword')" prop="confirmPassword">
+              <el-input v-model="passwordForm.confirmPassword" type="password"
+                :placeholder="$t('Users.confirmPasswordPlaceholder')" show-password clearable />
             </el-form-item>
-            
+
             <el-form-item>
-              <el-button 
-                type="primary" 
-                @click="handlePasswordChange" 
-                :loading="passwordSaving"
-              >
-                {{ passwordSaving ? '修改中...' : '修改密码' }}
+              <el-button type="primary" @click="handlePasswordChange" :loading="passwordSaving">
+                {{ passwordSaving ? $t('Users.changing') : $t('Users.changePasswordBtn') }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -263,9 +203,9 @@ const passwordRules = {
 const handleSave = async () => {
   try {
     await profileFormRef.value.validate()
-    
+
     saving.value = true
-    
+
     const updateData = {
       nickname: profileForm.nickname,
       email: profileForm.email,
@@ -273,7 +213,7 @@ const handleSave = async () => {
       gender: profileForm.gender,
       birthday: profileForm.birthday
     }
-    
+
     const response = await updateUserInfoApi(updateData)
     if (response.success) {
       await loadUserInfo()
@@ -298,20 +238,20 @@ const handleReset = () => {
   }).then(() => {
     loadUserInfo()
     ElMessage.success('已重置')
-  }).catch(() => {})
+  }).catch(() => { })
 }
 
 const handlePasswordChange = async () => {
   try {
     await passwordFormRef.value.validate()
-    
+
     passwordSaving.value = true
-    
+
     const response = await changePasswordApi(
       passwordForm.currentPassword,
       passwordForm.newPassword
     )
-    
+
     if (response.success) {
       Object.keys(passwordForm).forEach(key => {
         passwordForm[key] = ''
@@ -352,13 +292,14 @@ const loadUserInfo = async () => {
     const response = await getUserInfoApi()
     if (response.success && response.data) {
       const user = response.data
+      const genderMap = { M: 'male', F: 'female', P: 'secret' };
       Object.assign(profileForm, {
         id: user.id,
         username: user.username,
         nickname: user.nickname || '',
         email: user.email || '',
         phone: user.phone || '',
-        gender: user.gender || '',
+        gender: genderMap[user.gender] || user.gender || '',
         birthday: user.birthday || '',
         avatar: user.avatar || '',
         role: user.role,
@@ -521,4 +462,3 @@ onMounted(() => {
   }
 }
 </style>
-

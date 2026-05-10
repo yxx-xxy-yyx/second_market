@@ -1,113 +1,113 @@
 <template>
   <div class="admin-dashboard">
     <div class="page-header">
-      <h2 class="page-title">数据统计</h2>
+      <h2 class="page-title">{{ $t('Dashboard.title') }}</h2>
     </div>
 
-      <el-row :gutter="20">
+    <el-row :gutter="20">
       <!-- 左侧主要内容区域 70% -->
       <el-col :xs="24" :sm="24" :md="17" :lg="17">
         <div class="main-content-area">
           <!-- 图表区域 - 2x2网格 -->
           <el-row :gutter="15">
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="chart-card">
-            <template #header>
-              <div class="chart-header">
-                <span class="chart-title">用户增长趋势</span>
-                <span class="chart-subtitle">最近30天</span>
-              </div>
-            </template>
-            <div ref="userTrendChartRef" class="chart-container"></div>
-          </el-card>
-        </el-col>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <div class="chart-header">
+                    <span class="chart-title">{{ $t('Dashboard.userTrend') }}</span>
+                    <span class="chart-subtitle">{{ $t('Dashboard.last30Days') }}</span>
+                  </div>
+                </template>
+                <div ref="userTrendChartRef" class="chart-container"></div>
+              </el-card>
+            </el-col>
 
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="chart-card">
-            <template #header>
-              <div class="chart-header">
-                <span class="chart-title">商品分类分布</span>
-              </div>
-            </template>
-            <div ref="categoryChartRef" class="chart-container"></div>
-          </el-card>
-        </el-col>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <div class="chart-header">
+                    <span class="chart-title">{{ $t('Dashboard.categoryDistribution') }}</span>
+                  </div>
+                </template>
+                <div ref="categoryChartRef" class="chart-container"></div>
+              </el-card>
+            </el-col>
 
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="chart-card">
-            <template #header>
-              <div class="chart-header">
-                <span class="chart-title">订单状态分布</span>
-              </div>
-            </template>
-            <div ref="orderStatusChartRef" class="chart-container"></div>
-          </el-card>
-        </el-col>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <div class="chart-header">
+                    <span class="chart-title">{{ $t('Dashboard.orderStatusDistribution') }}</span>
+                  </div>
+                </template>
+                <div ref="orderStatusChartRef" class="chart-container"></div>
+              </el-card>
+            </el-col>
 
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="chart-card">
-            <template #header>
-              <div class="chart-header">
-                <span class="chart-title">交易趋势</span>
-                <span class="chart-subtitle">最近30天</span>
-              </div>
-            </template>
-            <div ref="tradeTrendChartRef" class="chart-container"></div>
-          </el-card>
-        </el-col>
-      </el-row>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="chart-card">
+                <template #header>
+                  <div class="chart-header">
+                    <span class="chart-title">{{ $t('Dashboard.tradeTrend') }}</span>
+                    <span class="chart-subtitle">{{ $t('Dashboard.last30Days') }}</span>
+                  </div>
+                </template>
+                <div ref="tradeTrendChartRef" class="chart-container"></div>
+              </el-card>
+            </el-col>
+          </el-row>
 
           <!-- 表格区域 - 1x2网格 -->
           <el-row :gutter="15" style="margin-top: 15px;">
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="table-card">
-            <template #header>
-              <div class="table-header">
-                <span class="table-title">热门商品 Top10</span>
-              </div>
-            </template>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="table-card">
+                <template #header>
+                  <div class="table-header">
+                    <span class="table-title">{{ $t('Dashboard.hotProductsTop10') }}</span>
+                  </div>
+                </template>
                 <el-table :data="hotProducts" stripe style="width: 100%" max-height="400">
-              <el-table-column label="排名" width="80">
-                <template #default="{ $index }">
-                  <div class="rank-cell">
-                    <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
-                    <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
-                    <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
-                    <span v-else>{{ $index + 1 }}</span>
-                  </div>
-                </template>
-              </el-table-column>
-              <el-table-column label="商品名称" prop="title" show-overflow-tooltip />
-              <el-table-column label="浏览量" prop="viewCount" width="100" />
-            </el-table>
-          </el-card>
-        </el-col>
+                  <el-table-column :label="$t('Dashboard.rank')" width="80">
+                    <template #default="{ $index }">
+                      <div class="rank-cell">
+                        <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
+                        <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
+                        <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
+                        <span v-else>{{ $index + 1 }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column :label="$t('Dashboard.productName')" prop="title" show-overflow-tooltip />
+                  <el-table-column :label="$t('Dashboard.viewCount')" prop="viewCount" width="100" />
+                </el-table>
+              </el-card>
+            </el-col>
 
-        <el-col :xs="24" :sm="24" :md="12" :lg="12">
-          <el-card class="table-card">
-            <template #header>
-              <div class="table-header">
-                <span class="table-title">活跃用户 Top10</span>
-              </div>
-            </template>
-                <el-table :data="activeUsers" stripe style="width: 100%" max-height="400">
-              <el-table-column label="排名" width="80">
-                <template #default="{ $index }">
-                  <div class="rank-cell">
-                    <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
-                    <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
-                    <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
-                    <span v-else>{{ $index + 1 }}</span>
+            <el-col :xs="24" :sm="24" :md="12" :lg="12">
+              <el-card class="table-card">
+                <template #header>
+                  <div class="table-header">
+                    <span class="table-title">{{ $t('Dashboard.activeUsersTop10') }}</span>
                   </div>
                 </template>
-              </el-table-column>
-              <el-table-column label="用户名" prop="username" show-overflow-tooltip />
-              <el-table-column label="活跃度" prop="activityScore" width="100" />
-            </el-table>
-          </el-card>
-        </el-col>
-      </el-row>
-    </div>
+                <el-table :data="activeUsers" stripe style="width: 100%" max-height="400">
+                  <el-table-column :label="$t('Dashboard.rank')" width="80">
+                    <template #default="{ $index }">
+                      <div class="rank-cell">
+                        <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
+                        <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
+                        <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
+                        <span v-else>{{ $index + 1 }}</span>
+                      </div>
+                    </template>
+                  </el-table-column>
+                  <el-table-column :label="$t('Dashboard.username')" prop="username" show-overflow-tooltip />
+                  <el-table-column :label="$t('Dashboard.activityScore')" prop="activityScore" width="100" />
+                </el-table>
+              </el-card>
+            </el-col>
+          </el-row>
+        </div>
       </el-col>
 
       <!-- 右侧侧边栏 30% - 数据指标卡片网格 -->
@@ -115,10 +115,10 @@
         <div class="sidebar-area">
           <!-- 主要指标卡片 2x2 网格 -->
           <div class="stats-grid">
-            <div class="stat-card-grid" v-for="stat in statsCards" :key="stat.label">
+            <div class="stat-card-grid" v-for="stat in statsCards" :key="stat.labelKey">
               <div class="stat-info-grid">
                 <div class="stat-value-grid">{{ stat.value }}</div>
-                <div class="stat-label-grid">{{ stat.label }}</div>
+                <div class="stat-label-grid">{{ $t(stat.labelKey) }}</div>
               </div>
             </div>
           </div>
@@ -127,25 +127,25 @@
           <el-card class="quick-actions-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <span class="card-title">快速操作</span>
+                <span class="card-title">{{ $t('Dashboard.quickActions') }}</span>
               </div>
             </template>
             <div class="quick-actions">
               <el-button type="primary" size="small" class="action-btn">
                 <el-icon><Plus /></el-icon>
-                新增用户
+                {{ $t('Dashboard.addUser') }}
               </el-button>
               <el-button type="success" size="small" class="action-btn">
                 <el-icon><Check /></el-icon>
-                审核商品
+                {{ $t('Dashboard.auditProduct') }}
               </el-button>
               <el-button type="warning" size="small" class="action-btn">
                 <el-icon><Warning /></el-icon>
-                处理举报
+                {{ $t('Dashboard.handleReport') }}
               </el-button>
               <el-button type="info" size="small" class="action-btn">
                 <el-icon><Document /></el-icon>
-                系统日志
+                {{ $t('Dashboard.systemLog') }}
               </el-button>
             </div>
           </el-card>
@@ -154,21 +154,21 @@
           <el-card class="system-status-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <span class="card-title">系统状态</span>
+                <span class="card-title">{{ $t('Dashboard.systemStatus') }}</span>
               </div>
             </template>
             <div class="system-status">
               <div class="status-item">
                 <div class="status-indicator online"></div>
-                <span class="status-text">服务器运行正常</span>
+                <span class="status-text">{{ $t('Dashboard.serverNormal') }}</span>
               </div>
               <div class="status-item">
                 <div class="status-indicator online"></div>
-                <span class="status-text">数据库连接正常</span>
+                <span class="status-text">{{ $t('Dashboard.databaseNormal') }}</span>
               </div>
               <div class="status-item">
                 <div class="status-indicator warning"></div>
-                <span class="status-text">存储空间 78%</span>
+                <span class="status-text">{{ $t('Dashboard.storageUsage', { percent: 78 }) }}</span>
               </div>
             </div>
           </el-card>
@@ -180,6 +180,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
   User,
@@ -195,6 +196,8 @@ import {
 import * as echarts from 'echarts'
 import { adminStatisticsApi } from '@/api/admin'
 
+const { t } = useI18n()
+
 const userTrendChartRef = ref(null)
 const categoryChartRef = ref(null)
 const orderStatusChartRef = ref(null)
@@ -205,11 +208,12 @@ let categoryChart = null
 let orderStatusChart = null
 let tradeTrendChart = null
 
+// 统计卡片使用 labelKey 存放翻译键，模板通过 $t(stat.labelKey) 渲染
 const statsCards = ref([
-  { label: '总用户数', value: 0, icon: User, gradient: 'linear-gradient(135deg, #e1f0ff 0%, #f0f8ff 100%)' },
-  { label: '总商品数', value: 0, icon: ShoppingBag, gradient: 'linear-gradient(135deg, #ffe1e1 0%, #fff0e6 100%)' },
-  { label: '总订单数', value: 0, icon: ShoppingCart, gradient: 'linear-gradient(135deg, #e6f4ff 0%, #f0faff 100%)' },
-  { label: '总交易额', value: '¥0', icon: Money, gradient: 'linear-gradient(135deg, #e8f5e8 0%, #f0faf0 100%)' }
+  { labelKey: 'Dashboard.totalUsers', value: 0, icon: User, gradient: 'linear-gradient(135deg, #e1f0ff 0%, #f0f8ff 100%)' },
+  { labelKey: 'Dashboard.totalProducts', value: 0, icon: ShoppingBag, gradient: 'linear-gradient(135deg, #ffe1e1 0%, #fff0e6 100%)' },
+  { labelKey: 'Dashboard.totalOrders', value: 0, icon: ShoppingCart, gradient: 'linear-gradient(135deg, #e6f4ff 0%, #f0faff 100%)' },
+  { labelKey: 'Dashboard.totalAmount', value: '¥0', icon: Money, gradient: 'linear-gradient(135deg, #e8f5e8 0%, #f0faf0 100%)' }
 ])
 
 const hotProducts = ref([])
@@ -227,7 +231,7 @@ const loadOverviewData = async () => {
       statsCards.value[3].value = `¥${(data.totalAmount || 0).toLocaleString()}`
     }
   } catch (error) {
-    console.error('获取概览数据失败:', error)
+    console.error('Failed to fetch overview data:', error)
   }
 }
 
@@ -269,7 +273,7 @@ const initUserTrendChart = () => {
     },
     series: [
       {
-        name: '新增用户',
+        name: t('Dashboard.newUsers'),
         type: 'line',
         smooth: true,
         data: values,
@@ -317,16 +321,16 @@ const initCategoryChart = () => {
     },
     series: [
       {
-        name: '商品分类',
+        name: t('Dashboard.productCategory'),
         type: 'pie',
         radius: '70%',
         center: ['35%', '50%'],
         data: [
-          { value: 335, name: '数码产品' },
-          { value: 310, name: '图书文具' },
-          { value: 234, name: '生活用品' },
-          { value: 135, name: '服装鞋包' },
-          { value: 148, name: '其他' }
+          { value: 335, name: t('Dashboard.category.digital') },
+          { value: 310, name: t('Dashboard.category.books') },
+          { value: 234, name: t('Dashboard.category.living') },
+          { value: 135, name: t('Dashboard.category.clothing') },
+          { value: 148, name: t('Dashboard.category.other') }
         ],
         emphasis: {
           itemStyle: {
@@ -363,7 +367,7 @@ const initOrderStatusChart = () => {
     },
     series: [
       {
-        name: '订单状态',
+        name: t('Dashboard.orderStatus'),
         type: 'pie',
         radius: ['40%', '70%'],
         center: ['35%', '50%'],
@@ -388,10 +392,10 @@ const initOrderStatusChart = () => {
           show: false
         },
         data: [
-          { value: 120, name: '待支付', itemStyle: { color: '#e6a23c' } },
-          { value: 280, name: '已支付', itemStyle: { color: '#409eff' } },
-          { value: 450, name: '已完成', itemStyle: { color: '#67c23a' } },
-          { value: 50, name: '已取消', itemStyle: { color: '#909399' } }
+          { value: 120, name: t('Dashboard.status.pendingPayment'), itemStyle: { color: '#e6a23c' } },
+          { value: 280, name: t('Dashboard.status.paid'), itemStyle: { color: '#409eff' } },
+          { value: 450, name: t('Dashboard.status.completed'), itemStyle: { color: '#67c23a' } },
+          { value: 50, name: t('Dashboard.status.cancelled'), itemStyle: { color: '#909399' } }
         ]
       }
     ]
@@ -429,7 +433,7 @@ const initTradeTrendChart = () => {
       }
     },
     legend: {
-      data: ['交易量', '交易额']
+      data: [t('Dashboard.tradeVolume'), t('Dashboard.tradeAmount')]
     },
     grid: {
       left: '3%',
@@ -444,18 +448,18 @@ const initTradeTrendChart = () => {
     yAxis: [
       {
         type: 'value',
-        name: '交易量',
+        name: t('Dashboard.tradeVolume'),
         position: 'left'
       },
       {
         type: 'value',
-        name: '交易额（元）',
+        name: t('Dashboard.tradeAmountYuan'),
         position: 'right'
       }
     ],
     series: [
       {
-        name: '交易量',
+        name: t('Dashboard.tradeVolume'),
         type: 'bar',
         yAxisIndex: 0,
         data: volumes,
@@ -474,7 +478,7 @@ const initTradeTrendChart = () => {
         }
       },
       {
-        name: '交易额',
+        name: t('Dashboard.tradeAmount'),
         type: 'line',
         yAxisIndex: 1,
         smooth: true,
@@ -491,6 +495,7 @@ const initTradeTrendChart = () => {
 
 const loadHotProducts = async () => {
   try {
+    // 模拟商品数据（可根据需要改为从接口获取，商品名称暂未国际化）
     hotProducts.value = [
       { title: '二手iPhone 13 Pro', viewCount: 1234 },
       { title: '大学物理教材', viewCount: 987 },
@@ -504,12 +509,13 @@ const loadHotProducts = async () => {
       { title: '数据结构书籍', viewCount: 123 }
     ]
   } catch (error) {
-    console.error('获取热门商品失败:', error)
+    console.error('Failed to fetch hot products:', error)
   }
 }
 
 const loadActiveUsers = async () => {
   try {
+    // 模拟活跃用户数据（用户名暂未国际化）
     activeUsers.value = [
       { username: 'user001', activityScore: 950 },
       { username: 'user002', activityScore: 890 },
@@ -523,7 +529,7 @@ const loadActiveUsers = async () => {
       { username: 'user010', activityScore: 234 }
     ]
   } catch (error) {
-    console.error('获取活跃用户失败:', error)
+    console.error('Failed to fetch active users:', error)
   }
 }
 
