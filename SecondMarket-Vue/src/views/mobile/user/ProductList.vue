@@ -328,7 +328,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { productApi } from '@/api/product'
 import { ElMessage } from 'element-plus'
@@ -397,6 +397,61 @@ const productListRef = ref(null)
 const loadingMore = ref(false)
 const hasMore = ref(true)
 
+const filterSectionIds = ['category', 'price', 'condition', 'ai']
+let ignoreFilterScrollSync = false
+let ignoreFilterScrollSyncTimer = null
+
+const setIgnoreFilterScrollSync = () => {
+  ignoreFilterScrollSync = true
+  if (ignoreFilterScrollSyncTimer) clearTimeout(ignoreFilterScrollSyncTimer)
+  ignoreFilterScrollSyncTimer = setTimeout(() => {
+    ignoreFilterScrollSync = false
+    ignoreFilterScrollSyncTimer = null
+  }, 450)
+}
+
+const syncActiveFilterTabFromScroll = () => {
+  const container = filterContentRef.value
+  if (!container) return
+  const containerRect = container.getBoundingClientRect()
+  const items = filterSectionIds
+    .map((id) => {
+      const el = document.getElementById(id)
+      if (!el) return null
+      const rect = el.getBoundingClientRect()
+      return { id, top: rect.top - containerRect.top }
+    })
+    .filter(Boolean)
+
+  if (!items.length) return
+
+  const current = items
+    .filter((x) => x.top <= 24)
+    .sort((a, b) => b.top - a.top)[0] || items.sort((a, b) => a.top - b.top)[0]
+
+  if (current && activeFilterTab.value !== current.id) {
+    activeFilterTab.value = current.id
+  }
+}
+
+const handleFilterContentScroll = () => {
+  if (ignoreFilterScrollSync) return
+  syncActiveFilterTabFromScroll()
+}
+
+const bindFilterContentScroll = () => {
+  const el = filterContentRef.value
+  if (!el) return
+  el.addEventListener('scroll', handleFilterContentScroll, { passive: true })
+  nextTick(() => syncActiveFilterTabFromScroll())
+}
+
+const unbindFilterContentScroll = () => {
+  const el = filterContentRef.value
+  if (!el) return
+  el.removeEventListener('scroll', handleFilterContentScroll)
+}
+
 // ========== 菜单控制 ==========
 const showSortMenu = ref(false)
 const showAreaMenu = ref(false)
@@ -435,6 +490,7 @@ const closeAllMenus = () => {
 
 const scrollToSection = (sectionId) => {
   activeFilterTab.value = sectionId
+  setIgnoreFilterScrollSync()
   nextTick(() => {
     const section = document.getElementById(sectionId)
     if (section && filterContentRef.value) {
@@ -442,6 +498,18 @@ const scrollToSection = (sectionId) => {
     }
   })
 }
+
+watch(showFullFilterMenu, (open) => {
+  nextTick(() => {
+    if (open) bindFilterContentScroll()
+    else unbindFilterContentScroll()
+  })
+})
+
+onBeforeUnmount(() => {
+  unbindFilterContentScroll()
+  if (ignoreFilterScrollSyncTimer) clearTimeout(ignoreFilterScrollSyncTimer)
+})
 
 // 下拉加载更多
 const handleScroll = () => {

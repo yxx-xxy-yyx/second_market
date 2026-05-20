@@ -45,7 +45,9 @@
       v-if="isDesktopScreen"
       class="mx-auto max-w-[1400px] px-4 py-5 grid grid-cols-[260px_1fr] gap-5"
     >
-      <UserSideNav />
+      <div class="sticky top-[80px] self-start max-h-[calc(100dvh-96px)] overflow-auto">
+        <UserSideNav />
+      </div>
       <main class="min-w-0">
         <router-view v-slot="{ Component, route }">
           <transition name="fade" mode="out-in">

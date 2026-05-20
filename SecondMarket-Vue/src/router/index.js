@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { neoRoutes } from '@/neo/neo.routes'
 
 // 引入页面组件
 const Login = () => import('@/views/auth/LoginEntry.vue')
@@ -259,6 +260,7 @@ const routes = [
       }
     ]
   },
+  ...neoRoutes,
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',

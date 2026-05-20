@@ -1,6 +1,8 @@
 :root {
-  --primary-color: #06B6D4;
-  --secondary-color: #8B5CF6;
+  --primary-color: #14B8A6;
+  --primary-rgb: 20, 184, 166;
+  --secondary-color: #0F766E;
+  --secondary-rgb: 15, 118, 110;
   --success-color: #22C55E;
   --warning-color: #F59E0B;
   --danger-color: #EF4444;
@@ -42,10 +44,10 @@
   --transition-slow: 0.5s;
 
   --el-color-primary: var(--primary-color);
-  --el-color-primary-light-3: rgba(6, 182, 212, 0.70);
-  --el-color-primary-light-5: rgba(6, 182, 212, 0.45);
-  --el-color-primary-light-7: rgba(6, 182, 212, 0.24);
-  --el-color-primary-light-9: rgba(6, 182, 212, 0.10);
+  --el-color-primary-light-3: rgba(var(--primary-rgb), 0.70);
+  --el-color-primary-light-5: rgba(var(--primary-rgb), 0.45);
+  --el-color-primary-light-7: rgba(var(--primary-rgb), 0.24);
+  --el-color-primary-light-9: rgba(var(--primary-rgb), 0.10);
 }
 
 * {
@@ -101,4 +103,3 @@ body {
     padding: var(--spacing-sm);
   }
 }
-

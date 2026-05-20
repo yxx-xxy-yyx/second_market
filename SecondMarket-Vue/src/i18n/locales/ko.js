@@ -131,6 +131,38 @@ export default {
     searchProducts: "상품 검색...",
     selectSchool: "학교 선택"
   },
+  neo: {
+    brand: "AI 중고 마켓",
+    tabs: {
+      home: "홈",
+      campus: "캠퍼스",
+      cart: "장바구니",
+      notice: "알림"
+    },
+    home: {
+      heroTitle: "AI 통합 홈",
+      heroDesc: "AI 추천, 인기 중고, 캠퍼스 추천, 동네 거래를 한 곳에서 빠르게 찾으세요.",
+      searchPlaceholder: "원하는 물건을 입력하면 AI가 매칭",
+      search: "검색",
+      refresh: "새로고침",
+      aiPick: "AI 추천",
+      viewAll: "전체보기",
+      hot: "인기 중고",
+      campusPick: "캠퍼스 추천",
+      cityPick: "동네 거래",
+      more: "더보기",
+      views: "조회",
+      quick: "바로가기",
+      orders: "주문",
+      chat: "채팅",
+      seller: "판매자"
+    },
+    placeholder: {
+      desc: "라우팅과 반응형 골격은 준비되었습니다. 기능은 단계적으로 완성됩니다.",
+      hint: "여기에는 목록/필터/인터랙션/AI 기능/가상 결제 흐름이 순차적으로 추가됩니다. 우선 홈에서 전체 비주얼과 네비게이션을 확인할 수 있습니다.",
+      back: "기존 홈으로"
+    }
+  },
   dashboard: {
     aiTitle: "AI 스마트 어시스턴트",
     aiDesc: "AI가 상품 평가와 설명 최적화를 도와드립니다!",

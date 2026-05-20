@@ -131,6 +131,38 @@ export default {
     searchProducts: "Search products...",
     selectSchool: "Select school"
   },
+  neo: {
+    brand: "AI Second Market",
+    tabs: {
+      home: "Home",
+      campus: "Campus",
+      cart: "Cart",
+      notice: "Notice"
+    },
+    home: {
+      heroTitle: "AI Aggregated Home",
+      heroDesc: "AI picks, hot items, campus picks and local deals—find the right second-hand item faster.",
+      searchPlaceholder: "Type what you want, AI will match",
+      search: "Search",
+      refresh: "Refresh",
+      aiPick: "AI Picks",
+      viewAll: "View all",
+      hot: "Hot Items",
+      campusPick: "Campus Picks",
+      cityPick: "Local Deals",
+      more: "More",
+      views: "Views",
+      quick: "Quick Actions",
+      orders: "Orders",
+      chat: "Chat",
+      seller: "Seller"
+    },
+    placeholder: {
+      desc: "Routes and responsive skeleton are ready. Business logic will be implemented step by step.",
+      hint: "This area will be completed with lists, filters, interactions, AI features and mock payment flow. You can start from the home page to preview the visual style and navigation.",
+      back: "Back to old home"
+    }
+  },
   dashboard: {
     aiTitle: "AI Assistant Online",
     aiDesc: "Click here to let AI evaluate products and optimize descriptions!",

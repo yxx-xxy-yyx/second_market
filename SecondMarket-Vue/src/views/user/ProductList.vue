@@ -846,6 +846,11 @@ onMounted(() => {
 .filter-panel {
   width: 240px;
   flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+  max-height: calc(100dvh - 96px);
+  overflow: auto;
   background: #fff;
   border-radius: 10px;
   padding: 18px;
@@ -1213,6 +1218,9 @@ onMounted(() => {
 
 /* 推荐侧边栏 */
 .recommend-sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
   background: #fff;
   border-radius: 10px;
   padding: 16px;

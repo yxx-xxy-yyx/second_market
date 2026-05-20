@@ -30,8 +30,8 @@ export default {
 /* 全局样式优化 */
 :root {
   --el-color-primary: var(--primary-color);
-  --el-border-radius-base: 8px;
-  --el-box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --el-border-radius-base: var(--card-radius);
+  --el-box-shadow-light: var(--card-shadow);
 }
 
 body {
@@ -93,8 +93,8 @@ body {
 }
 
 .el-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover) !important;
 }
 
 /* 按钮圆角优化 */

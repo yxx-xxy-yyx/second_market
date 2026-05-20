@@ -131,6 +131,38 @@ export default {
     searchProducts: "搜索商品...",
     selectSchool: "选择学校"
   },
+  neo: {
+    brand: "AI二手商城",
+    tabs: {
+      home: "首页",
+      campus: "校园",
+      cart: "购物车",
+      notice: "通知"
+    },
+    home: {
+      heroTitle: "AI 智能聚合首页",
+      heroDesc: "整合 AI 推荐、热门闲置、校园好物、同城好物，快速找到适合你的二手好物。",
+      searchPlaceholder: "输入想买的东西，AI帮你匹配",
+      search: "搜索",
+      refresh: "刷新",
+      aiPick: "AI 推荐精选",
+      viewAll: "查看全部",
+      hot: "热门闲置",
+      campusPick: "校园好物",
+      cityPick: "同城好物",
+      more: "更多",
+      views: "浏览",
+      quick: "快捷入口",
+      orders: "订单",
+      chat: "聊天",
+      seller: "卖家"
+    },
+    placeholder: {
+      desc: "该模块已创建路由与三端自适应骨架，正在逐步完善具体业务。",
+      hint: "后续这里将接入完整功能：数据列表、筛选体系、交互流程、AI能力与模拟支付等。你可以先从首页进入体验整体视觉与基础导航。",
+      back: "返回旧首页"
+    }
+  },
   dashboard: {
     aiTitle: "AI 智能助手已上线",
     aiDesc: "点击这里，让 AI 帮你评估商品、优化描述，开启智能交易新体验！",
