@@ -1,6 +1,14 @@
 const NeoLayout = () => import('@/neo/NeoLayout.vue')
 const NeoHome = () => import('@/neo/views/NeoHomeEntry.vue')
 const NeoPlaceholder = () => import('@/neo/views/NeoPlaceholderEntry.vue')
+const NeoCartEntry = () => import('@/neo/views/NeoCartEntry.vue')
+const NeoCheckoutEntry = () => import('@/neo/views/NeoCheckoutEntry.vue')
+const NeoAddressesEntry = () => import('@/neo/views/NeoAddressesEntry.vue')
+const NeoOrdersEntry = () => import('@/neo/views/orders/NeoOrdersEntry.vue')
+const NeoPayCenterSelect = () => import('@/neo/views/pay/NeoPayCenterSelect.vue')
+const NeoPayCenterCountdown = () => import('@/neo/views/pay/NeoPayCenterCountdown.vue')
+const NeoPayCenterSuccess = () => import('@/neo/views/pay/NeoPayCenterSuccess.vue')
+const NeoPayCenterFail = () => import('@/neo/views/pay/NeoPayCenterFail.vue')
 
 export const neoRoutes = [
   {
@@ -31,37 +39,43 @@ export const neoRoutes = [
       {
         path: 'cart',
         name: 'neo-cart',
-        component: NeoPlaceholder,
+        component: NeoCartEntry,
         meta: { title: '购物车', requiresAuth: true }
+      },
+      {
+        path: 'checkout',
+        name: 'neo-checkout',
+        component: NeoCheckoutEntry,
+        meta: { title: '确认订单', requiresAuth: true }
       },
       {
         path: 'orders/pending-pay',
         name: 'neo-orders-pending-pay',
-        component: NeoPlaceholder,
+        component: NeoOrdersEntry,
         meta: { title: '待付款订单', requiresAuth: true }
       },
       {
         path: 'orders/pending-ship',
         name: 'neo-orders-pending-ship',
-        component: NeoPlaceholder,
+        component: NeoOrdersEntry,
         meta: { title: '待发货订单', requiresAuth: true }
       },
       {
         path: 'orders/pending-receive',
         name: 'neo-orders-pending-receive',
-        component: NeoPlaceholder,
+        component: NeoOrdersEntry,
         meta: { title: '待收货订单', requiresAuth: true }
       },
       {
         path: 'orders/completed',
         name: 'neo-orders-completed',
-        component: NeoPlaceholder,
+        component: NeoOrdersEntry,
         meta: { title: '已完成订单', requiresAuth: true }
       },
       {
         path: 'orders/cancelled',
         name: 'neo-orders-cancelled',
-        component: NeoPlaceholder,
+        component: NeoOrdersEntry,
         meta: { title: '取消订单', requiresAuth: true }
       },
       {
@@ -91,14 +105,32 @@ export const neoRoutes = [
       {
         path: 'addresses',
         name: 'neo-addresses',
-        component: NeoPlaceholder,
+        component: NeoAddressesEntry,
         meta: { title: '收货地址管理', requiresAuth: true }
       },
       {
         path: 'pay-center',
         name: 'neo-pay-center',
-        component: NeoPlaceholder,
+        component: NeoPayCenterSelect,
         meta: { title: '模拟支付中心', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/countdown',
+        name: 'neo-pay-center-countdown',
+        component: NeoPayCenterCountdown,
+        meta: { title: '支付倒计时', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/success',
+        name: 'neo-pay-center-success',
+        component: NeoPayCenterSuccess,
+        meta: { title: '支付成功', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/fail',
+        name: 'neo-pay-center-fail',
+        component: NeoPayCenterFail,
+        meta: { title: '支付失败', requiresAuth: true }
       },
       {
         path: 'review-center',

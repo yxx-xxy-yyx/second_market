@@ -318,6 +318,20 @@
           </el-button>
         </div>
 
+        <div class="btn-wrapper">
+          <el-button
+            type="primary"
+            plain
+            size="large"
+            :disabled="product.status === 4"
+            @click="handleAddToCart"
+            class="action-btn"
+          >
+            <el-icon><Plus /></el-icon>
+            {{ $t('neo.cart.addToCart') }}
+          </el-button>
+        </div>
+
         <div class="secondary-actions">
           <!-- 按钮4：收藏 -->
           <div class="btn-wrapper">
@@ -540,6 +554,7 @@ import { reviewApi } from '@/api/review'
 import { orderApi } from '@/api/order'
 import { aiApi } from '@/api/ai'
 import { useUserStore } from '@/stores/user'
+import { useNeoCartStore } from '@/neo/stores/neoCart'
 import { formatAvatarUrl, formatImageUrl } from '@/utils/url'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElNotification, ElMessageBox } from 'element-plus'
@@ -562,12 +577,14 @@ import {
   TrendCharts,
   ShoppingBag,
   Money,
-  Box
+  Box,
+  Plus
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const neoCart = useNeoCartStore()
 const { t, locale } = useI18n()
 
 const loading = ref(false)
@@ -906,6 +923,23 @@ const handleBuy = async () => {
       ElMessage.error(error.message || t('product.orderFail'))
     }
   }
+}
+
+const handleAddToCart = () => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning(t('product.pleaseLogin'))
+    router.push('/login')
+    return
+  }
+  if (!product.value) return
+  neoCart.add(product.value, 1)
+  ElNotification({
+    title: t('neo.cart.addedTitle'),
+    message: t('neo.cart.addedMsg'),
+    type: 'success',
+    duration: 2000
+  })
+  router.push('/neo/cart')
 }
 
 const handleFavorite = async () => {
