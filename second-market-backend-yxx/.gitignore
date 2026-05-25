@@ -8,7 +8,6 @@ out/
 # Maven 编译输出
 target/
 classes/
-resources/
 
 # Maven 本地缓存文件
 Maven_*.xml
