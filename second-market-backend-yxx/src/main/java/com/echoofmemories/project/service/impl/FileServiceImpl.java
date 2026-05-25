@@ -14,12 +14,19 @@ import com.echoofmemories.project.mapper.FileInfoMapper;
 import com.echoofmemories.project.service.FileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -40,11 +47,22 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
     @Value("${project.file.upload-path:${java.io.tmpdir}/uploads}")
     private String uploadPath;
 
+    @Value("${project.supabase.url:${SUPABASE_URL:}}")
+    private String supabaseUrl;
+
+    @Value("${project.supabase.service-role-key:${SUPABASE_SERVICE_ROLE_KEY:}}")
+    private String supabaseServiceRoleKey;
+
+    @Value("${project.supabase.storage.bucket:${SUPABASE_STORAGE_BUCKET:images}}")
+    private String supabaseBucket;
+
     @Value("${project.file.allowed-types:jpg,jpeg,png,gif,bmp,webp,pdf,doc,docx,xls,xlsx,ppt,pptx,txt}")
     private String allowedTypes;
 
     @Value("${project.file.max-size:100MB}")
     private String maxSize;
+
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder().build();
 
     // 支持的图片类型
     private static final List<String> IMAGE_TYPES = Arrays.asList("jpg", "jpeg", "png", "gif", "bmp", "webp");
@@ -52,6 +70,82 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
     // 支持的文档类型
     private static final List<String> DOCUMENT_TYPES = Arrays.asList("pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
             "txt");
+
+    private boolean isSupabaseEnabled() {
+        return StrUtil.isNotBlank(supabaseUrl) && StrUtil.isNotBlank(supabaseServiceRoleKey) && StrUtil.isNotBlank(supabaseBucket);
+    }
+
+    private String normalizeBaseUrl(String url) {
+        if (url == null) {
+            return "";
+        }
+        return url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
+    }
+
+    private String buildSupabasePublicUrl(String objectKey) {
+        String base = normalizeBaseUrl(supabaseUrl);
+        String encoded = Arrays.stream(objectKey.split("/"))
+                .map(seg -> URLEncoder.encode(seg, StandardCharsets.UTF_8))
+                .collect(java.util.stream.Collectors.joining("/"));
+        return base + "/storage/v1/object/public/" + supabaseBucket + "/" + encoded;
+    }
+
+    private void uploadToSupabase(String objectKey, byte[] bytes, String contentType) {
+        String base = normalizeBaseUrl(supabaseUrl);
+        String encoded = Arrays.stream(objectKey.split("/"))
+                .map(seg -> URLEncoder.encode(seg, StandardCharsets.UTF_8))
+                .collect(java.util.stream.Collectors.joining("/"));
+        String url = base + "/storage/v1/object/" + supabaseBucket + "/" + encoded;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + supabaseServiceRoleKey)
+                .header("apikey", supabaseServiceRoleKey)
+                .header("x-upsert", "true")
+                .header("Content-Type", StrUtil.blankToDefault(contentType, MediaType.APPLICATION_OCTET_STREAM_VALUE))
+                .PUT(HttpRequest.BodyPublishers.ofByteArray(bytes))
+                .build();
+
+        try {
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            int code = response.statusCode();
+            if (code >= 200 && code < 300) {
+                return;
+            }
+            throw new CustomException("上传到对象存储失败: " + code);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new CustomException("上传到对象存储失败: " + e.getMessage());
+        } catch (IOException e) {
+            throw new CustomException("上传到对象存储失败: " + e.getMessage());
+        }
+    }
+
+    private void deleteFromSupabase(String objectKey) {
+        String base = normalizeBaseUrl(supabaseUrl);
+        String encoded = Arrays.stream(objectKey.split("/"))
+                .map(seg -> URLEncoder.encode(seg, StandardCharsets.UTF_8))
+                .collect(java.util.stream.Collectors.joining("/"));
+        String url = base + "/storage/v1/object/" + supabaseBucket + "/" + encoded;
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Authorization", "Bearer " + supabaseServiceRoleKey)
+                .header("apikey", supabaseServiceRoleKey)
+                .DELETE()
+                .build();
+
+        try {
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            int code = response.statusCode();
+            if (code >= 200 && code < 300) {
+                return;
+            }
+            log.warn("删除对象存储文件失败: {}, status={}", objectKey, code);
+        } catch (Exception e) {
+            log.warn("删除对象存储文件失败: {}, err={}", objectKey, e.getMessage());
+        }
+    }
 
     @Override
     public FileInfo uploadFile(MultipartFile file, Long userId) {
@@ -93,24 +187,33 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
 
             // 按日期创建目录结构
             String dateDir = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-            String dirPath = uploadPath + File.separator + dateDir;
+            String filePath;
+            String fileUrl;
 
-            // 确保目录存在
-            File directory = new File(dirPath);
-            if (!directory.exists()) {
-                boolean created = directory.mkdirs();
-                if (!created) {
-                    log.error("创建上传目录失败: {}", dirPath);
-                    throw new CustomException("创建上传目录失败");
+            if (isSupabaseEnabled()) {
+                String objectKey = dateDir + "/" + newFileName;
+                uploadToSupabase(objectKey, fileBytes, file.getContentType());
+                filePath = objectKey;
+                fileUrl = buildSupabasePublicUrl(objectKey);
+                log.info("文件上传到对象存储成功: {}", objectKey);
+            } else {
+                String dirPath = uploadPath + File.separator + dateDir;
+                File directory = new File(dirPath);
+                if (!directory.exists()) {
+                    boolean created = directory.mkdirs();
+                    if (!created) {
+                        log.error("创建上传目录失败: {}", dirPath);
+                        throw new CustomException("创建上传目录失败");
+                    }
                 }
+
+                String localPath = dirPath + File.separator + newFileName;
+                File targetFile = new File(localPath);
+                file.transferTo(targetFile);
+                log.info("文件保存成功: {}", localPath);
+                filePath = localPath;
+                fileUrl = "/uploads/" + dateDir + "/" + newFileName;
             }
-
-            // 保存文件
-            String filePath = dirPath + File.separator + newFileName;
-            File targetFile = new File(filePath);
-            file.transferTo(targetFile);
-
-            log.info("文件保存成功: {}", filePath);
 
             // 创建文件信息记录
             FileInfo fileInfo = new FileInfo();
@@ -134,8 +237,6 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
                 fileInfo.setFileType("other");
             }
 
-            // 设置访问URL - 修改为完整的相对路径
-            String fileUrl = "/uploads/" + dateDir + "/" + newFileName;
             fileInfo.setFileUrl(fileUrl);
 
             // 保存到数据库
@@ -217,7 +318,11 @@ public class FileServiceImpl extends ServiceImpl<FileInfoMapper, FileInfo> imple
         fileInfo.setDeleted(1);
         fileInfoMapper.updateById(fileInfo);
 
-        // 删除物理文件
+        if (isSupabaseEnabled() && StrUtil.isNotBlank(fileInfo.getFilePath())) {
+            deleteFromSupabase(fileInfo.getFilePath());
+            return true;
+        }
+
         try {
             FileUtil.del(fileInfo.getFilePath());
             log.info("删除文件成功: {}", fileInfo.getFileName());

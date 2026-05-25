@@ -89,7 +89,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             }
         }
         if (product.getStatus() == null) {
-            product.setStatus(1);
+            product.setStatus(2);
         }
         if (product.getViewCount() == null) {
             product.setViewCount(0);

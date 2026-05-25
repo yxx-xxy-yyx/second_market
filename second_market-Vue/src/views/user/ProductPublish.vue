@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useDeviceType } from '@/utils/device'
 import { productApi } from '@/api/product'
@@ -121,18 +121,24 @@ const form = ref({
   images: ''
 })
 
-const uploadAction = '/api/common/upload'
-const uploadHeaders = { Authorization: userStore.token }
+const apiBaseUrl = computed(() => (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, ''))
+const uploadAction = computed(() => `${apiBaseUrl.value}/file/upload`)
+const uploadHeaders = computed(() => {
+  const token = localStorage.getItem('token') || userStore.token
+  return { Authorization: token ? `Bearer ${token}` : '' }
+})
 
 const handleUploadSuccess = (res) => {
   if (res.code === '200') {
-    imageUrls.value.push(res.data.url)
+    const url = res?.data?.fileUrl || res?.data?.url
+    if (!url) return
+    imageUrls.value.push(url)
     form.value.images = JSON.stringify(imageUrls.value)
   }
 }
 
 const handleRemove = (file) => {
-  const url = file.response?.data?.url || file.url
+  const url = file.response?.data?.fileUrl || file.response?.data?.url || file.url
   imageUrls.value = imageUrls.value.filter(u => u !== url)
   form.value.images = JSON.stringify(imageUrls.value)
 }

@@ -275,7 +275,7 @@ const handleImageUpload = async (selectedFile) => {
   uploadingImage.value = true
   showToast('图片上传中...')
   try {
-    const res = await request.post('/common/upload', formData, {
+    const res = await request.post('/file/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -286,6 +286,7 @@ const handleImageUpload = async (selectedFile) => {
       (typeof data === 'string' ? data : '') ||
       data?.url ||
       data?.fileUrl ||
+      data?.data?.fileUrl ||
       data?.filePath ||
       data?.path
 
