@@ -1,0 +1,12 @@
+.git
+.vscode
+.trae
+
+**/node_modules
+**/dist
+**/.vite
+**/target
+
+**/*.log
+**/*.tmp
+**/*.temp
