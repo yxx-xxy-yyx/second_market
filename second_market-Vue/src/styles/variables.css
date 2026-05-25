@@ -1,0 +1,118 @@
+:root {
+  --primary-color: #36B3C2;
+  --primary-color-light: #62C6D2;
+  --primary-color-dark: #268F9C;
+  --secondary-color: #0F172A;
+  --success-color: #22C55E;
+  --warning-color: #F59E0B;
+  --danger-color: #EF4444;
+  --info-color: #94A3B8;
+  
+  --text-primary: #0F172A;
+  --text-regular: #334155;
+  --text-secondary: #64748B;
+  --text-placeholder: #94A3B8;
+  
+  --bg-color: #F6F8FA;
+  --bg-white: #FFFFFF;
+  --border-color: #E2E8F0;
+  --border-light: #EEF2F7;
+  --bg-ivory: #FAF9F6;
+  --bg-cyan-soft: rgba(54, 179, 194, 0.10);
+  
+  --card-radius: 12px;
+  --button-radius: 5px;
+  --input-radius: 4px;
+  
+  --card-shadow: 0 2px 16px rgba(15, 23, 42, 0.06);
+  --card-shadow-hover: 0 8px 22px rgba(15, 23, 42, 0.10);
+  
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 20px;
+  --spacing-xxl: 24px;
+  
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-xxl: 24px;
+  
+  --transition-fast: 0.2s;
+  --transition-base: 0.3s;
+  --transition-slow: 0.5s;
+
+  --el-color-primary: var(--primary-color);
+  --el-color-primary-light-3: rgba(54, 179, 194, 0.70);
+  --el-color-primary-light-5: rgba(54, 179, 194, 0.45);
+  --el-color-primary-light-7: rgba(54, 179, 194, 0.24);
+  --el-color-primary-light-9: rgba(54, 179, 194, 0.10);
+
+  --van-primary-color: var(--primary-color);
+  --van-button-primary-background: var(--primary-color);
+  --van-button-primary-border-color: var(--primary-color);
+  --van-tabs-bottom-bar-color: var(--primary-color);
+  --van-checkbox-checked-icon-color: var(--primary-color);
+  --van-radio-checked-icon-color: var(--primary-color);
+  --van-loading-spinner-color: var(--primary-color);
+
+  --app-header-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-color);
+  margin: 0;
+  padding: 0;
+}
+
+.card-common {
+  background: var(--bg-white);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-base);
+}
+
+.card-common:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.btn-common {
+  border-radius: var(--button-radius);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-common:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: var(--spacing-md);
+  }
+}
+
+@media (max-width: 576px) {
+  .page-container {
+    padding: var(--spacing-sm);
+  }
+}
+

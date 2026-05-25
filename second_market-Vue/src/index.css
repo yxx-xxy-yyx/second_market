@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .page-container {
+    @apply w-full mx-auto min-h-screen px-3 py-3 md:px-5 md:py-5 lg:px-6 lg:py-6 md:max-w-[1024px] lg:max-w-[1400px];
+  }
+
+  .page-header {
+    @apply mb-3 md:mb-4 lg:mb-5;
+  }
+
+  .page-title {
+    @apply text-xl md:text-2xl lg:text-3xl font-semibold text-[#303133] mb-2;
+  }
+
+  .page-subtitle {
+    @apply text-sm text-[#909399];
+  }
+}
+
+@layer utilities {
+  .text-primary {
+    color: var(--primary-color) !important;
+  }
+
+  .bg-primary {
+    background-color: var(--primary-color) !important;
+  }
+
+  .border-primary {
+    border-color: var(--primary-color) !important;
+  }
+
+  .ring-primary {
+    --tw-ring-color: rgba(54, 179, 194, 0.25) !important;
+  }
+
+  .from-primary {
+    --tw-gradient-from: var(--primary-color) var(--tw-gradient-from-position);
+    --tw-gradient-to: rgba(54, 179, 194, 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .to-primary-dark {
+    --tw-gradient-to: var(--primary-color-dark) var(--tw-gradient-to-position);
+  }
+
+  .shadow-cyan-soft {
+    box-shadow: 0 1px 12px rgba(54, 179, 194, 0.14);
+  }
+}

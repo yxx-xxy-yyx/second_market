@@ -1,0 +1,90 @@
+/* 全局卡片动画效果 */
+.el-card {
+  transition: all 0.3s ease;
+}
+
+.el-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 表单输入框focus动画 */
+.el-input__wrapper {
+  transition: all 0.3s ease;
+}
+
+.el-input__wrapper:focus-within,
+.el-input__wrapper.is-focus {
+  border-color: #409eff !important;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1) !important;
+}
+
+.el-textarea__inner:focus {
+  border-color: #409eff !important;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1) !important;
+}
+
+/* 按钮动画 */
+.el-button {
+  transition: all 0.3s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-2px);
+}
+
+.el-button:active {
+  transform: translateY(0);
+}
+
+/* 对话框动画优化 */
+.el-dialog {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* 抽屉动画优化 */
+.el-drawer {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+/* 表格行hover效果 */
+.el-table__row {
+  transition: background-color 0.2s ease;
+}
+
+/* 空状态优化 */
+.el-empty {
+  padding: 40px 20px;
+}
+
+/* 标签动画 */
+.el-tag {
+  transition: all 0.2s ease;
+}
+
+.el-tag:hover {
+  transform: scale(1.05);
+}
+
+/* 通知样式优化 */
+.el-notification {
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 消息样式优化 */
+.el-message {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 加载动画优化 */
+.el-loading-mask {
+  backdrop-filter: blur(2px);
+}
+
