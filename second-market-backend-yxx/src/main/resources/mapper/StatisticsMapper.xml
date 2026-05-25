@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.StatisticsMapper">
+
+    <select id="selectOverviewStatistics" resultType="com.echoofmemories.project.dto.StatisticsOverviewDTO">
+        SELECT 
+            (SELECT COUNT(*) FROM sys_user WHERE deleted = 0) AS totalUsers,
+            (SELECT COUNT(*) FROM product WHERE deleted = 0) AS totalProducts,
+            (SELECT COUNT(*) FROM orders WHERE deleted = 0) AS totalOrders,
+            (SELECT IFNULL(SUM(amount), 0) FROM orders WHERE deleted = 0 AND status = 2) AS totalAmount
+    </select>
+
+    <select id="selectUserTrend" resultType="com.echoofmemories.project.dto.TrendDataDTO">
+        SELECT 
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*) AS count
+        FROM sys_user
+        WHERE deleted = 0 
+            AND create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="selectCategoryStatistics" resultType="com.echoofmemories.project.dto.CategoryStatisticsDTO">
+        SELECT 
+            category,
+            COUNT(*) AS count
+        FROM product
+        WHERE deleted = 0
+        GROUP BY category
+        ORDER BY count DESC
+    </select>
+
+    <select id="selectOrderStatusStatistics" resultType="com.echoofmemories.project.dto.OrderStatusStatisticsDTO">
+        SELECT 
+            status,
+            CASE 
+                WHEN status = 0 THEN '待支付'
+                WHEN status = 1 THEN '已支付'
+                WHEN status = 2 THEN '已完成'
+                WHEN status = 3 THEN '已取消'
+                ELSE '未知'
+            END AS statusName,
+            COUNT(*) AS count
+        FROM orders
+        WHERE deleted = 0
+        GROUP BY status
+        ORDER BY status ASC
+    </select>
+
+    <select id="selectTradeTrend" resultType="com.echoofmemories.project.dto.TradeTrendDTO">
+        SELECT 
+            DATE_FORMAT(create_time, '%Y-%m-%d') AS date,
+            COUNT(*) AS orderCount,
+            IFNULL(SUM(amount), 0) AS totalAmount
+        FROM orders
+        WHERE deleted = 0 
+            AND status = 2
+            AND create_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(create_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="selectHotProducts" resultType="com.echoofmemories.project.dto.HotProductDTO">
+        SELECT 
+            id,
+            title,
+            category,
+            price,
+            view_count AS viewCount,
+            images
+        FROM product
+        WHERE deleted = 0 AND status = 2
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectActiveUsers" resultType="com.echoofmemories.project.dto.ActiveUserDTO">
+        SELECT 
+            u.id AS userId,
+            u.nickname,
+            u.avatar,
+            IFNULL(p.product_count, 0) AS productCount,
+            IFNULL(o.order_count, 0) AS orderCount,
+            (IFNULL(p.product_count, 0) + IFNULL(o.order_count, 0)) AS totalActivity
+        FROM sys_user u
+        LEFT JOIN (
+            SELECT user_id, COUNT(*) AS product_count
+            FROM product
+            WHERE deleted = 0
+            GROUP BY user_id
+        ) p ON u.id = p.user_id
+        LEFT JOIN (
+            SELECT seller_id, COUNT(*) AS order_count
+            FROM orders
+            WHERE deleted = 0
+            GROUP BY seller_id
+        ) o ON u.id = o.seller_id
+        WHERE u.deleted = 0
+        ORDER BY totalActivity DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUserOverviewStatistics" resultType="com.echoofmemories.project.dto.UserStatisticsOverviewDTO">
+        SELECT 
+            (SELECT COUNT(*) FROM product WHERE deleted = 0 AND user_id = #{userId}) AS productCount,
+            (SELECT COUNT(*) FROM product WHERE deleted = 0 AND user_id = #{userId} AND status = 4) AS soldCount,
+            (SELECT COUNT(*) FROM orders WHERE deleted = 0 AND buyer_id = #{userId}) AS buyCount,
+            (SELECT COUNT(*) FROM favorite WHERE deleted = 0 AND user_id = #{userId}) AS favoriteCount,
+            (SELECT IFNULL(credit_score, 0) FROM sys_user WHERE id = #{userId} AND deleted = 0) AS creditScore,
+            (SELECT COUNT(*) FROM review WHERE deleted = 0 AND reviewee_id = #{userId}) AS reviewCount
+    </select>
+
+    <select id="selectUserIncome" resultType="com.echoofmemories.project.dto.IncomeExpenseDTO">
+        SELECT 
+            DATE_FORMAT(finish_time, '%Y-%m-%d') AS date,
+            SUM(amount) AS amount
+        FROM orders
+        WHERE deleted = 0 
+            AND seller_id = #{userId}
+            AND status = 2
+            AND finish_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(finish_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="selectUserExpense" resultType="com.echoofmemories.project.dto.IncomeExpenseDTO">
+        SELECT 
+            DATE_FORMAT(finish_time, '%Y-%m-%d') AS date,
+            SUM(amount) AS amount
+        FROM orders
+        WHERE deleted = 0 
+            AND buyer_id = #{userId}
+            AND status = 2
+            AND finish_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE_FORMAT(finish_time, '%Y-%m-%d')
+        ORDER BY date ASC
+    </select>
+
+    <select id="selectUserProductViewTrend" resultType="com.echoofmemories.project.dto.ProductViewTrendDTO">
+        SELECT 
+            id AS productId,
+            title AS productTitle,
+            view_count AS viewCount
+        FROM product
+        WHERE deleted = 0 AND user_id = #{userId}
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectUserRating" resultType="com.echoofmemories.project.dto.UserRatingDTO">
+        SELECT 
+            IFNULL(AVG(rating), 0) AS avgRating,
+            COUNT(*) AS reviewCount
+        FROM review
+        WHERE deleted = 0 AND reviewee_id = #{userId}
+    </select>
+
+</mapper>
+

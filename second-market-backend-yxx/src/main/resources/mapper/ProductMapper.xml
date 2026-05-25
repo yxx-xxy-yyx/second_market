@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.ProductMapper">
+
+    <resultMap id="ProductWithUserResult" type="com.echoofmemories.project.entity.Product">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="schoolId" column="school_id_resolved"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="category" column="category"/>
+        <result property="price" column="price"/>
+        <result property="originalPrice" column="original_price"/>
+        <result property="conditionScore" column="condition_score"/>
+        <result property="conditionDesc" column="condition_desc"/>
+        <result property="images" column="images"/>
+        <result property="status" column="status"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="aiAnalyzed" column="ai_analyzed"/>
+        <result property="aiSuggestions" column="ai_suggestions"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+    </resultMap>
+
+    <select id="selectProductPageWithUser" resultMap="ProductWithUserResult">
+        SELECT 
+            p.*,
+            COALESCE(p.school_id, u.school_id) AS school_id_resolved,
+            u.nickname AS user_nickname,
+            u.avatar AS user_avatar
+        FROM product p
+        LEFT JOIN sys_user u ON p.user_id = u.id
+        WHERE p.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (p.title LIKE CONCAT('%', #{keyword}, '%') 
+                 OR p.description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="category != null and category != ''">
+            AND p.category = #{category}
+        </if>
+        <if test="minPrice != null">
+            AND p.price &gt;= #{minPrice}
+        </if>
+        <if test="maxPrice != null">
+            AND p.price &lt;= #{maxPrice}
+        </if>
+        <if test="minCondition != null">
+            AND p.condition_score &gt;= #{minCondition}
+        </if>
+        <if test="maxCondition != null">
+            AND p.condition_score &lt;= #{maxCondition}
+        </if>
+        <if test="status != null">
+            <choose>
+                <when test="status == 2">
+                    AND p.status IN (1, 2)
+                </when>
+                <otherwise>
+                    AND p.status = #{status}
+                </otherwise>
+            </choose>
+        </if>
+        <if test="userId != null">
+            AND p.user_id = #{userId}
+        </if>
+        <if test="schoolId != null">
+            AND COALESCE(p.school_id, u.school_id) = #{schoolId}
+        </if>
+        <choose>
+            <when test="sortBy == 'createTime'">
+                ORDER BY p.create_time DESC
+            </when>
+            <when test="sortBy == 'priceAsc'">
+                ORDER BY p.price ASC
+            </when>
+            <when test="sortBy == 'priceDesc'">
+                ORDER BY p.price DESC
+            </when>
+            <when test="sortBy == 'viewCount'">
+                ORDER BY p.view_count DESC
+            </when>
+            <otherwise>
+                ORDER BY p.create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectProductWithUserById" resultMap="ProductWithUserResult">
+        SELECT 
+            p.*,
+            COALESCE(p.school_id, u.school_id) AS school_id_resolved,
+            u.nickname AS user_nickname,
+            u.avatar AS user_avatar
+        FROM product p
+        LEFT JOIN sys_user u ON p.user_id = u.id
+        WHERE p.id = #{id} AND p.deleted = 0
+    </select>
+
+</mapper>

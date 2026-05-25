@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.SchoolMapper">
+
+    <select id="selectSchoolOptions" resultType="com.echoofmemories.project.entity.School">
+        SELECT 
+            id,
+            school_code,
+            CASE 
+                WHEN #{language} = 'ko' THEN name_ko
+                WHEN #{language} = 'en' THEN name_en
+                ELSE name_zh
+            END as name,
+            CASE 
+                WHEN #{language} = 'ko' THEN city_ko
+                WHEN #{language} = 'en' THEN city_en
+                ELSE city_zh
+            END as city,
+            logo_url,
+            status,
+            created_time,
+            updated_time,
+            deleted
+        FROM school
+        WHERE deleted = 0 AND status = 1
+        ORDER BY name ASC
+    </select>
+
+</mapper>

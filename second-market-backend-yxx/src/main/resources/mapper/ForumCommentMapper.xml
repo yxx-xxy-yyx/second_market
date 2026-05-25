@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.ForumCommentMapper">
+
+    <resultMap id="ForumCommentResult" type="com.echoofmemories.project.entity.ForumComment">
+        <id property="id" column="id"/>
+        <result property="postId" column="post_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="isAnonymous" column="is_anonymous"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+    </resultMap>
+
+    <select id="selectByPostId" resultMap="ForumCommentResult">
+        SELECT 
+            c.*,
+            CASE WHEN c.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
+            CASE WHEN c.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar
+        FROM forum_comment c
+        LEFT JOIN sys_user u ON c.user_id = u.id
+        WHERE c.post_id = #{postId} AND c.deleted = 0
+        ORDER BY c.create_time ASC
+    </select>
+
+</mapper>

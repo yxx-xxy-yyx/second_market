@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.FavoriteMapper">
+
+    <resultMap id="FavoriteWithProductResult" type="com.echoofmemories.project.entity.Favorite">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="productTitle" column="product_title"/>
+        <result property="productImages" column="product_images"/>
+        <result property="productPrice" column="product_price"/>
+        <result property="productOriginalPrice" column="product_original_price"/>
+        <result property="productStatus" column="product_status"/>
+        <result property="productConditionScore" column="product_condition_score"/>
+        <result property="productViewCount" column="product_view_count"/>
+        <result property="productFavoriteCount" column="product_favorite_count"/>
+        <result property="productAiAnalyzed" column="product_ai_analyzed"/>
+        <result property="productCategory" column="product_category"/>
+    </resultMap>
+
+    <select id="selectFavoritePageWithProduct" resultMap="FavoriteWithProductResult">
+        SELECT 
+            f.*,
+            p.title AS product_title,
+            p.images AS product_images,
+            p.price AS product_price,
+            p.original_price AS product_original_price,
+            p.status AS product_status,
+            p.condition_score AS product_condition_score,
+            p.view_count AS product_view_count,
+            p.favorite_count AS product_favorite_count,
+            p.ai_analyzed AS product_ai_analyzed,
+            p.category AS product_category
+        FROM favorite f
+        LEFT JOIN product p ON f.product_id = p.id
+        WHERE f.deleted = 0 AND f.user_id = #{userId} AND (p.deleted = 0 OR p.deleted IS NULL)
+        ORDER BY f.create_time DESC
+    </select>
+
+</mapper>
+

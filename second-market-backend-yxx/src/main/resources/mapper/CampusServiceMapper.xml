@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.CampusServiceMapper">
+
+    <resultMap id="CampusServiceWithUserResult" type="com.echoofmemories.project.entity.CampusService">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="location" column="location"/>
+        <result property="reward" column="reward"/>
+        <result property="limitCount" column="limit_count"/>
+        <result property="currentCount" column="current_count"/>
+        <result property="deadline" column="deadline"/>
+        <result property="status" column="status"/>
+        <result property="accepterId" column="accepter_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="accepterNickname" column="accepter_nickname"/>
+        <result property="accepterAvatar" column="accepter_avatar"/>
+    </resultMap>
+
+    <select id="selectCampusServicePage" resultMap="CampusServiceWithUserResult">
+        SELECT 
+            cs.*,
+            u.nickname AS user_nickname,
+            u.avatar AS user_avatar,
+            a.nickname AS accepter_nickname,
+            a.avatar AS accepter_avatar
+        FROM campus_service cs
+        LEFT JOIN sys_user u ON cs.user_id = u.id
+        LEFT JOIN sys_user a ON cs.accepter_id = a.id
+        WHERE cs.deleted = 0
+        <if test="type != null">
+            AND cs.type = #{type}
+        </if>
+        <if test="schoolId != null">
+            AND cs.school_id = #{schoolId}
+        </if>
+        ORDER BY cs.create_time DESC
+    </select>
+
+    <select id="selectCampusServiceDetail" resultMap="CampusServiceWithUserResult">
+        SELECT
+            cs.*,
+            u.nickname AS user_nickname,
+            u.avatar AS user_avatar,
+            a.nickname AS accepter_nickname,
+            a.avatar AS accepter_avatar
+        FROM campus_service cs
+        LEFT JOIN sys_user u ON cs.user_id = u.id
+        LEFT JOIN sys_user a ON cs.accepter_id = a.id
+        WHERE cs.deleted = 0 AND cs.id = #{id}
+        LIMIT 1
+    </select>
+
+</mapper>

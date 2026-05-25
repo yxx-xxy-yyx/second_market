@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.ForumPostMapper">
+
+    <resultMap id="ForumPostResult" type="com.echoofmemories.project.entity.ForumPost">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="category" column="category"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="images" column="images"/>
+        <result property="isSchoolOnly" column="is_school_only"/>
+        <result property="isAnonymous" column="is_anonymous"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="userNickname" column="user_nickname"/>
+        <result property="userAvatar" column="user_avatar"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="liked" column="liked"/>
+        <result property="favoriteCount" column="favorite_count"/>
+        <result property="favorited" column="favorited"/>
+    </resultMap>
+
+    <select id="selectForumPage" resultMap="ForumPostResult">
+        SELECT 
+            p.*,
+            (SELECT COUNT(1) FROM forum_like fl WHERE fl.post_id = p.id) AS like_count,
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS liked,
+            (SELECT COUNT(1) FROM forum_favorite ff WHERE ff.post_id = p.id) AS favorite_count,
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS favorited,
+            CASE WHEN p.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
+            CASE WHEN p.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar,
+            s.name_zh AS school_name
+        FROM forum_post p
+        LEFT JOIN sys_user u ON p.user_id = u.id
+        LEFT JOIN school s ON p.school_id = s.id
+        WHERE p.deleted = 0
+        <if test="category != null and category != ''">
+            AND p.category = #{category}
+        </if>
+        <choose>
+            <when test="schoolId != null and schoolId != ''">
+                AND p.school_id = #{schoolId}
+            </when>
+            <otherwise>
+                AND p.is_school_only = 0
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="sortBy == 'hot'">
+                ORDER BY (p.comment_count + p.view_count + (SELECT COUNT(1) FROM forum_like fl3 WHERE fl3.post_id = p.id)) DESC, p.create_time DESC
+            </when>
+            <otherwise>
+                ORDER BY p.create_time DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectForumDetail" resultMap="ForumPostResult">
+        SELECT 
+            p.*,
+            (SELECT COUNT(1) FROM forum_like fl WHERE fl.post_id = p.id) AS like_count,
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS liked,
+            (SELECT COUNT(1) FROM forum_favorite ff WHERE ff.post_id = p.id) AS favorite_count,
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS favorited,
+            CASE WHEN p.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
+            CASE WHEN p.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar,
+            s.name_zh AS school_name
+        FROM forum_post p
+        LEFT JOIN sys_user u ON p.user_id = u.id
+        LEFT JOIN school s ON p.school_id = s.id
+        WHERE p.id = #{id} AND p.deleted = 0
+    </select>
+
+    <select id="selectMyFavoritePage" resultMap="ForumPostResult">
+        SELECT
+            p.*,
+            (SELECT COUNT(1) FROM forum_like fl WHERE fl.post_id = p.id) AS like_count,
+            0 AS liked,
+            (SELECT COUNT(1) FROM forum_favorite ff WHERE ff.post_id = p.id) AS favorite_count,
+            1 AS favorited,
+            CASE WHEN p.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
+            CASE WHEN p.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar,
+            s.name_zh AS school_name
+        FROM forum_favorite f
+        INNER JOIN forum_post p ON f.post_id = p.id
+        LEFT JOIN sys_user u ON p.user_id = u.id
+        LEFT JOIN school s ON p.school_id = s.id
+        WHERE f.user_id = #{userId} AND p.deleted = 0
+        ORDER BY f.create_time DESC
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE forum_post SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="updateCommentCount">
+        UPDATE forum_post SET comment_count = comment_count + #{delta} WHERE id = #{id}
+    </update>
+
+</mapper>

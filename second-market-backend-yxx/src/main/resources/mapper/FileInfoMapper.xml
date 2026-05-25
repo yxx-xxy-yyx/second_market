@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.FileInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.echoofmemories.project.entity.FileInfo">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="originalName" column="original_name" jdbcType="VARCHAR"/>
+        <result property="fileName" column="file_name" jdbcType="VARCHAR"/>
+        <result property="filePath" column="file_path" jdbcType="VARCHAR"/>
+        <result property="fileSize" column="file_size" jdbcType="BIGINT"/>
+        <result property="fileType" column="file_type" jdbcType="VARCHAR"/>
+        <result property="mimeType" column="mime_type" jdbcType="VARCHAR"/>
+        <result property="extension" column="extension" jdbcType="VARCHAR"/>
+        <result property="md5" column="md5" jdbcType="VARCHAR"/>
+        <result property="fileUrl" column="file_url" jdbcType="VARCHAR"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="deleted" column="deleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, original_name, file_name, file_path, file_size, file_type, mime_type, 
+        extension, md5, file_url, user_id, create_time, deleted
+    </sql>
+
+    <!-- 根据MD5查询文件 -->
+    <select id="selectByMd5" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM sys_file_info
+        WHERE md5 = #{md5} AND deleted = 0
+        LIMIT 1
+    </select>
+
+</mapper>

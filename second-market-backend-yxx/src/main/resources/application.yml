@@ -54,7 +54,7 @@ logging:
     
 # Knife4j Swagger 配置
 knife4j:
-  enable: true
+  enable: ${KNIFE4J_ENABLE:false}
   setting:
     language: zh-CN
     enable-swagger-models: true

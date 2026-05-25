@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.echoofmemories.project.mapper.UserMapper">
+
+    <select id="selectUserDetailPage" resultType="com.echoofmemories.project.dto.UserDetailDTO">
+        SELECT
+        u.id,
+        u.username,
+        u.nickname,
+        u.email,
+        u.phone,
+        u.address,
+        u.avatar,
+        u.role,
+        u.status,
+        u.school_id AS schoolId,
+
+        <!-- 动态根据 language 参数显示 学校名称 -->
+        CASE
+        WHEN #{language} = 'ko' THEN s.name_ko
+        WHEN #{language} = 'en' THEN s.name_en
+        ELSE s.name_zh
+        END AS schoolName,
+
+        <!-- 动态根据 language 参数显示 城市名称（可选，我也给你加上了） -->
+        CASE
+        WHEN #{language} = 'ko' THEN s.city_ko
+        WHEN #{language} = 'en' THEN s.city_en
+        ELSE s.city_zh
+        END AS cityName,
+
+        u.credit_score AS creditScore,
+        u.create_time AS createTime,
+        (SELECT COUNT(*) FROM product WHERE deleted = 0 AND user_id = u.id) AS productCount,
+        (SELECT COUNT(*) FROM orders WHERE deleted = 0 AND seller_id = u.id) AS orderCount
+
+        FROM sys_user u
+        LEFT JOIN school s ON u.school_id = s.id
+        WHERE u.deleted = 0
+
+        <if test="keyword != null and keyword != ''">
+            AND (
+            u.username LIKE CONCAT('%', #{keyword}, '%')
+            OR u.nickname LIKE CONCAT('%', #{keyword}, '%')
+            OR u.phone LIKE CONCAT('%', #{keyword}, '%')
+            OR s.name_zh LIKE CONCAT('%', #{keyword}, '%')
+            OR s.name_en LIKE CONCAT('%', #{keyword}, '%')
+            OR s.name_ko LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+
+        <if test="username != null and username != ''">
+            AND u.username LIKE CONCAT('%', #{username}, '%')
+        </if>
+        <if test="nickname != null and nickname != ''">
+            AND u.nickname LIKE CONCAT('%', #{nickname}, '%')
+        </if>
+        <if test="phone != null and phone != ''">
+            AND u.phone LIKE CONCAT('%', #{phone}, '%')
+        </if>
+        <if test="schoolId != null">
+            AND u.school_id = #{schoolId}
+        </if>
+        <if test="status != null and status != ''">
+            AND u.status = CASE
+            WHEN #{status} = 'normal' THEN 1
+            WHEN #{status} = 'banned' THEN 0
+            ELSE u.status
+            END
+        </if>
+
+        ORDER BY u.create_time DESC
+    </select>
+
+    <select id="selectByUsername" resultType="com.echoofmemories.project.entity.User">
+        SELECT * FROM sys_user
+        WHERE username = #{username} AND deleted = 0
+    </select>
+
+    <select id="selectByEmail" resultType="com.echoofmemories.project.entity.User">
+        SELECT * FROM sys_user
+        WHERE email = #{email} AND deleted = 0
+    </select>
+
+</mapper>
