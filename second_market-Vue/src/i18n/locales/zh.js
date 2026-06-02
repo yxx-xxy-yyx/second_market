@@ -1,4 +1,22 @@
 export default {
+  ai: {
+    title: "AI智能助手",
+    oneClickPublish: "AI一键发布",
+    oneClickPublishDesc: "拍照识别，智能定价",
+    authenticate: "AI鉴定质检",
+    authenticateDesc: "图片秒级鉴定",
+    marketTrend: "AI行情参考",
+    marketTrendDesc: "价格趋势分析",
+    chatAssistant: "AI智能助手",
+    chatAssistantDesc: "自动回复，砍价辅助",
+    smartTrust: "AI智能托管",
+    smartSearch: "AI智能搜索",
+    campusMatch: "校园AI匹配",
+    disputeResolution: "AI风控仲裁",
+    campusService: "校园专属AI",
+    darkMode: "深色模式",
+    lightMode: "浅色模式"
+  },
   common: {
     home: "首页",
     mall: "商城",

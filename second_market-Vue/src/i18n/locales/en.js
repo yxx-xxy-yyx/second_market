@@ -1,4 +1,22 @@
 export default {
+  ai: {
+    title: "AI Assistant",
+    oneClickPublish: "AI Quick Publish",
+    oneClickPublishDesc: "Photo recognition, smart pricing",
+    authenticate: "AI Authentication",
+    authenticateDesc: "Instant image verification",
+    marketTrend: "AI Market Trends",
+    marketTrendDesc: "Price trend analysis",
+    chatAssistant: "AI Chat Assistant",
+    chatAssistantDesc: "Auto replies, negotiation help",
+    smartTrust: "AI Smart Trust",
+    smartSearch: "AI Smart Search",
+    campusMatch: "Campus AI Match",
+    disputeResolution: "AI Dispute Resolution",
+    campusService: "Campus AI Services",
+    darkMode: "Dark Mode",
+    lightMode: "Light Mode"
+  },
   common: {
     home: "Home",
     mall: "Mall",
