@@ -42,6 +42,31 @@
           </el-carousel>
         </div>
 
+        <!-- AI功能入口 -->
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                <el-icon class="text-white" :size="16"><MagicStick /></el-icon>
+              </div>
+              <div class="text-sm font-semibold text-gray-900">AI智能助手</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-3">
+            <button
+              v-for="a in aiQuickActions"
+              :key="a.key"
+              class="rounded-2xl bg-gray-50 border border-gray-100 shadow-sm px-2 py-3 text-left active:scale-[0.99] transition"
+              @click="router.push(a.path)"
+            >
+              <div class="h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-sm mx-auto" :style="{ background: a.bg }">
+                <el-icon :size="18"><component :is="a.icon" /></el-icon>
+              </div>
+              <div class="mt-2 text-[11px] font-bold text-gray-900 text-center truncate">{{ a.label }}</div>
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-4 gap-3">
           <button
             v-for="a in quickActions"
@@ -127,6 +152,32 @@
               </div>
             </el-carousel-item>
           </el-carousel>
+        </div>
+
+        <!-- AI功能入口 -->
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-9 w-9 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                <el-icon class="text-white" :size="18"><MagicStick /></el-icon>
+              </div>
+              <div class="text-base font-semibold text-gray-900">AI智能助手</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-4">
+            <button
+              v-for="a in aiQuickActions"
+              :key="a.key"
+              class="rounded-2xl bg-gray-50 border border-gray-100 shadow-sm px-4 py-5 text-left active:scale-[0.99] transition"
+              @click="router.push(a.path)"
+            >
+              <div class="h-11 w-11 rounded-xl flex items-center justify-center text-white shadow-sm mx-auto" :style="{ background: a.bg }">
+                <el-icon :size="22"><component :is="a.icon" /></el-icon>
+              </div>
+              <div class="mt-3 text-sm font-semibold text-gray-900 text-center">{{ a.label }}</div>
+              <div class="text-xs text-gray-500 mt-1 text-center">{{ a.desc }}</div>
+            </button>
+          </div>
         </div>
 
         <div class="grid grid-cols-4 gap-4">
@@ -221,6 +272,33 @@
             </el-carousel>
           </div>
           <div class="space-y-6">
+            <!-- AI功能区域 -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div class="flex items-center gap-2 mb-4">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                  <el-icon class="text-white" :size="18"><MagicStick /></el-icon>
+                </div>
+                <h3 class="text-lg font-bold">AI智能助手</h3>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  v-for="a in aiQuickActions"
+                  :key="a.key"
+                  class="rounded-xl border border-gray-100 p-4 text-left hover:shadow-sm transition"
+                  @click="router.push(a.path)"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-xl flex items-center justify-center text-white" :style="{ background: a.bg }">
+                      <el-icon :size="18"><component :is="a.icon" /></el-icon>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm font-bold text-gray-900 truncate">{{ a.label }}</div>
+                      <div class="text-xs text-gray-500 truncate">{{ a.desc }}</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
               <h3 class="text-lg font-bold mb-4">{{ $t('dashboard.quickActions') }}</h3>
               <div class="grid grid-cols-2 gap-3">
@@ -294,7 +372,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Bell, View, Plus, ShoppingCart, Star, Clock } from '@element-plus/icons-vue'
+import { Bell, View, Plus, ShoppingCart, Star, Clock, MagicStick, TrendCharts, Search, Document, ChatDotRound, School, Odometer, Warning } from '@element-plus/icons-vue'
 import { useSchoolStore } from '@/stores/school'
 import { useDeviceType } from '@/utils/device'
 import { productApi } from '@/api/product'
@@ -329,6 +407,13 @@ const quickActions = computed(() => ([
   { key: 'orders', label: t('dashboard.stats.orders'), desc: t('ordersPage.title'), path: '/user/orders', icon: ShoppingCart, bg: 'linear-gradient(135deg, rgba(6,182,212,0.85) 0%, rgba(139,92,246,0.85) 100%)' },
   { key: 'favorites', label: t('dashboard.stats.favorites'), desc: t('favoritesPage.title'), path: '/user/favorites', icon: Star, bg: 'linear-gradient(135deg, rgba(6,182,212,0.70) 0%, rgba(139,92,246,0.70) 100%)' },
   { key: 'history', label: t('dashboard.stats.history'), desc: t('profilePage.menu.history'), path: '/user/recently-viewed', icon: Clock, bg: 'linear-gradient(135deg, rgba(6,182,212,0.65) 0%, rgba(139,92,246,0.65) 100%)' }
+]))
+
+const aiQuickActions = computed(() => ([
+  { key: 'ai-publish', label: 'AI一键发布', desc: '拍照识别，智能定价', path: '/user/publish', icon: MagicStick, bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  { key: 'ai-authenticate', label: 'AI鉴定质检', desc: '图片秒级鉴定', path: '/user/ai-authenticate', icon: Document, bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+  { key: 'ai-market', label: 'AI行情参考', desc: '价格趋势分析', path: '/user/ai-market', icon: TrendCharts, bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+  { key: 'ai-chat', label: 'AI智能助手', desc: '自动回复，砍价辅助', path: '/user/ai-chat', icon: ChatDotRound, bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }
 ]))
 
 const handleCategoryClick = (id) => {

@@ -35,6 +35,10 @@ const Feedback = () => import('@/views/user/Feedback.vue')
 const Verify = () => import('@/views/user/Verify.vue')
 const Credit = () => import('@/views/user/Credit.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
+
+// 新增AI功能页面
+const AiAuthenticate = () => import('@/views/user/AiAuthenticate.vue')
+const AiMarketTrend = () => import('@/views/user/AiMarketTrend.vue')
 const AdminDashboard = () => import('@/views/admin/Dashboard.vue')
 const AdminUsers = () => import('@/views/admin/Users.vue')
 const AdminProfile = () => import('@/views/admin/Profile.vue')
@@ -445,6 +449,24 @@ const routes = [
         component: SearchView,
         meta: {
           title: '搜索',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'ai-authenticate',
+        name: 'ai-authenticate',
+        component: AiAuthenticate,
+        meta: {
+          title: 'AI鉴定质检',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'ai-market',
+        name: 'ai-market',
+        component: AiMarketTrend,
+        meta: {
+          title: 'AI行情参考',
           requiresAuth: true
         }
       }

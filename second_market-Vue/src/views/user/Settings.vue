@@ -1,75 +1,89 @@
 <template>
-  <div class="settings-container min-h-screen bg-gray-50 pb-24">
-    <div class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+  <div class="settings-container min-h-screen pb-24" :style="{ backgroundColor: 'var(--bg-color)'">
+    <div class="sticky top-0 z-50 backdrop-blur border-b px-4 py-3 flex items-center justify-between"
+         :style="{ backgroundColor: 'rgba(255,255,255,0.9)', borderColor: 'var(--border-color)' }">
       <div class="flex items-center gap-3">
-        <el-icon :size="20" class="text-gray-700" @click="router.back()"><ArrowLeft /></el-icon>
-        <div class="text-base font-bold text-gray-900">{{ $t('settings.title') }}</div>
+        <el-icon :size="20" @click="router.back()" :style="{ color: 'var(--text-primary)'"><ArrowLeft /></el-icon>
+        <div class="text-base font-bold" :style="{ color: 'var(--text-primary)'">{{ $t('settings.title') }}</div>
       </div>
       <LangSwitcher />
     </div>
 
     <div class="px-3 py-4 space-y-3">
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <!-- 外观设置 -->
+      <div class="rounded-2xl border shadow-sm overflow-hidden" :style="{ backgroundColor: 'var(--bg-white)', borderColor: 'var(--border-color)' }">
         <div class="cell" @click="router.push('/user/profileEdit')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><User /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.accountProfile') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.accountProfile') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
         <div class="cell" @click="router.push('/user/address')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><MapLocation /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.address') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.address') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
         <div class="cell" @click="router.push('/user/verify')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><Stamp /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.verify') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.verify') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
         <div class="cell" @click="router.push('/user/credit')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><Odometer /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.credit') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.credit') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <!-- 外观设置 -->
+      <div class="rounded-2xl border shadow-sm overflow-hidden" :style="{ backgroundColor: 'var(--bg-white)', borderColor: 'var(--border-color)' }">
+        <div class="cell">
+          <div class="cell-left">
+            <div class="icon bg-primary/10 text-primary"><el-icon><Moon /></el-icon></div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">深色模式</div>
+          </div>
+          <el-switch v-model="isDark" @change="toggleTheme" />
+        </div>
+      </div>
+
+      <!-- 其他设置 -->
+      <div class="rounded-2xl border shadow-sm overflow-hidden" :style="{ backgroundColor: 'var(--bg-white)', borderColor: 'var(--border-color)' }">
         <div class="cell" @click="router.push('/user/privacy')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><Document /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.privacy') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.privacy') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
         <div class="cell" @click="router.push('/user/terms')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><Tickets /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.terms') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.terms') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
         <div class="cell" @click="router.push('/user/feedback')">
           <div class="cell-left">
             <div class="icon bg-primary/10 text-primary"><el-icon><ChatLineRound /></el-icon></div>
-            <div class="cell-title">{{ $t('settings.feedback') }}</div>
+            <div class="cell-title" :style="{ color: 'var(--text-primary)'">{{ $t('settings.feedback') }}</div>
           </div>
-          <el-icon class="text-gray-300"><ArrowRight /></el-icon>
+          <el-icon :style="{ color: 'var(--text-secondary)'"><ArrowRight /></el-icon>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="rounded-2xl border shadow-sm overflow-hidden" :style="{ backgroundColor: 'var(--bg-white)', borderColor: 'var(--border-color)' }">
         <button class="w-full h-12 text-red-500 font-bold" @click="logout">{{ $t('settings.logout') }}</button>
       </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <button class="w-full h-12 text-gray-500 font-bold" @click="deactivate">{{ $t('settings.deactivate') }}</button>
+      <div class="rounded-2xl border shadow-sm overflow-hidden" :style="{ backgroundColor: 'var(--bg-white)', borderColor: 'var(--border-color)' }">
+        <button class="w-full h-12 font-bold" :style="{ color: 'var(--text-secondary)'}" @click="deactivate">{{ $t('settings.deactivate') }}</button>
       </div>
     </div>
   </div>
@@ -78,14 +92,30 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { ArrowLeft, ArrowRight, User, MapLocation, Stamp, Odometer, Document, Tickets, ChatLineRound } from '@element-plus/icons-vue'
+import { useThemeStore } from '@/stores/theme'
+import { computed } from 'vue'
+import { ArrowLeft, ArrowRight, User, MapLocation, Stamp, Odometer, Document, Tickets, ChatLineRound, Moon } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 const { t } = useI18n()
+
+const isDark = computed({
+  get: () => themeStore.isDark,
+  set: (val) => {
+    if (val !== themeStore.isDark) {
+      themeStore.toggleTheme()
+    }
+  }
+})
+
+const toggleTheme = () => {
+  themeStore.toggleTheme()
+}
 
 const logout = async () => {
   try {
@@ -114,7 +144,7 @@ const deactivate = async () => {
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(241, 245, 249, 0.9);
+  border-bottom: 1px solid var(--border-light);
 }
 
 .cell:last-child {
@@ -141,7 +171,6 @@ const deactivate = async () => {
 .cell-title {
   font-size: 14px;
   font-weight: 700;
-  color: #0f172a;
 }
 </style>
 

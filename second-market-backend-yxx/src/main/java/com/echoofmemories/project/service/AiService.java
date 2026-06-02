@@ -1,8 +1,6 @@
 package com.echoofmemories.project.service;
 
-import com.echoofmemories.project.dto.AiRequest;
-import com.echoofmemories.project.dto.AiResponse;
-import com.echoofmemories.project.dto.ProductAnalysisDTO;
+import com.echoofmemories.project.dto.*;
 import java.util.List;
 
 /**
@@ -74,4 +72,81 @@ public interface AiService {
             String additionalInfo,
             Long userId,
             String language);
+
+    /**
+     * 智能托管服务
+     * 
+     * @param request 托管请求
+     * @param userId 用户ID
+     * @return 托管响应
+     */
+    AiIntelligentTrustResponse intelligentTrust(
+            AiIntelligentTrustRequest request,
+            Long userId);
+
+    /**
+     * 鉴定质检服务
+     * 
+     * @param request 鉴定请求
+     * @param userId 用户ID
+     * @return 鉴定响应
+     */
+    AiAuthenticationResponse authenticateProduct(
+            AiAuthenticationRequest request,
+            Long userId);
+
+    /**
+     * 市场行情参考
+     * 
+     * @param request 行情请求
+     * @param userId 用户ID
+     * @return 行情响应
+     */
+    AiMarketTrendResponse getMarketTrend(
+            AiMarketTrendRequest request,
+            Long userId);
+
+    /**
+     * 智能搜索
+     * 
+     * @param request 搜索请求
+     * @param userId 用户ID
+     * @return 搜索响应
+     */
+    AiSmartSearchResponse smartSearch(
+            AiSmartSearchRequest request,
+            Long userId);
+
+    /**
+     * 校园匹配
+     * 
+     * @param request 匹配请求
+     * @param userId 用户ID
+     * @return 匹配响应
+     */
+    AiCampusMatchResponse campusMatch(
+            AiCampusMatchRequest request,
+            Long userId);
+
+    /**
+     * AI纠纷仲裁
+     * 
+     * @param request 仲裁请求
+     * @param userId 用户ID
+     * @return 仲裁响应
+     */
+    AiDisputeResolutionResponse resolveDispute(
+            AiDisputeResolutionRequest request,
+            Long userId);
+
+    /**
+     * 校园专属服务
+     * 
+     * @param request 服务请求
+     * @param userId 用户ID
+     * @return 服务响应
+     */
+    AiCampusServiceResponse campusService(
+            AiCampusServiceRequest request,
+            Long userId);
 }
