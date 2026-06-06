@@ -3,99 +3,141 @@
     <template v-if="product">
       <!-- 移动端视图 -->
       <template v-if="isMobileScreen">
-        <div class="product-detail-mobile min-h-screen bg-gray-50 pb-24">
+        <div class="product-detail-mobile min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 pb-32">
           <!-- 顶部导航 -->
-          <div class="sticky top-0 z-50 bg-white/90 backdrop-blur px-4 py-3 flex items-center justify-between border-b border-gray-100">
-            <el-icon :size="20" @click="router.back()"><ArrowLeft /></el-icon>
-            <span class="text-sm font-bold truncate px-4">{{ product.title }}</span>
-            <div class="flex items-center gap-3">
-              <el-icon :size="20" @click="handleReport"><Warning /></el-icon>
-              <el-icon :size="20" @click="handleShare"><Share /></el-icon>
+          <div class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl px-4 py-3 flex items-center justify-between border-b border-gray-100 shadow-sm">
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center cursor-pointer hover:from-gray-200 hover:to-gray-300 transition-all active:scale-95 shadow-sm" @click="router.back()">
+              <el-icon :size="18" class="text-gray-700"><ArrowLeft /></el-icon>
+            </div>
+            <span class="text-sm font-bold truncate px-3 text-gray-800">{{ product.title }}</span>
+            <div class="flex items-center gap-2">
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center cursor-pointer hover:from-orange-200 hover:to-orange-300 transition-all active:scale-95 shadow-sm" @click="handleReport">
+                <el-icon :size="18" class="text-orange-600"><Warning /></el-icon>
+              </div>
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center cursor-pointer hover:from-blue-200 hover:to-blue-300 transition-all active:scale-95 shadow-sm" @click="handleShare">
+                <el-icon :size="18" class="text-blue-600"><Share /></el-icon>
+              </div>
             </div>
           </div>
 
           <!-- 商品图片轮播 -->
-          <div class="w-full aspect-square bg-white relative">
-            <el-carousel height="100%" :autoplay="false" arrow="never" @change="i => currentImageIndex = i">
+          <div class="w-full aspect-square bg-gradient-to-br from-gray-100 via-white to-gray-50 relative overflow-hidden">
+            <el-carousel height="100%" :autoplay="false" arrow="always" indicator-position="outside" @change="i => currentImageIndex = i">
               <el-carousel-item v-for="(img, index) in imageList" :key="index">
-                <img :src="img" class="w-full h-full object-contain" />
+                <div class="w-full h-full flex items-center justify-center">
+                  <img :src="img" class="w-full h-full object-cover transition-all duration-500 hover:scale-105" />
+                </div>
               </el-carousel-item>
             </el-carousel>
-            <div class="absolute bottom-4 right-4 bg-black/40 text-white text-[10px] px-2 py-0.5 rounded-full">
+            <div class="absolute bottom-4 right-4 bg-gradient-to-r from-gray-800/90 to-gray-900/90 text-white text-xs px-3 py-1.5 rounded-2xl shadow-lg backdrop-blur-sm border border-white/20">
               {{ currentImageIndex + 1 }}/{{ imageList.length }}
             </div>
           </div>
 
           <!-- 商品信息 -->
-          <div class="bg-white p-4 space-y-3">
-            <div class="flex items-baseline gap-1 text-primary">
-              <span class="text-lg font-bold">¥</span>
-              <span class="text-2xl font-black">{{ product.price }}</span>
-              <span v-if="product.originalPrice" class="text-xs text-gray-400 line-through ml-2">¥{{ product.originalPrice }}</span>
+          <div class="bg-white/80 backdrop-blur-xl p-6 space-y-4 mx-3 -mt-6 rounded-3xl border border-gray-100 shadow-xl relative z-10">
+            <div class="flex items-end gap-2">
+              <span class="text-xl font-extrabold text-primary">¥</span>
+              <span class="text-4xl font-black bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">{{ product.price }}</span>
+              <span v-if="product.originalPrice" class="text-sm text-gray-400 line-through ml-3 font-medium">¥{{ product.originalPrice }}</span>
             </div>
-            <h1 class="text-lg font-bold text-gray-900 leading-snug">{{ product.title }}</h1>
+            <h1 class="text-xl font-extrabold text-gray-900 leading-tight">{{ product.title }}</h1>
             <div class="flex flex-wrap gap-2">
-              <el-tag v-if="product.aiAnalyzed" size="small" type="success" effect="dark"><el-icon><MagicStick /></el-icon> AI评估</el-tag>
-              <el-tag size="small" type="primary">{{ getCategoryName(product.category) }}</el-tag>
+              <div v-if="product.aiAnalyzed" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold shadow-md">
+                <el-icon><MagicStick /></el-icon> AI评估
+              </div>
+              <div class="inline-flex items-center px-3 py-1.5 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-md">
+                {{ getCategoryName(product.category) }}
+              </div>
             </div>
           </div>
 
           <!-- 卖家信息 -->
-          <div class="mt-2 bg-white p-4 flex items-center gap-3" @click="showSellerDrawer = true">
-            <el-avatar :size="40" :src="formatAvatarUrl(product.userAvatar)" />
-            <div class="flex-1">
-              <div class="text-sm font-bold text-gray-900">{{ product.userNickname || '匿名用户' }}</div>
-              <div class="flex items-center gap-2 mt-0.5">
-                <el-rate v-model="sellerRating.averageRating" disabled size="small" />
-                <span class="text-[10px] text-gray-400">信用良好</span>
+          <div class="mt-4 bg-white/80 backdrop-blur-xl p-5 mx-3 rounded-3xl border border-gray-100 shadow-lg cursor-pointer hover:shadow-xl transition-all" @click="showSellerDrawer = true">
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <el-avatar :size="50" :src="formatAvatarUrl(product.userAvatar)" class="ring-4 ring-gray-100 shadow-lg" />
+                <div class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center border-2 border-white shadow-sm">
+                  <el-icon :size="10" class="text-white"><CircleCheck /></el-icon>
+                </div>
+              </div>
+              <div class="flex-1">
+                <div class="text-base font-bold text-gray-900">{{ product.userNickname || '匿名用户' }}</div>
+                <div class="flex items-center gap-3 mt-1">
+                  <div class="flex items-center gap-1">
+                    <el-rate v-model="sellerRating.averageRating" disabled size="small" />
+                    <span class="text-xs text-gray-500 font-medium">信用良好</span>
+                  </div>
+                </div>
+              </div>
+              <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary/10 to-indigo-100 flex items-center justify-center">
+                <el-icon :size="18" class="text-primary"><ArrowRight /></el-icon>
               </div>
             </div>
-            <el-icon class="text-gray-300"><ArrowRight /></el-icon>
           </div>
 
           <!-- 商品描述 -->
-          <div class="mt-2 bg-white p-4">
-            <h2 class="text-sm font-bold text-gray-900 mb-2">商品详情</h2>
-            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{{ product.description }}</p>
+          <div class="mt-4 bg-white/80 backdrop-blur-xl p-6 mx-3 rounded-3xl border border-gray-100 shadow-lg">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                <el-icon :size="16" class="text-indigo-600"><Document /></el-icon>
+              </div>
+              <h2 class="text-base font-bold text-gray-900">商品详情</h2>
+            </div>
+            <p class="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap bg-gray-50/50 p-4 rounded-2xl border border-gray-100">{{ product.description }}</p>
           </div>
 
-          <div v-if="similarProducts.length" class="mt-2 bg-white p-4">
-            <div class="flex items-center justify-between mb-3">
-              <h2 class="text-sm font-bold text-gray-900">同款推荐</h2>
-              <button class="text-xs text-primary" @click="router.push({ path: '/user/products', query: { category: product.category } })">查看更多</button>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <div v-for="sp in similarProducts" :key="sp.id" class="rounded-xl overflow-hidden border border-gray-100 bg-white" @click="router.push(`/user/product/${sp.id}`)">
-                <div class="aspect-square bg-gray-50">
-                  <img :src="getProductImage(sp.images)" class="w-full h-full object-cover" />
+          <div v-if="similarProducts.length" class="mt-4 bg-white/80 backdrop-blur-xl p-5 mx-3 rounded-3xl border border-gray-100 shadow-lg">
+            <div class="flex items-center justify-between mb-5">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 rounded-xl bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                  <el-icon :size="16" class="text-rose-600"><Star /></el-icon>
                 </div>
-                <div class="p-2">
-                  <div class="text-[11px] font-semibold text-gray-900 line-clamp-2 leading-snug">{{ sp.title }}</div>
-                  <div class="mt-1 text-[11px] font-black text-primary">¥{{ sp.price }}</div>
+                <h2 class="text-base font-bold text-gray-900">同款推荐</h2>
+              </div>
+              <div class="flex items-center gap-1 text-primary font-medium text-sm cursor-pointer hover:text-purple-600 transition-colors" @click="router.push({ path: '/user/products', query: { category: product.category } })">
+                <span>查看更多</span>
+                <el-icon><ArrowRight /></el-icon>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+              <div v-for="sp in similarProducts" :key="sp.id" class="rounded-2xl overflow-hidden border border-gray-100 bg-gradient-to-br from-white to-gray-50 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer" @click="router.push(`/user/product/${sp.id}`)">
+                <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                  <img :src="getProductImage(sp.images)" class="w-full h-full object-cover hover:scale-110 transition-transform duration-300" />
+                </div>
+                <div class="p-3">
+                  <div class="text-xs font-bold text-gray-800 line-clamp-2 leading-snug">{{ sp.title }}</div>
+                  <div class="mt-2 text-base font-black text-primary">¥{{ sp.price }}</div>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- 底部操作栏 -->
-          <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-3 flex items-center gap-4 z-50">
-            <div class="flex flex-col items-center gap-1 min-w-[40px]" @click="toggleFavorite">
-              <el-icon :size="20" :class="isFavorited ? 'text-red-500' : 'text-gray-500'">
-                <component :is="isFavorited ? StarFilled : Star" />
-              </el-icon>
-              <span class="text-[10px] text-gray-500">收藏</span>
+          <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-100 px-4 py-4 flex items-center gap-4 z-50 shadow-2xl">
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform" @click="toggleFavorite">
+              <div :class="['h-10 w-10 rounded-2xl flex items-center justify-center shadow-md transition-all', isFavorited ? 'bg-gradient-to-br from-red-500 to-rose-600' : 'bg-gradient-to-br from-gray-100 to-gray-200']">
+                <el-icon :size="20" :class="isFavorited ? 'text-white' : 'text-gray-600'">
+                  <component :is="isFavorited ? StarFilled : Star" />
+                </el-icon>
+              </div>
+              <span class="text-xs text-gray-600 font-medium">收藏</span>
             </div>
-            <div class="flex flex-col items-center gap-1 min-w-[40px]" @click="handleContact">
-              <el-icon :size="20" class="text-gray-500"><ChatDotRound /></el-icon>
-              <span class="text-[10px] text-gray-500">聊一聊</span>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform" @click="handleContact">
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-green-100 to-emerald-200 flex items-center justify-center shadow-md">
+                <el-icon :size="20" class="text-green-600"><ChatDotRound /></el-icon>
+              </div>
+              <span class="text-xs text-gray-600 font-medium">聊一聊</span>
             </div>
-            <div class="flex flex-col items-center gap-1 min-w-[40px]" @click="router.push('/user/cart')">
-              <el-icon :size="20" class="text-gray-500"><ShoppingCart /></el-icon>
-              <span class="text-[10px] text-gray-500">购物车</span>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform" @click="router.push('/user/cart')">
+              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center shadow-md">
+                <el-icon :size="20" class="text-blue-600"><ShoppingCart /></el-icon>
+              </div>
+              <span class="text-xs text-gray-600 font-medium">购物车</span>
             </div>
-            <div class="flex-1 flex gap-2">
-              <el-button type="warning" class="flex-1 !rounded-full !h-10" @click="handleAddToCart">加入购物车</el-button>
-              <el-button type="primary" class="flex-1 !rounded-full !h-10" @click="handleBuy">立即购买</el-button>
+            <div class="flex-1 flex gap-3">
+              <el-button type="warning" class="flex-1 !rounded-full !h-12 !font-bold !text-base shadow-lg" @click="handleAddToCart">加入购物车</el-button>
+              <el-button type="primary" class="flex-1 !rounded-full !h-12 !font-bold !text-base shadow-lg" @click="handleBuy">立即购买</el-button>
             </div>
           </div>
         </div>
@@ -103,85 +145,127 @@
 
       <!-- 桌面端视图 -->
       <template v-else>
-        <div class="product-detail-desktop p-6 max-w-7xl mx-auto space-y-6 pb-24">
-          <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/user/dashboard' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item :to="{ path: '/user/products' }">商品列表</el-breadcrumb-item>
-            <el-breadcrumb-item>商品详情</el-breadcrumb-item>
-          </el-breadcrumb>
+        <div class="product-detail-desktop bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 min-h-screen pb-24">
+          <div class="p-8 max-w-7xl mx-auto space-y-8">
+            <el-breadcrumb separator="/" class="text-sm">
+              <el-breadcrumb-item :to="{ path: '/user/dashboard' }" class="hover:text-primary transition-colors">首页</el-breadcrumb-item>
+              <el-breadcrumb-item :to="{ path: '/user/products' }" class="hover:text-primary transition-colors">商品列表</el-breadcrumb-item>
+              <el-breadcrumb-item class="text-gray-800 font-medium">商品详情</el-breadcrumb-item>
+            </el-breadcrumb>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- 左侧图片 -->
-            <div class="space-y-4">
-              <el-card :body-style="{ padding: '0' }" class="aspect-square overflow-hidden flex items-center justify-center bg-gray-50">
-                <el-image :src="currentImage" :preview-src-list="imageList" fit="contain" class="w-full h-full" />
-              </el-card>
-              <div class="flex gap-2 overflow-x-auto py-2">
-                <div v-for="(img, index) in imageList" :key="index" :class="['w-20 h-20 border-2 rounded cursor-pointer overflow-hidden', currentImageIndex === index ? 'border-primary' : 'border-transparent']" @click="currentImageIndex = index">
-                  <img :src="img" class="w-full h-full object-cover" />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <!-- 左侧图片 -->
+              <div class="space-y-6">
+                <div class="bg-white/85 backdrop-blur-xl rounded-3xl shadow-xl border border-gray-100 p-4 aspect-square overflow-hidden flex items-center justify-center">
+                  <el-image :src="currentImage" :preview-src-list="imageList" fit="contain" class="w-full h-full transition-all duration-300 hover:scale-102" />
                 </div>
-              </div>
-            </div>
-
-            <!-- 右侧详情 -->
-            <div class="space-y-6">
-              <h1 class="text-2xl font-bold text-gray-900">{{ product.title }}</h1>
-              <div class="bg-gray-50 p-6 rounded-xl space-y-4">
-                <div class="flex items-baseline gap-2">
-                  <span class="text-3xl font-bold text-primary">¥{{ product.price }}</span>
-                  <span v-if="product.originalPrice" class="text-sm text-gray-400 line-through">¥{{ product.originalPrice }}</span>
-                </div>
-                <div class="grid grid-cols-2 gap-4 text-sm text-gray-500 border-t border-gray-100 pt-4">
-                  <div>成色：<el-rate v-model="product.conditionScore" disabled size="small" /></div>
-                  <div>浏览：{{ product.viewCount }}</div>
-                </div>
-              </div>
-
-              <div class="space-y-4">
-                <h3 class="font-bold">商品描述</h3>
-                <p class="text-gray-600 leading-relaxed whitespace-pre-wrap">{{ product.description }}</p>
-              </div>
-
-              <el-card v-if="similarProducts.length" shadow="never">
-                <template #header>
-                  <div class="flex items-center justify-between">
-                    <div class="font-bold">同款推荐</div>
-                    <el-button link type="primary" @click="router.push({ path: '/user/products', query: { category: product.category } })">查看更多</el-button>
-                  </div>
-                </template>
-                <div class="grid grid-cols-3 gap-3">
-                  <div v-for="sp in similarProducts" :key="sp.id" class="rounded-xl overflow-hidden border border-gray-100 cursor-pointer" @click="router.push(`/user/product/${sp.id}`)">
-                    <div class="aspect-square bg-gray-50">
-                      <img :src="getProductImage(sp.images)" class="w-full h-full object-cover" />
-                    </div>
-                    <div class="p-2">
-                      <div class="text-sm font-medium line-clamp-2">{{ sp.title }}</div>
-                      <div class="mt-1 font-bold text-primary">¥{{ sp.price }}</div>
+                <div class="bg-white/85 backdrop-blur-xl rounded-2xl shadow-lg border border-gray-100 p-4">
+                  <div class="flex gap-3 overflow-x-auto py-2">
+                    <div v-for="(img, index) in imageList" :key="index" 
+                         :class="['w-24 h-24 border-3 rounded-2xl cursor-pointer overflow-hidden transition-all duration-300 hover:scale-105', 
+                                  currentImageIndex === index ? 'border-primary shadow-lg scale-105' : 'border-gray-100 hover:border-primary/50']" 
+                         @click="currentImageIndex = index">
+                      <img :src="img" class="w-full h-full object-cover" />
                     </div>
                   </div>
                 </div>
-              </el-card>
-
-              <div class="flex gap-4 pt-6 border-t border-gray-100">
-                <el-button type="primary" size="large" class="flex-1" @click="handleBuy">立即购买</el-button>
-                <el-button type="warning" size="large" class="flex-1" @click="handleAddToCart">加入购物车</el-button>
-                <el-button size="large" @click="toggleFavorite">
-                  <el-icon class="mr-2"><component :is="isFavorited ? StarFilled : Star" /></el-icon>
-                  {{ isFavorited ? '已收藏' : '收藏' }}
-                </el-button>
-                <el-button size="large" @click="handleReport">举报</el-button>
               </div>
 
-              <el-card class="mt-8" shadow="never">
-                <div class="flex items-center gap-4">
-                  <el-avatar :size="60" :src="formatAvatarUrl(product.userAvatar)" />
-                  <div class="flex-1">
-                    <div class="font-bold">{{ product.userNickname || '匿名用户' }}</div>
-                    <div class="text-sm text-gray-500 mt-1">卖家评分：<el-rate v-model="sellerRating.averageRating" disabled size="small" /></div>
+              <!-- 右侧详情 -->
+              <div class="space-y-8">
+                <h1 class="text-3xl font-black text-gray-900 leading-tight">{{ product.title }}</h1>
+                <div class="bg-gradient-to-br from-white/90 to-gray-50/90 backdrop-blur-xl p-8 rounded-3xl shadow-xl border border-gray-100 space-y-6">
+                  <div class="flex items-end gap-4">
+                    <span class="text-5xl font-black bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">¥{{ product.price }}</span>
+                    <span v-if="product.originalPrice" class="text-xl text-gray-400 line-through font-medium">¥{{ product.originalPrice }}</span>
                   </div>
-                  <el-button type="primary" plain @click="handleContact">联系卖家</el-button>
+                  <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
+                    <div v-if="product.aiAnalyzed" class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-bold shadow-lg">
+                      <el-icon><MagicStick /></el-icon> AI评估
+                    </div>
+                    <div class="inline-flex items-center px-4 py-2 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg">
+                      {{ getCategoryName(product.category) }}
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-6 text-sm pt-4 border-t border-gray-100">
+                    <div class="flex items-center gap-2 text-gray-600">
+                      <span class="font-medium">成色：</span>
+                      <el-rate v-model="product.conditionScore" disabled size="default" />
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                      <span class="font-medium">浏览：</span>
+                      <span class="font-bold text-gray-800">{{ product.viewCount }}</span>
+                    </div>
+                  </div>
                 </div>
-              </el-card>
+
+                <div class="space-y-4 bg-white/85 backdrop-blur-xl p-6 rounded-3xl shadow-lg border border-gray-100">
+                  <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                      <el-icon :size="18" class="text-indigo-600"><Document /></el-icon>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900">商品描述</h3>
+                  </div>
+                  <p class="text-base text-gray-600 leading-relaxed whitespace-pre-wrap bg-gray-50/70 p-6 rounded-2xl border border-gray-100">{{ product.description }}</p>
+                </div>
+
+                <div v-if="similarProducts.length" class="bg-white/85 backdrop-blur-xl rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-100 to-pink-100 flex items-center justify-center">
+                        <el-icon :size="18" class="text-rose-600"><Star /></el-icon>
+                      </div>
+                      <span class="font-bold text-gray-900 text-lg">同款推荐</span>
+                    </div>
+                    <el-button type="primary" link class="text-base font-medium" @click="router.push({ path: '/user/products', query: { category: product.category } })">查看更多 →</el-button>
+                  </div>
+                  <div class="p-6">
+                    <div class="grid grid-cols-3 gap-5">
+                      <div v-for="sp in similarProducts" :key="sp.id" class="group rounded-2xl overflow-hidden border border-gray-100 bg-gradient-to-br from-white to-gray-50 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer" @click="router.push(`/user/product/${sp.id}`)">
+                        <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                          <img :src="getProductImage(sp.images)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                        </div>
+                        <div class="p-4">
+                          <div class="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">{{ sp.title }}</div>
+                          <div class="mt-2 text-xl font-black text-primary">¥{{ sp.price }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap gap-4 pt-8 border-t border-gray-200">
+                  <el-button type="primary" size="large" class="flex-1 !h-14 !text-lg !font-bold !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="handleBuy">立即购买</el-button>
+                  <el-button type="warning" size="large" class="flex-1 !h-14 !text-lg !font-bold !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="handleAddToCart">加入购物车</el-button>
+                  <el-button :type="isFavorited ? 'danger' : 'default'" size="large" class="!h-14 !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="toggleFavorite">
+                    <el-icon class="mr-2"><component :is="isFavorited ? StarFilled : Star" /></el-icon>
+                    {{ isFavorited ? '已收藏' : '收藏' }}
+                  </el-button>
+                  <el-button size="large" class="!h-14 !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="handleReport">
+                    <el-icon class="mr-2"><Warning /></el-icon>
+                    举报
+                  </el-button>
+                </div>
+
+                <div class="bg-white/85 backdrop-blur-xl rounded-3xl shadow-lg border border-gray-100 p-6">
+                  <div class="flex items-center gap-6">
+                    <div class="relative">
+                      <el-avatar :size="80" :src="formatAvatarUrl(product.userAvatar)" class="ring-6 ring-gray-100 shadow-xl" />
+                      <div class="absolute -bottom-2 -right-2 h-8 w-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center border-4 border-white shadow-lg">
+                        <el-icon :size="14" class="text-white"><CircleCheck /></el-icon>
+                      </div>
+                    </div>
+                    <div class="flex-1">
+                      <div class="text-xl font-black text-gray-900">{{ product.userNickname || '匿名用户' }}</div>
+                      <div class="text-base text-gray-500 mt-2 flex items-center gap-2">
+                        <span class="font-medium">卖家评分：</span>
+                        <el-rate v-model="sellerRating.averageRating" disabled size="default" />
+                      </div>
+                    </div>
+                    <el-button type="primary" plain size="large" class="!h-12 !px-8 !rounded-full !font-bold !shadow-lg hover:!shadow-xl transition-all" @click="handleContact">联系卖家</el-button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -205,7 +289,7 @@ import { useDeviceType } from '@/utils/device'
 import { formatAvatarUrl, formatProductImageUrl } from '@/utils/url'
 import { 
   ArrowLeft, Share, Star, StarFilled, ChatDotRound, 
-  MagicStick, Picture, Warning, ShoppingCart
+  MagicStick, Picture, Warning, ShoppingCart, Document, CircleCheck
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 

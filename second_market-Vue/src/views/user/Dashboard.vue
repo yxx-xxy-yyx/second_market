@@ -42,47 +42,72 @@
           </el-carousel>
         </div>
 
+        <!-- AI功能入口 -->
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center animate-pulse">
+                <el-icon class="text-white" :size="16"><MagicStick /></el-icon>
+              </div>
+              <div class="text-sm font-semibold text-gray-900">{{ $t('ai.title') }}</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-3">
+            <button
+              v-for="a in aiQuickActions"
+              :key="a.key"
+              class="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-100 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 px-2 py-3 text-center"
+              @click="router.push(a.path)"
+            >
+              <div class="h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-lg mx-auto transition-transform hover:scale-110" :style="{ background: a.bg }">
+                <el-icon :size="18"><component :is="a.icon" /></el-icon>
+              </div>
+              <div class="mt-2 text-[11px] font-bold text-gray-900 text-center truncate">{{ a.label }}</div>
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-4 gap-3">
           <button
             v-for="a in quickActions"
             :key="a.key"
-            class="rounded-2xl bg-white border border-gray-100 shadow-sm px-3 py-4 text-left active:scale-[0.99] transition"
+            class="rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 px-3 py-4 text-center"
             @click="router.push(a.path)"
           >
-            <div class="h-10 w-10 rounded-2xl flex items-center justify-center text-white shadow-sm" :style="{ background: a.bg }">
+            <div class="h-10 w-10 rounded-2xl flex items-center justify-center text-white shadow-md mx-auto transition-transform hover:scale-110" :style="{ background: a.bg }">
               <el-icon :size="20"><component :is="a.icon" /></el-icon>
             </div>
-            <div class="mt-3 text-xs font-bold text-gray-900 truncate">{{ a.label }}</div>
+            <div class="mt-3 text-xs font-bold text-gray-900">{{ a.label }}</div>
           </button>
         </div>
 
         <!-- 分类网格 -->
         <div class="grid grid-cols-5 gap-y-4 py-2">
-          <div v-for="cat in mobileCategories" :key="cat.id" class="flex flex-col items-center gap-1.5 active:scale-90 transition-transform cursor-pointer" @click="handleCategoryClick(cat.id)">
-            <div class="w-11 h-11 rounded-2xl flex items-center justify-center bg-white shadow-sm border border-gray-50">
-              <CategoryIcon :category-id="cat.id" :size="24" />
+          <div v-for="cat in mobileCategories" :key="cat.id" class="flex flex-col items-center gap-2 active:scale-90 transition-all duration-200 cursor-pointer group" @click="handleCategoryClick(cat.id)">
+            <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-white to-gray-50 shadow-md group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300 border border-gray-100">
+              <CategoryIcon :category-id="cat.id" :size="26" />
             </div>
-            <span class="text-[11px] text-gray-600 font-medium">{{ $t(`categories.${cat.id}`) }}</span>
+            <span class="text-[11px] text-gray-700 font-semibold">{{ $t(`categories.${cat.id}`) }}</span>
           </div>
         </div>
 
         <!-- 推荐商品 -->
-        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-sm font-semibold text-gray-900">{{ $t('dashboard.recommend') }}</div>
-            <button class="text-sm sm-text-primary" @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }}</button>
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-md p-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-base font-bold text-gray-900">{{ $t('dashboard.recommend') }}</div>
+            <button class="text-sm font-medium sm-text-primary bg-primary" @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }} →</button>
           </div>
-          <div v-loading="loading" class="grid grid-cols-2 gap-3">
-            <button v-for="p in recommendProducts" :key="p.id" class="rounded-2xl bg-white border border-gray-100 overflow-hidden shadow-sm text-left active:scale-[0.99] transition" @click="router.push(`/user/product/${p.id}`)">
-              <div class="w-full aspect-[4/3] bg-gray-100">
-                <img :src="getProductImage(p.images)" class="h-full w-full object-cover" @error="handleImgError" />
+          <div v-loading="loading" class="grid grid-cols-2 gap-4">
+            <button v-for="p in recommendProducts" :key="p.id" class="rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left" @click="router.push(`/user/product/${p.id}`)">
+              <div class="w-full aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                <img :src="getProductImage(p.images)" class="h-full w-full object-cover hover:scale-110 transition-transform duration-300" @error="handleImgError" />
               </div>
-              <div class="p-3">
+              <div class="p-4">
                 <div class="text-sm font-semibold text-gray-900 line-clamp-2">
                   {{ locale === 'ko' && p.titleKo ? p.titleKo : p.title }}
                 </div>
-                <div class="mt-2 flex items-center justify-between">
-                  <div class="text-base font-bold sm-text-primary">
+                <div class="mt-2">
+                  <div class="text-lg font-bold sm-text-primary">
                     {{ $t('common.currency') }}{{ p.price }}
                   </div>
                 </div>
@@ -129,59 +154,85 @@
           </el-carousel>
         </div>
 
+        <!-- AI功能入口 -->
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-lg p-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center animate-pulse">
+                <el-icon class="text-white" :size="20"><MagicStick /></el-icon>
+              </div>
+              <div class="text-lg font-bold text-gray-900">{{ $t('ai.title') }}</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-4 gap-4">
+            <button
+              v-for="a in aiQuickActions"
+              :key="a.key"
+              class="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 px-4 py-5 text-center"
+              @click="router.push(a.path)"
+            >
+              <div class="h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg mx-auto transition-transform hover:scale-115" :style="{ background: a.bg }">
+                <el-icon :size="24"><component :is="a.icon" /></el-icon>
+              </div>
+              <div class="mt-3 text-sm font-bold text-gray-900">{{ a.label }}</div>
+              <div class="text-xs text-gray-500 mt-1">{{ a.desc }}</div>
+            </button>
+          </div>
+        </div>
+
         <div class="grid grid-cols-4 gap-4">
           <button
             v-for="a in quickActions"
             :key="a.key"
-            class="rounded-2xl bg-white border border-gray-100 shadow-sm px-4 py-5 text-left active:scale-[0.99] transition"
+            class="rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 px-4 py-5 text-center"
             @click="router.push(a.path)"
           >
-            <div class="h-11 w-11 rounded-2xl flex items-center justify-center text-white shadow-sm" :style="{ background: a.bg }">
-              <el-icon :size="22"><component :is="a.icon" /></el-icon>
+            <div class="h-12 w-12 rounded-2xl flex items-center justify-center text-white shadow-md mx-auto transition-transform hover:scale-110" :style="{ background: a.bg }">
+              <el-icon :size="24"><component :is="a.icon" /></el-icon>
             </div>
-            <div class="mt-3 text-sm font-semibold text-gray-900">{{ a.label }}</div>
+            <div class="mt-3 text-sm font-bold text-gray-900">{{ a.label }}</div>
             <div class="text-xs text-gray-500 mt-1">{{ a.desc }}</div>
           </button>
         </div>
 
-        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-sm font-semibold text-gray-900">{{ $t('dashboard.quickCategory') }}</div>
-            <button class="text-sm sm-text-primary" @click="router.push('/user/categories')">{{ $t('common.view') }}</button>
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-md p-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-base font-bold text-gray-900">{{ $t('dashboard.quickCategory') }}</div>
+            <button class="text-sm font-medium sm-text-primary" @click="router.push('/user/categories')">{{ $t('common.view') }} →</button>
           </div>
-          <div class="grid grid-cols-8 gap-y-4 py-2">
-            <div v-for="cat in CATEGORIES.slice(0, 16)" :key="cat.id" class="flex flex-col items-center gap-1.5 active:scale-90 transition-transform cursor-pointer" @click="handleCategoryClick(cat.id)">
-              <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-50 hover:bg-primary/10 transition-colors">
-                <CategoryIcon :category-id="cat.id" :size="24" />
+          <div class="grid grid-cols-8 gap-y-5 py-2">
+            <div v-for="cat in CATEGORIES.slice(0, 16)" :key="cat.id" class="flex flex-col items-center gap-2 active:scale-90 transition-all duration-200 cursor-pointer group" @click="handleCategoryClick(cat.id)">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 group-hover:bg-primary/10 transition-all duration-300 shadow-md group-hover:shadow-xl group-hover:-translate-y-1 border border-gray-100">
+                <CategoryIcon :category-id="cat.id" :size="28" />
               </div>
-              <span class="text-[11px] text-gray-600 font-medium">{{ $t(`categories.${cat.id}`) }}</span>
+              <span class="text-[11px] text-gray-700 font-semibold">{{ $t(`categories.${cat.id}`) }}</span>
             </div>
           </div>
         </div>
 
-        <div class="rounded-2xl bg-white border border-gray-100 shadow-sm p-4">
-          <div class="flex items-center justify-between mb-3">
-            <div class="text-sm font-semibold text-gray-900">{{ $t('dashboard.recommend') }}</div>
-            <button class="text-sm sm-text-primary" @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }}</button>
+        <div class="rounded-2xl bg-white border border-gray-100 shadow-md p-4">
+          <div class="flex items-center justify-between mb-4">
+            <div class="text-base font-bold text-gray-900">{{ $t('dashboard.recommend') }}</div>
+            <button class="text-sm font-medium sm-text-primary" @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }} →</button>
           </div>
-          <div v-loading="loading" class="grid grid-cols-3 gap-4">
+          <div v-loading="loading" class="grid grid-cols-3 gap-5">
             <button
               v-for="p in recommendProducts.slice(0, 9)"
               :key="p.id"
-              class="rounded-2xl bg-white border border-gray-100 overflow-hidden text-left shadow-sm active:scale-[0.99] transition"
+              class="rounded-2xl bg-gradient-to-br from-white to-gray-50 border border-gray-100 overflow-hidden text-left shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               @click="router.push(`/user/product/${p.id}`)"
             >
-              <div class="w-full aspect-[4/3] bg-gray-100">
-                <img :src="getProductImage(p.images)" class="h-full w-full object-cover" @error="handleImgError" />
+              <div class="w-full aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                <img :src="getProductImage(p.images)" class="h-full w-full object-cover hover:scale-110 transition-transform duration-300" @error="handleImgError" />
               </div>
-              <div class="p-3">
+              <div class="p-4">
                 <div class="text-sm font-semibold text-gray-900 line-clamp-2">
                   {{ locale === 'ko' && p.titleKo ? p.titleKo : p.title }}
                 </div>
-                <div class="mt-2 flex items-center justify-between">
-                  <div class="text-base font-bold sm-text-primary">{{ $t('common.currency') }}{{ p.price }}</div>
+                <div class="mt-3 flex items-center justify-between">
+                  <div class="text-xl font-bold sm-text-primary">{{ $t('common.currency') }}{{ p.price }}</div>
                   <div class="text-xs text-gray-500 flex items-center gap-1">
-                    <el-icon :size="12"><View /></el-icon>
+                    <el-icon :size="14"><View /></el-icon>
                     <span>{{ p.viewCount || 0 }}</span>
                   </div>
                 </div>
@@ -221,35 +272,62 @@
             </el-carousel>
           </div>
           <div class="space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <h3 class="text-lg font-bold mb-4">{{ $t('dashboard.quickActions') }}</h3>
-              <div class="grid grid-cols-2 gap-3">
+            <!-- AI功能区域 -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="h-10 w-10 rounded-xl bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center animate-pulse">
+                  <el-icon class="text-white" :size="20"><MagicStick /></el-icon>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">{{ $t('ai.title') }}</h3>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
                 <button
-                  v-for="a in quickActions"
+                  v-for="a in aiQuickActions"
                   :key="a.key"
-                  class="rounded-xl border border-gray-100 p-4 text-left hover:shadow-sm transition"
+                  class="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 p-5 text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
                   @click="router.push(a.path)"
                 >
-                  <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-xl flex items-center justify-center text-white" :style="{ background: a.bg }">
-                      <el-icon :size="18"><component :is="a.icon" /></el-icon>
+                  <div class="flex items-center gap-4">
+                    <div class="h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-110" :style="{ background: a.bg }">
+                      <el-icon :size="22"><component :is="a.icon" /></el-icon>
                     </div>
                     <div class="min-w-0">
-                      <div class="text-sm font-bold text-gray-900 truncate">{{ a.label }}</div>
-                      <div class="text-xs text-gray-500 truncate">{{ a.desc }}</div>
+                      <div class="text-base font-bold text-gray-900 truncate">{{ a.label }}</div>
+                      <div class="text-sm text-gray-500 truncate">{{ a.desc }}</div>
                     </div>
                   </div>
                 </button>
               </div>
             </div>
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-              <h3 class="text-lg font-bold mb-4">{{ $t('dashboard.quickCategory') }}</h3>
-              <div class="grid grid-cols-4 gap-4">
-                <div v-for="cat in CATEGORIES.slice(0, 8)" :key="cat.id" class="flex flex-col items-center gap-2 cursor-pointer" @click="handleCategoryClick(cat.id)">
-                  <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center hover:bg-primary/10 transition-colors">
-                    <CategoryIcon :category-id="cat.id" :size="24" />
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+              <h3 class="text-xl font-bold mb-4 text-gray-900">{{ $t('dashboard.quickActions') }}</h3>
+              <div class="grid grid-cols-2 gap-4">
+                <button
+                  v-for="a in quickActions"
+                  :key="a.key"
+                  class="rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 p-5 text-left hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                  @click="router.push(a.path)"
+                >
+                  <div class="flex items-center gap-4">
+                    <div class="h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform hover:scale-110" :style="{ background: a.bg }">
+                      <el-icon :size="22"><component :is="a.icon" /></el-icon>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-base font-bold text-gray-900 truncate">{{ a.label }}</div>
+                      <div class="text-sm text-gray-500 truncate">{{ a.desc }}</div>
+                    </div>
                   </div>
-                  <span class="text-xs text-gray-600">{{ $t(`categories.${cat.id}`) }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+              <h3 class="text-xl font-bold mb-4 text-gray-900">{{ $t('dashboard.quickCategory') }}</h3>
+              <div class="grid grid-cols-4 gap-5">
+                <div v-for="cat in CATEGORIES.slice(0, 8)" :key="cat.id" class="flex flex-col items-center gap-3 cursor-pointer group" @click="handleCategoryClick(cat.id)">
+                  <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center group-hover:bg-primary/10 transition-all duration-300 shadow-md group-hover:shadow-xl group-hover:-translate-y-1">
+                    <CategoryIcon :category-id="cat.id" :size="28" />
+                  </div>
+                  <span class="text-sm font-medium text-gray-600">{{ $t(`categories.${cat.id}`) }}</span>
                 </div>
               </div>
             </div>
@@ -257,19 +335,19 @@
         </div>
 
         <!-- 商品展示 -->
-        <div class="space-y-4">
+        <div class="space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-900">{{ $t('dashboard.recommend') }}</h2>
-            <el-button link type="primary" @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }}</el-button>
+            <h2 class="text-2xl font-bold text-gray-900">{{ $t('dashboard.recommend') }}</h2>
+            <el-button type="primary" round @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }} →</el-button>
           </div>
-          <div v-loading="loading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer" @click="router.push(`/user/product/${p.id}`)">
-              <div class="aspect-square bg-gray-50">
-                <img :src="getProductImage(p.images)" class="w-full h-full object-cover" />
+          <div v-loading="loading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" @click="router.push(`/user/product/${p.id}`)">
+              <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                <img :src="getProductImage(p.images)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
-              <div class="p-3">
-                <h4 class="text-sm font-medium text-gray-900 line-clamp-2 mb-2">{{ locale === 'ko' && p.titleKo ? p.titleKo : p.title }}</h4>
-                <div class="text-lg font-bold text-primary">{{ $t('common.currency') }}{{ p.price }}</div>
+              <div class="p-4">
+                <h4 class="text-sm font-semibold text-gray-900 line-clamp-2 mb-2">{{ locale === 'ko' && p.titleKo ? p.titleKo : p.title }}</h4>
+                <div class="text-xl font-bold text-primary">{{ $t('common.currency') }}{{ p.price }}</div>
               </div>
             </div>
           </div>
@@ -294,7 +372,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Bell, View, Plus, ShoppingCart, Star, Clock } from '@element-plus/icons-vue'
+import { Bell, View, Plus, ShoppingCart, Star, Clock, MagicStick, TrendCharts, Search, Document, ChatDotRound, School, Odometer, Warning } from '@element-plus/icons-vue'
 import { useSchoolStore } from '@/stores/school'
 import { useDeviceType } from '@/utils/device'
 import { productApi } from '@/api/product'
@@ -329,6 +407,13 @@ const quickActions = computed(() => ([
   { key: 'orders', label: t('dashboard.stats.orders'), desc: t('ordersPage.title'), path: '/user/orders', icon: ShoppingCart, bg: 'linear-gradient(135deg, rgba(6,182,212,0.85) 0%, rgba(139,92,246,0.85) 100%)' },
   { key: 'favorites', label: t('dashboard.stats.favorites'), desc: t('favoritesPage.title'), path: '/user/favorites', icon: Star, bg: 'linear-gradient(135deg, rgba(6,182,212,0.70) 0%, rgba(139,92,246,0.70) 100%)' },
   { key: 'history', label: t('dashboard.stats.history'), desc: t('profilePage.menu.history'), path: '/user/recently-viewed', icon: Clock, bg: 'linear-gradient(135deg, rgba(6,182,212,0.65) 0%, rgba(139,92,246,0.65) 100%)' }
+]))
+
+const aiQuickActions = computed(() => ([
+  { key: 'ai-publish', label: t('ai.oneClickPublish'), desc: t('ai.oneClickPublishDesc'), path: '/user/publish', icon: MagicStick, bg: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' },
+  { key: 'ai-authenticate', label: t('ai.authenticate'), desc: t('ai.authenticateDesc'), path: '/user/ai-authenticate', icon: Document, bg: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' },
+  { key: 'ai-market', label: t('ai.marketTrend'), desc: t('ai.marketTrendDesc'), path: '/user/ai-market', icon: TrendCharts, bg: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' },
+  { key: 'ai-chat', label: t('ai.chatAssistant'), desc: t('ai.chatAssistantDesc'), path: '/user/ai-chat', icon: ChatDotRound, bg: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' }
 ]))
 
 const handleCategoryClick = (id) => {

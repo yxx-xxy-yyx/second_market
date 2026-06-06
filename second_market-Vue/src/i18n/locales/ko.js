@@ -1,4 +1,22 @@
 export default {
+  ai: {
+    title: "AI 인텔리전트 어시스턴트",
+    oneClickPublish: "AI 원클릭 등록",
+    oneClickPublishDesc: "사진 인식, 스마트 가격 책정",
+    authenticate: "AI 인증 품질 검사",
+    authenticateDesc: "사진 즉시 인증",
+    marketTrend: "AI 시장 동향",
+    marketTrendDesc: "가격 추세 분석",
+    chatAssistant: "AI 채팅 어시스턴트",
+    chatAssistantDesc: "자동 응답, 가격 협상 지원",
+    smartTrust: "AI 스마트 위탁",
+    smartSearch: "AI 스마트 검색",
+    campusMatch: "캠퍼스 AI 매치",
+    disputeResolution: "AI 분쟁 해결",
+    campusService: "캠퍼스 전용 AI",
+    darkMode: "다크 모드",
+    lightMode: "라이트 모드"
+  },
   common: {
     home: "홈",
     mall: "몰",

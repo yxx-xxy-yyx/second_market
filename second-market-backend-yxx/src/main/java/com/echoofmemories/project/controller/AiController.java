@@ -228,4 +228,139 @@ public class AiController {
             return Result.error("获取AI帮助信息失败");
         }
     }
+
+    @Operation(summary = "智能托管", description = "开启商品智能托管，自动回复、议价、调价")
+    @PostMapping("/trust")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiIntelligentTrustResponse> intelligentTrust(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiIntelligentTrustRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求智能托管服务", userId);
+
+            com.echoofmemories.project.dto.AiIntelligentTrustResponse response = 
+                aiService.intelligentTrust(request, userId);
+            return Result.success("智能托管开启成功", response);
+
+        } catch (Exception e) {
+            log.error("智能托管服务失败：{}", e.getMessage(), e);
+            return Result.error("智能托管服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "鉴定质检", description = "上传商品图片进行AI鉴定和成色评估")
+    @PostMapping("/authenticate")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiAuthenticationResponse> authenticateProduct(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiAuthenticationRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求商品鉴定服务", userId);
+
+            com.echoofmemories.project.dto.AiAuthenticationResponse response = 
+                aiService.authenticateProduct(request, userId);
+            return Result.success("商品鉴定完成", response);
+
+        } catch (Exception e) {
+            log.error("商品鉴定服务失败：{}", e.getMessage(), e);
+            return Result.error("商品鉴定服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "市场行情参考", description = "获取商品市场行情、价格趋势和同款最低价")
+    @PostMapping("/market")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiMarketTrendResponse> getMarketTrend(
+            @RequestBody com.echoofmemories.project.dto.AiMarketTrendRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求市场行情参考", userId);
+
+            com.echoofmemories.project.dto.AiMarketTrendResponse response = 
+                aiService.getMarketTrend(request, userId);
+            return Result.success("获取市场行情成功", response);
+
+        } catch (Exception e) {
+            log.error("获取市场行情失败：{}", e.getMessage(), e);
+            return Result.error("获取市场行情失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "智能搜索", description = "AI智能搜索，支持模糊和语音搜索")
+    @PostMapping("/search")
+    public Result<com.echoofmemories.project.dto.AiSmartSearchResponse> smartSearch(
+            @RequestBody com.echoofmemories.project.dto.AiSmartSearchRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            if (userId == null) {
+                userId = 0L;
+            }
+            log.info("用户{}请求智能搜索", userId);
+
+            com.echoofmemories.project.dto.AiSmartSearchResponse response = 
+                aiService.smartSearch(request, userId);
+            return Result.success("搜索完成", response);
+
+        } catch (Exception e) {
+            log.error("智能搜索失败：{}", e.getMessage(), e);
+            return Result.error("智能搜索失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "校园匹配", description = "按学校、距离、专业匹配相关商品和用户")
+    @PostMapping("/match")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiCampusMatchResponse> campusMatch(
+            @RequestBody com.echoofmemories.project.dto.AiCampusMatchRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求校园匹配服务", userId);
+
+            com.echoofmemories.project.dto.AiCampusMatchResponse response = 
+                aiService.campusMatch(request, userId);
+            return Result.success("校园匹配完成", response);
+
+        } catch (Exception e) {
+            log.error("校园匹配失败：{}", e.getMessage(), e);
+            return Result.error("校园匹配失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "纠纷仲裁", description = "AI辅助纠纷判断和处理建议")
+    @PostMapping("/dispute")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiDisputeResolutionResponse> resolveDispute(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiDisputeResolutionRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求纠纷仲裁服务", userId);
+
+            com.echoofmemories.project.dto.AiDisputeResolutionResponse response = 
+                aiService.resolveDispute(request, userId);
+            return Result.success("纠纷分析完成", response);
+
+        } catch (Exception e) {
+            log.error("纠纷仲裁服务失败：{}", e.getMessage(), e);
+            return Result.error("纠纷仲裁服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "校园专属服务", description = "AI教材循环、闲置置换、校园跑腿等服务")
+    @PostMapping("/campus-service")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiCampusServiceResponse> campusService(
+            @RequestBody com.echoofmemories.project.dto.AiCampusServiceRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求校园专属服务", userId);
+
+            com.echoofmemories.project.dto.AiCampusServiceResponse response = 
+                aiService.campusService(request, userId);
+            return Result.success("校园服务匹配完成", response);
+
+        } catch (Exception e) {
+            log.error("校园服务匹配失败：{}", e.getMessage(), e);
+            return Result.error("校园服务匹配失败：" + e.getMessage());
+        }
+    }
 }

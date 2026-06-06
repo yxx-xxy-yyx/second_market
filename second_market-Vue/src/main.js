@@ -9,6 +9,7 @@ import App from './App.vue'
 import router from './router'
 import i18n from './i18n/index'
 import './index.css'
+import { useThemeStore } from './stores/theme'
 
 // 导入 Vant
 import Vant from 'vant'
@@ -48,3 +49,8 @@ app.use(ElementPlus)
 app.use(Vant)
 
 app.mount('#app')
+
+// 初始化主题
+const themeStore = useThemeStore()
+themeStore.initTheme()
+themeStore.watchSystemTheme()

@@ -1,3 +1,4 @@
+/* 浅色主题 (默认) */
 :root {
   --primary-color: #36B3C2;
   --primary-color-light: #62C6D2;
@@ -15,6 +16,7 @@
   
   --bg-color: #F6F8FA;
   --bg-white: #FFFFFF;
+  --bg-secondary: #F8FAFC;
   --border-color: #E2E8F0;
   --border-light: #EEF2F7;
   --bg-ivory: #FAF9F6;
@@ -50,6 +52,50 @@
   --el-color-primary-light-5: rgba(54, 179, 194, 0.45);
   --el-color-primary-light-7: rgba(54, 179, 194, 0.24);
   --el-color-primary-light-9: rgba(54, 179, 194, 0.10);
+
+  --van-primary-color: var(--primary-color);
+  --van-button-primary-background: var(--primary-color);
+  --van-button-primary-border-color: var(--primary-color);
+  --van-tabs-bottom-bar-color: var(--primary-color);
+  --van-checkbox-checked-icon-color: var(--primary-color);
+  --van-radio-checked-icon-color: var(--primary-color);
+  --van-loading-spinner-color: var(--primary-color);
+
+  --app-header-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color-dark) 100%);
+}
+
+/* 暗黑主题 */
+html.dark {
+  --primary-color: #4DD0E1;
+  --primary-color-light: #80DEEA;
+  --primary-color-dark: #26C6DA;
+  --secondary-color: #E2E8F0;
+  --success-color: #4ADE80;
+  --warning-color: #FBBF24;
+  --danger-color: #F87171;
+  --info-color: #94A3B8;
+  
+  --text-primary: #F1F5F9;
+  --text-regular: #CBD5E1;
+  --text-secondary: #94A3B8;
+  --text-placeholder: #64748B;
+  
+  --bg-color: #0F172A;
+  --bg-white: #1E293B;
+  --bg-secondary: #334155;
+  --border-color: #475569;
+  --border-light: #334155;
+  --bg-ivory: #1E293B;
+  --bg-cyan-soft: rgba(77, 208, 225, 0.15);
+  
+  --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 22px rgba(0, 0, 0, 0.4);
+
+  --el-color-primary: var(--primary-color);
+  --el-color-primary-light-3: rgba(77, 208, 225, 0.70);
+  --el-color-primary-light-5: rgba(77, 208, 225, 0.45);
+  --el-color-primary-light-7: rgba(77, 208, 225, 0.24);
+  --el-color-primary-light-9: rgba(77, 208, 225, 0.10);
 
   --van-primary-color: var(--primary-color);
   --van-button-primary-background: var(--primary-color);
