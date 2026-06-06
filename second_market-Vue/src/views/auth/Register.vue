@@ -1,156 +1,325 @@
 <template>
-  <div class="register-page flex flex-col lg:flex-row">
-    <!-- 右上角语言切换 -->
+  <div class="register-page">
+    <!-- 语言切换 -->
     <div class="lang-switch">
       <LangSwitcher />
     </div>
 
-    <div class="brand-section hidden lg:flex">
-      <div class="brand-content">
-        <div class="logo-container">
-          <div class="logo">
+    <!-- 移动端/平板端设计 -->
+    <div class="mobile-container lg:hidden">
+      <div class="mobile-background">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+      </div>
+      
+      <div class="mobile-content">
+        <div class="mobile-brand">
+          <div class="mobile-logo">
             <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
           </div>
+          <h1 class="mobile-title">{{ $t('login.appName') }}</h1>
+          <p class="mobile-subtitle">{{ $t('login.appSlogan') }}</p>
         </div>
-        <h1 class="brand-title">{{ $t('login.appName') }}</h1>
-        <p class="brand-slogan">{{ $t('login.appSlogan') }}</p>
-        <div class="brand-features">
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('register.feature1Desc') }}</div>
-            <span>{{ $t('register.feature1') }}</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('register.feature2Desc') }}</div>
-            <span>{{ $t('register.feature2') }}</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('register.feature3Desc') }}</div>
-            <span>{{ $t('register.feature3') }}</span>
+
+        <div class="mobile-form-wrapper">
+          <div class="mobile-form-card">
+            <h2 class="mobile-form-title">{{ $t('register.title') }}</h2>
+            
+            <el-form
+              ref="registerFormRef"
+              :model="registerForm"
+              :rules="registerRules"
+              class="register-form"
+              label-position="top"
+              size="large"
+            >
+              <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+                <el-input
+                  v-model="registerForm.uid"
+                  :placeholder="$t('common.pleaseInputUid')"
+                  clearable
+                  class="mobile-input"
+                >
+                  <template #prefix>
+                    <el-icon><User /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.pleaseInputNickname')" prop="nickname">
+                <el-input
+                  v-model="registerForm.nickname"
+                  :placeholder="$t('common.pleaseInputNickname')"
+                  clearable
+                  class="mobile-input"
+                >
+                  <template #prefix>
+                    <el-icon><Avatar /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.pleaseInputEmail')" prop="email">
+                <el-input
+                  v-model="registerForm.email"
+                  :placeholder="$t('common.pleaseInputEmail')"
+                  clearable
+                  class="mobile-input"
+                >
+                  <template #prefix>
+                    <el-icon><Message /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.school')" prop="schoolId">
+                <el-select
+                  v-model="registerForm.schoolId"
+                  :placeholder="$t('common.pleaseSelectSchool')"
+                  class="mobile-select"
+                  clearable
+                  filterable
+                >
+                  <template #prefix>
+                    <el-icon><School /></el-icon>
+                  </template>
+                  <el-option
+                    v-for="item in schools"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+                <el-input
+                  v-model="registerForm.password"
+                  type="password"
+                  :placeholder="$t('common.pleaseInputPassword')"
+                  show-password
+                  clearable
+                  class="mobile-input"
+                >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('register.confirmPassword')" prop="confirmPassword">
+                <el-input
+                  v-model="registerForm.confirmPassword"
+                  type="password"
+                  :placeholder="$t('register.confirmPasswordPlaceholder')"
+                  show-password
+                  clearable
+                  class="mobile-input"
+                  @keyup.enter="handleRegister"
+                >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  class="mobile-register-btn"
+                  :loading="loading"
+                  @click="handleRegister"
+                >
+                  {{ loading ? $t('register.registering') : $t('common.register') }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+
+            <div class="form-footer">
+              <span>{{ $t('register.hasAccount') }}</span>
+              <el-link type="primary" :underline="false" @click="$router.push('/login')">
+                {{ $t('common.login') }}
+              </el-link>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="form-section flex-1">
-      <div class="decorative-circle circle-1"></div>
-      <div class="decorative-circle circle-2"></div>
+    <!-- 桌面端设计 -->
+    <div class="desktop-container hidden lg:block">
+      <div class="desktop-background">
+        <div class="bg-gradient-1"></div>
+        <div class="bg-gradient-2"></div>
+        <div class="bg-particles">
+          <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
+        </div>
+      </div>
 
-      <div class="form-content">
-        <div class="form-header">
-          <h2 class="form-title">{{ $t('register.title') }}</h2>
-          <p class="form-subtitle">{{ $t('register.subtitle') }}</p>
+      <div class="desktop-content">
+        <div class="desktop-brand">
+          <div class="brand-logo-wrapper">
+            <div class="brand-logo">
+              <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
+            </div>
+            <div class="logo-glow"></div>
+          </div>
+          <h1 class="desktop-title">{{ $t('login.appName') }}</h1>
+          <p class="desktop-slogan">{{ $t('login.appSlogan') }}</p>
+          
+          <div class="desktop-features">
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><Shop /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('register.feature1') }}</span>
+            </div>
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><PriceTag /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('register.feature2') }}</span>
+            </div>
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><User /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('register.feature3') }}</span>
+            </div>
+          </div>
         </div>
 
-        <el-form
-          ref="registerFormRef"
-          :model="registerForm"
-          :rules="registerRules"
-          class="register-form"
-          label-position="top"
-          size="large"
-        >
-          <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
-            <el-input
-              v-model="registerForm.uid"
-              :placeholder="$t('common.pleaseInputUid')"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><User /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+        <div class="desktop-form-wrapper">
+          <div class="desktop-form-card">
+            <div class="form-decoration">
+              <div class="decoration-circle dec-1"></div>
+              <div class="decoration-circle dec-2"></div>
+              <div class="decoration-circle dec-3"></div>
+            </div>
+            
+            <div class="form-card-content">
+              <h2 class="desktop-form-title">{{ $t('register.title') }}</h2>
+              <p class="desktop-form-subtitle">{{ $t('register.subtitle') }}</p>
 
-          <el-form-item :label="$t('common.pleaseInputNickname')" prop="nickname">
-            <el-input
-              v-model="registerForm.nickname"
-              :placeholder="$t('common.pleaseInputNickname')"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Avatar /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+              <el-form
+                ref="registerFormRef"
+                :model="registerForm"
+                :rules="registerRules"
+                class="register-form"
+                label-position="top"
+                size="large"
+              >
+                <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+                  <el-input
+                    v-model="registerForm.uid"
+                    :placeholder="$t('common.pleaseInputUid')"
+                    clearable
+                    class="desktop-input"
+                  >
+                    <template #prefix>
+                      <el-icon><User /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-          <el-form-item :label="$t('common.pleaseInputEmail')" prop="email">
-            <el-input
-              v-model="registerForm.email"
-              :placeholder="$t('common.pleaseInputEmail')"
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Message /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+                <el-form-item :label="$t('common.pleaseInputNickname')" prop="nickname">
+                  <el-input
+                    v-model="registerForm.nickname"
+                    :placeholder="$t('common.pleaseInputNickname')"
+                    clearable
+                    class="desktop-input"
+                  >
+                    <template #prefix>
+                      <el-icon><Avatar /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-          <el-form-item :label="$t('common.school')" prop="schoolId">
-            <el-select
-              v-model="registerForm.schoolId"
-              :placeholder="$t('common.pleaseSelectSchool')"
-              class="w-full"
-              clearable
-              filterable
-            >
-              <template #prefix>
-                <el-icon><School /></el-icon>
-              </template>
-              <el-option
-                v-for="item in schools"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
+                <el-form-item :label="$t('common.pleaseInputEmail')" prop="email">
+                  <el-input
+                    v-model="registerForm.email"
+                    :placeholder="$t('common.pleaseInputEmail')"
+                    clearable
+                    class="desktop-input"
+                  >
+                    <template #prefix>
+                      <el-icon><Message /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-          <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
-            <el-input
-              v-model="registerForm.password"
-              type="password"
-              :placeholder="$t('common.pleaseInputPassword')"
-              show-password
-              clearable
-            >
-              <template #prefix>
-                <el-icon><Lock /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+                <el-form-item :label="$t('common.school')" prop="schoolId">
+                  <el-select
+                    v-model="registerForm.schoolId"
+                    :placeholder="$t('common.pleaseSelectSchool')"
+                    class="desktop-select"
+                    clearable
+                    filterable
+                  >
+                    <template #prefix>
+                      <el-icon><School /></el-icon>
+                    </template>
+                    <el-option
+                      v-for="item in schools"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-form-item>
 
-          <el-form-item :label="$t('register.confirmPassword')" prop="confirmPassword">
-            <el-input
-              v-model="registerForm.confirmPassword"
-              type="password"
-              :placeholder="$t('register.confirmPasswordPlaceholder')"
-              show-password
-              clearable
-              @keyup.enter="handleRegister"
-            >
-              <template #prefix>
-                <el-icon><Lock /></el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+                <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+                  <el-input
+                    v-model="registerForm.password"
+                    type="password"
+                    :placeholder="$t('common.pleaseInputPassword')"
+                    show-password
+                    clearable
+                    class="desktop-input"
+                  >
+                    <template #prefix>
+                      <el-icon><Lock /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-          <el-form-item>
-            <el-button
-              type="primary"
-              class="register-btn"
-              :loading="loading"
-              @click="handleRegister"
-            >
-              {{ loading ? $t('register.registering') : $t('common.register') }}
-            </el-button>
-          </el-form-item>
-        </el-form>
+                <el-form-item :label="$t('register.confirmPassword')" prop="confirmPassword">
+                  <el-input
+                    v-model="registerForm.confirmPassword"
+                    type="password"
+                    :placeholder="$t('register.confirmPasswordPlaceholder')"
+                    show-password
+                    clearable
+                    class="desktop-input"
+                    @keyup.enter="handleRegister"
+                  >
+                    <template #prefix>
+                      <el-icon><Lock /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-        <div class="form-footer">
-          <span>{{ $t('register.hasAccount') }}</span>
-          <el-link type="primary" :underline="false" @click="$router.push('/login')">
-            {{ $t('common.login') }}
-          </el-link>
+                <el-form-item>
+                  <el-button
+                    type="primary"
+                    class="desktop-register-btn"
+                    :loading="loading"
+                    @click="handleRegister"
+                  >
+                    {{ loading ? $t('register.registering') : $t('common.register') }}
+                  </el-button>
+                </el-form-item>
+              </el-form>
+
+              <div class="desktop-form-footer">
+                <span>{{ $t('register.hasAccount') }}</span>
+                <el-link type="primary" :underline="false" @click="$router.push('/login')">
+                  {{ $t('common.login') }}
+                </el-link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -161,7 +330,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { User, Lock, Message, Avatar, School } from '@element-plus/icons-vue'
+import { User, Lock, Message, Avatar, School, Shop, PriceTag } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { schoolApi } from '@/api/school'
@@ -169,6 +338,20 @@ import { schoolApi } from '@/api/school'
 const { t, locale } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
+
+// 为桌面端粒子效果生成随机样式
+const getParticleStyle = (i) => {
+  const size = Math.random() * 60 + 20
+  return {
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    width: `${size}px`,
+    height: `${size}px`,
+    animationDelay: `${Math.random() * 10}s`,
+    animationDuration: `${Math.random() * 20 + 20}s`,
+    opacity: Math.random() * 0.4 + 0.1
+  }
+}
 
 const registerFormRef = ref()
 const loading = ref(false)
@@ -266,276 +449,642 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-/* 语言切换样式 */
+/* 基础样式 */
+* {
+  box-sizing: border-box;
+}
+
 .lang-switch {
   position: fixed;
   top: 20px;
   right: 24px;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .register-page {
   min-height: 100vh;
-  display: flex;
-  background: #FFFFFF;
   overflow: hidden;
   position: relative;
 }
 
-.brand-section {
-  flex: 0 0 60%;
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px;
+/* 移动端/平板端样式 */
+.mobile-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0d2b3e 0%, #1a4a5e 50%, #0a3d4c 100%);
   position: relative;
-  overflow: hidden;
 }
 
-.brand-section::before {
-  content: '';
+.mobile-background {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(1200px 600px at 70% 20%, rgba(46, 125, 50, 0.22) 0%, rgba(255, 255, 255, 0) 60%),
-    radial-gradient(900px 500px at 20% 70%, rgba(46, 125, 50, 0.16) 0%, rgba(255, 255, 255, 0) 55%);
-  z-index: 0;
+  inset: 0;
+  overflow: hidden;
 }
 
-.brand-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 500px;
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
 }
 
-.logo-container {
-  margin-bottom: 30px;
-}
-
-.logo {
+.floating-circle.circle-1 {
   width: 200px;
   height: 200px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.floating-circle.circle-2 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  top: 40%;
+  right: -30px;
+  animation-delay: 2s;
+}
+
+.floating-circle.circle-3 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  bottom: -60px;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+.mobile-content {
+  position: relative;
+  z-index: 1;
+  padding: 80px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-brand {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.mobile-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+  animation: pulse-glow 3s ease-in-out infinite;
 }
 
-.logo img {
-  width: 150px;
-  height: 150px;
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 50px rgba(6, 182, 212, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.mobile-logo img {
+  width: 80px;
+  height: 80px;
   object-fit: contain;
 }
 
-.brand-title {
-  font-size: 42px;
-  font-weight: 700;
-  color: #388E3C;
-  margin: 20px 0 10px 0;
-  letter-spacing: 2px;
-}
-
-.brand-slogan {
-  font-size: 20px;
-  color: #1B5E20;
-  margin: 0 0 40px 0;
-}
-
-.brand-features {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  min-width: 120px;
-}
-
-.feature-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #42a5f5 0%, #478ed1 100%);
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.mobile-title {
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
-.feature-item span:last-child {
-  font-size: 14px;
-  color: #424242;
+.mobile-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
-.form-section {
-  flex: 0 0 40%;
+.mobile-form-wrapper {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
-  position: relative;
-  background: #FFFFFF;
 }
 
-.decorative-circle {
-  position: absolute;
-  border-radius: 50%;
-  z-index: 0;
-}
-
-.circle-1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-  opacity: 0.15;
-  top: -100px;
-  right: -100px;
-}
-
-.circle-2 {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(135deg, #FF9800 0%, #F57C00 100%);
-  opacity: 0.15;
-  bottom: -50px;
-  left: -50px;
-}
-
-.form-content {
-  position: relative;
-  z-index: 1;
+.mobile-form-card {
   width: 100%;
   max-width: 400px;
-  background: white;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  border-radius: 32px;
+  padding: 40px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+              0 0 60px rgba(6, 182, 212, 0.1);
+  animation: slide-up 0.8s ease-out;
 }
 
-.form-header {
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-form-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: white;
   text-align: center;
   margin-bottom: 32px;
 }
 
-.form-title {
-  font-size: 32px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin: 0 0 8px 0;
+.mobile-input :deep(.el-input__wrapper),
+.mobile-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: none;
+  transition: all 0.3s ease;
 }
 
-.form-subtitle {
-  color: #757575;
-  font-size: 14px;
-  margin: 0;
+.mobile-input :deep(.el-input__wrapper:hover),
+.mobile-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(6, 182, 212, 0.5);
 }
 
-.register-form {
-  margin-bottom: 24px;
+.mobile-input :deep(.el-input__wrapper.is-focus),
+.mobile-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #06b6d4;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
 }
 
-.register-btn {
-  width: 100%;
-  height: 48px;
-  margin-top: 8px;
-  font-size: 16px;
+.mobile-input :deep(.el-input__inner),
+.mobile-input :deep(.el-input__prefix),
+.mobile-input :deep(.el-input__suffix),
+.mobile-select :deep(.el-input__inner) {
+  color: white;
+}
+
+.mobile-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mobile-input :deep(.el-form-item__label),
+.mobile-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 600;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-  border: none;
 }
 
-.register-btn:hover {
-  background: linear-gradient(135deg, #388E3C 0%, #2E7D32 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+.mobile-register-btn {
+  width: 100%;
+  height: 54px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+  transition: all 0.3s ease;
+}
+
+.mobile-register-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.5);
+}
+
+.mobile-register-btn:active {
+  transform: translateY(-1px);
 }
 
 .form-footer {
   text-align: center;
-  color: #757575;
-  font-size: 14px;
-  padding: 16px 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.form-footer .el-link {
-  margin-left: 8px;
+.form-footer a {
+  color: #06b6d4;
+  font-weight: 700;
+}
+
+/* 桌面端样式 */
+.desktop-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #042f3d 0%, #0a4a5e 50%, #063344 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.desktop-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.bg-gradient-1 {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.35) 0%, transparent 70%);
+  top: -200px;
+  left: -200px;
+  animation: pulse 15s ease-in-out infinite;
+}
+
+.bg-gradient-2 {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%);
+  bottom: -100px;
+  right: -100px;
+  animation: pulse 12s ease-in-out infinite reverse;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.bg-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+  animation: float-particle 20s linear infinite;
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.desktop-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  padding: 40px 80px;
+  gap: 80px;
+}
+
+.desktop-brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.brand-logo-wrapper {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.brand-logo {
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 2;
+  animation: logo-float 6s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.brand-logo img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.logo-glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.6) 0%, transparent 70%);
+  z-index: 1;
+  animation: glow-pulse 4s ease-in-out infinite;
+  filter: blur(30px);
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.desktop-title {
+  font-size: 64px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 40%, #22d3ee 80%, #0891b2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.desktop-slogan {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  margin-bottom: 60px;
+}
+
+.desktop-features {
+  display: flex;
+  gap: 32px;
+}
+
+.desktop-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 28px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s ease;
+}
+
+.desktop-feature-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.feature-text {
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
+  font-size: 16px;
 }
 
-@media (max-width: 768px) {
-  .register-page {
-    flex-direction: column;
-  }
+.desktop-form-wrapper {
+  flex: 0 0 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-  .brand-section {
-    flex: 0 0 auto;
-    min-height: 300px;
-    padding: 40px 20px;
-  }
+.desktop-form-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(50px);
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  animation: card-appear 0.8s ease-out;
+}
 
-  .logo {
-    width: 120px;
-    height: 120px;
+@keyframes card-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
   }
-
-  .logo img {
-    width: 80px;
-    height: 80px;
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
+}
 
-  .brand-title {
-    font-size: 28px;
+.form-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  opacity: 0.1;
+}
+
+.decoration-circle.dec-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -100px;
+}
+
+.decoration-circle.dec-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: -50px;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.decoration-circle.dec-3 {
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  right: -30px;
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+}
+
+.form-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 56px 48px;
+}
+
+.desktop-form-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.desktop-form-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 40px;
+}
+
+.desktop-input :deep(.el-input__wrapper),
+.desktop-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: none;
+  transition: all 0.4s ease;
+}
+
+.desktop-input :deep(.el-input__wrapper:hover),
+.desktop-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.desktop-input :deep(.el-input__wrapper.is-focus),
+.desktop-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #06b6d4;
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.25);
+}
+
+.desktop-input :deep(.el-input__inner),
+.desktop-input :deep(.el-input__prefix),
+.desktop-input :deep(.el-input__suffix),
+.desktop-select :deep(.el-input__inner) {
+  color: white;
+  font-size: 16px;
+}
+
+.desktop-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.desktop-input :deep(.el-form-item__label),
+.desktop-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.desktop-register-btn {
+  width: 100%;
+  height: 60px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border: none;
+  box-shadow: 0 10px 35px rgba(6, 182, 212, 0.4);
+  transition: all 0.4s ease;
+  margin-top: 8px;
+}
+
+.desktop-register-btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 45px rgba(6, 182, 212, 0.5);
+}
+
+.desktop-register-btn:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+.desktop-form-footer {
+  text-align: center;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8px;
+}
+
+.desktop-form-footer a {
+  color: #06b6d4;
+  font-weight: 700;
+}
+
+/* 平板端适配 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .desktop-content {
+    padding: 40px;
+    gap: 40px;
   }
-
-  .brand-slogan {
-    font-size: 16px;
+  
+  .desktop-title {
+    font-size: 48px;
   }
-
-  .form-section {
-    flex: 1;
-    padding: 40px 20px;
+  
+  .desktop-slogan {
+    font-size: 20px;
   }
-
-  .form-content {
-    padding: 30px 20px;
+  
+  .desktop-form-wrapper {
+    flex-basis: 420px;
   }
-
-  .form-title {
-    font-size: 26px;
-  }
-
-  .register-input .el-input__wrapper {
-    border-radius: 8px;
-    height: 40px;
-  }
-
-  .lang-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 12px;
+  
+  .form-card-content {
+    padding: 48px 36px;
   }
 }
 </style>
