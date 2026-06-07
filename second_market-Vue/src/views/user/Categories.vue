@@ -1,16 +1,16 @@
 <template>
-  <div class="campus-page min-h-screen pb-20" style="padding-top: calc(80px + env(safe-area-inset-top));">
+  <div class="campus-page min-h-screen pb-16" style="padding-top: calc(68px + env(safe-area-inset-top));">
     <!-- 顶部状态栏占位 (移动端) -->
     <div class="h-safe-top bg-[#f8f8fa]"></div>
 
     <!-- 顶部固定区域 -->
-    <div class="sticky z-50 bg-[#f8f8fa]/80 backdrop-blur-md px-4 py-4 space-y-6"
+    <div class="sticky z-50 bg-[#f8f8fa]/80 backdrop-blur-md px-4 py-2.5 space-y-3"
       :style="{ top: `calc(65px + env(safe-area-inset-top))` }">
       <!-- 模式切换与学校筛选 -->
       <div class="flex items-center justify-between">
         <div class="flex p-1 bg-[#f0f0f2] rounded-[12px] border border-gray-200/50 shadow-sm">
           <div v-for="mode in modes" :key="mode.value" @click="currentMode = mode.value"
-            class="relative px-6 py-1.5 cursor-pointer transition-all duration-300 rounded-[10px] text-sm font-medium overflow-hidden"
+            class="relative px-5 py-1.5 cursor-pointer transition-all duration-300 rounded-[10px] text-sm font-medium overflow-hidden"
             :class="currentMode === mode.value ? 'text-white shadow-inner-custom active-mode-bg' : 'text-gray-500 hover:text-gray-700'">
             {{ mode.label }}
           </div>
@@ -22,7 +22,7 @@
       <div v-if="currentMode === 'discovery'" class="search-section">
         <div class="relative flex items-center group">
           <input v-model="searchKeyword" type="text" placeholder="搜索校内好物..."
-            class="custom-capsule-input w-full pl-11 pr-24 py-3 bg-white text-sm outline-none transition-all duration-300"
+            class="custom-capsule-input w-full pl-10 pr-24 py-2.5 bg-white text-sm outline-none transition-all duration-300"
             @keyup.enter="handleSearch" />
           <div class="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
             <el-icon :size="18" class="font-light">
@@ -41,9 +41,9 @@
         </div>
 
         <!-- 热门搜索 -->
-        <div v-if="showSearchHistory && hotKeywords.length > 0" class="mt-4 flex flex-wrap gap-2">
+        <div v-if="showSearchHistory && hotKeywords.length > 0" class="mt-2 flex flex-wrap gap-2">
           <div v-for="word in hotKeywords" :key="word" @click="quickSearch(word)"
-            class="px-4 py-1.5 bg-white border border-gray-100 rounded-full text-[11px] text-gray-500 hover:border-primary/30 hover:text-primary transition-all duration-200 cursor-pointer">
+            class="px-3 py-1 bg-white border border-gray-100 rounded-full text-[11px] text-gray-500 hover:border-primary/30 hover:text-primary transition-all duration-200 cursor-pointer">
             {{ word }}
           </div>
         </div>
@@ -51,13 +51,13 @@
 
       <!-- 模式B：分类模式的横向标签 -->
       <div v-if="currentMode === 'category'" class="category-tabs-v2">
-        <div class="flex overflow-x-auto no-scrollbar space-x-8 py-2">
+        <div class="flex overflow-x-auto no-scrollbar space-x-5 py-1">
           <div v-for="cat in categoriesList" :key="cat.id" @click="handleMainCategorySelect(cat)"
-            class="flex flex-col items-center flex-shrink-0 space-y-2 cursor-pointer group clickable-effect">
+            class="flex flex-col items-center flex-shrink-0 space-y-1.5 cursor-pointer group clickable-effect">
             <div
-              class="w-[40px] h-[40px] rounded-[14px] flex items-center justify-center transition-all duration-300 shadow-sm"
+              class="w-9 h-9 rounded-[12px] flex items-center justify-center transition-all duration-300 shadow-sm"
               :class="activeCategoryId === cat.id ? 'active-cat-icon text-white' : 'bg-white text-gray-400 group-hover:bg-gray-50'">
-              <el-icon :size="20">
+              <el-icon :size="18">
                 <component :is="getCategoryIcon(cat.id)" />
               </el-icon>
             </div>
@@ -71,20 +71,20 @@
     </div>
 
     <!-- 内容区域 -->
-    <div class="px-4 py-6 space-y-10">
+    <div class="px-4 py-3 space-y-5">
       <!-- 模式A：发现模式特有内容 -->
-      <div v-if="currentMode === 'discovery'" class="space-y-10">
-        <div class="space-y-4">
+      <div v-if="currentMode === 'discovery'" class="space-y-5">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">校园服务</h2>
+            <h2 class="text-base font-bold text-gray-900 tracking-tight">校园服务</h2>
           </div>
-          <div class="grid grid-cols-2 gap-4">
+          <div class="grid grid-cols-2 gap-3">
             <div
-              class="h-28 rounded-[24px] relative overflow-hidden cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50 bg-gradient-to-br from-[#eef2ff] to-[#f5f3ff]"
+              class="h-[88px] rounded-[18px] relative overflow-hidden cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50 bg-gradient-to-br from-[#eef2ff] to-[#f5f3ff]"
               @click="router.push('/user/forum')">
-              <div class="p-5 flex flex-col justify-between h-full">
+              <div class="p-4 flex flex-col justify-between h-full">
                 <div>
-                  <div class="text-[15px] font-bold text-gray-900 tracking-tight">校园论坛</div>
+                  <div class="text-sm font-bold text-gray-900 tracking-tight">校园论坛</div>
                   <div class="text-[11px] text-gray-500 mt-1">本校/全校帖子实时看</div>
                 </div>
                 <div class="flex justify-end">
@@ -95,11 +95,11 @@
               </div>
             </div>
             <div
-              class="h-28 rounded-[24px] relative overflow-hidden cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50 bg-gradient-to-br from-[#ecfeff] to-[#e6fffb]"
+              class="h-[88px] rounded-[18px] relative overflow-hidden cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50 bg-gradient-to-br from-[#ecfeff] to-[#e6fffb]"
               @click="router.push('/user/campus-nearby')">
-              <div class="p-5 flex flex-col justify-between h-full">
+              <div class="p-4 flex flex-col justify-between h-full">
                 <div>
-                  <div class="text-[15px] font-bold text-gray-900 tracking-tight">跑腿互助</div>
+                  <div class="text-sm font-bold text-gray-900 tracking-tight">跑腿互助</div>
                   <div class="text-[11px] text-gray-500 mt-1">发布/接单一站搞定</div>
                 </div>
                 <div class="flex justify-end">
@@ -112,14 +112,14 @@
           </div>
         </div>
         <!-- 推荐分类流 -->
-        <div class="recommend-categories grid grid-cols-2 gap-4">
+        <div class="recommend-categories grid grid-cols-2 gap-3">
           <div v-for="item in recommendCategories" :key="item.id"
-            class="flex-shrink-0 h-28 rounded-[24px] relative overflow-hidden group cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50"
+            class="flex-shrink-0 h-[88px] rounded-[18px] relative overflow-hidden group cursor-pointer shadow-sm active:scale-[0.98] transition-all border border-gray-50"
             :style="{ background: item.bg }"
             @click="handleRecommendClick(item)">
-            <div class="p-5 flex flex-col justify-between h-full relative z-10">
+            <div class="p-4 flex flex-col justify-between h-full relative z-10">
               <div>
-                <span class="text-[15px] font-bold text-gray-800 block tracking-tight">{{ item.title }}</span>
+                <span class="text-sm font-bold text-gray-800 block tracking-tight">{{ item.title }}</span>
                 <span class="text-[11px] text-gray-500 mt-1 block">{{ item.desc }}</span>
               </div>
               <div class="flex justify-end">
@@ -132,9 +132,9 @@
         </div>
 
         <!-- 猜你喜欢 -->
-        <div class="space-y-4">
+        <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900 tracking-tight">猜你喜欢</h2>
+            <h2 class="text-base font-bold text-gray-900 tracking-tight">猜你喜欢</h2>
             <div
               class="text-[11px] text-gray-400 flex items-center cursor-pointer hover:text-primary transition-all duration-300 group">
               <span>换一批</span>
@@ -147,10 +147,10 @@
       </div>
 
       <!-- 模式B：细分类别区 -->
-      <div v-if="currentMode === 'category'" class="space-y-4">
-        <div class="flex flex-col space-y-4">
+      <div v-if="currentMode === 'category'" class="space-y-3">
+        <div class="flex flex-col space-y-3">
           <!-- 排序选项 -->
-          <div class="flex items-center space-x-6 text-[13px]">
+          <div class="flex items-center space-x-5 text-[13px]">
             <div v-for="sort in sortOptions" :key="sort.value" @click="currentSort = sort.value"
               class="relative py-1 cursor-pointer transition-all duration-300 font-medium"
               :class="currentSort === sort.value ? 'text-primary' : 'text-gray-400'">
@@ -163,12 +163,12 @@
           <!-- 子分类标签 -->
           <div class="flex overflow-x-auto no-scrollbar space-x-2 pb-1">
             <div @click="activeSubCategoryId = null"
-              class="px-5 py-2 rounded-full text-[12px] flex-shrink-0 transition-all duration-300 border font-medium"
+              class="px-4 py-1.5 rounded-full text-[12px] flex-shrink-0 transition-all duration-300 border font-medium"
               :class="activeSubCategoryId === null ? 'bg-primary border-primary text-white shadow-md shadow-primary/20' : 'bg-white border-gray-100 text-gray-600 hover:border-primary/20'">
               全部
             </div>
             <div v-for="sub in currentSubCategories" :key="sub.id" @click="activeSubCategoryId = sub.id"
-              class="px-5 py-2 rounded-full text-[12px] flex-shrink-0 transition-all duration-300 border font-medium"
+              class="px-4 py-1.5 rounded-full text-[12px] flex-shrink-0 transition-all duration-300 border font-medium"
               :class="activeSubCategoryId === sub.id ? 'bg-primary border-primary text-white shadow-md shadow-primary/20' : 'bg-white border-gray-100 text-gray-600 hover:border-primary/20'">
               {{ sub.name }}
             </div>
@@ -178,7 +178,7 @@
 
       <!-- 统一商品列表 -->
       <div class="product-grid">
-        <div v-if="loading && products.length === 0" class="grid grid-cols-2 gap-4">
+        <div v-if="loading && products.length === 0" class="grid grid-cols-2 gap-3">
           <div v-for="i in 4" :key="i" class="bg-white p-2 rounded-[12px] animate-pulse">
             <div class="bg-gray-100 aspect-square rounded-[8px]"></div>
             <div class="h-4 bg-gray-100 rounded mt-4 w-3/4"></div>
@@ -186,12 +186,12 @@
           </div>
         </div>
 
-        <div v-else-if="products.length > 0" class="grid grid-cols-2 gap-4">
+        <div v-else-if="products.length > 0" class="grid grid-cols-2 gap-3">
           <div v-for="product in products" :key="product.id"
             class="product-card-v2 bg-white rounded-[12px] p-2 transition-all duration-300 group cursor-pointer"
             @click="goDetail(product.id)">
             <!-- 商品图片 -->
-            <div class="aspect-square relative overflow-hidden rounded-[8px] bg-gray-50 mb-3">
+            <div class="aspect-square relative overflow-hidden rounded-[8px] bg-gray-50 mb-2">
               <div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 to-primary z-10"></div>
               <el-image :src="getProductImage(product.images)" fit="cover"
                 class="w-full h-full group-hover:scale-105 transition-transform duration-500">
@@ -206,7 +206,7 @@
             </div>
 
             <!-- 商品信息 -->
-            <div class="px-1 pb-1 flex flex-col justify-between h-[68px]">
+            <div class="px-1 pb-1 flex flex-col justify-between h-[62px]">
               <div class="flex flex-col space-y-1">
                 <h3 class="text-[13px] font-medium text-gray-800 line-clamp-1 leading-tight">
                   {{ product.title }}
@@ -227,12 +227,12 @@
         </div>
 
         <!-- 空状态 -->
-        <div v-else class="py-20 flex flex-col items-center justify-center text-gray-400">
-          <el-empty description="暂无相关商品" :image-size="120" />
+        <div v-else class="py-14 flex flex-col items-center justify-center text-gray-400">
+          <el-empty description="暂无相关商品" :image-size="108" />
         </div>
 
         <!-- 加载更多 -->
-        <div v-if="hasMore" class="py-12 flex justify-center">
+        <div v-if="hasMore" class="py-8 flex justify-center">
           <el-button :loading="loading" text
             class="text-gray-300 text-[11px] tracking-widest uppercase hover:text-primary transition-colors"
             @click="loadMore">

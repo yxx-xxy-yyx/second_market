@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { showToast, showSuccessToast } from 'vant'
 import {
@@ -15,10 +16,10 @@ import {
 import { userApi } from '@/api/user'
 import { uploadAvatarApi } from '@/api/file'
 import { formatAvatarUrl } from '@/utils/url'
-import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const { t } = useI18n()
 
 const isSaving = ref(false)
 const isUploadingAvatar = ref(false)
@@ -70,7 +71,7 @@ const loadUserInfo = async () => {
     }
   } catch (error) {
     console.error('获取用户信息失败:', error)
-    showToast('获取用户信息失败')
+    showToast(t('profilePage.profileEdit.loadUserInfoFail'))
   }
 }
 
@@ -81,20 +82,20 @@ onMounted(() => {
 const uploadAvatar = async (selectedFile) => {
   if (!selectedFile || isUploadingAvatar.value) return
   if (!selectedFile.type?.startsWith('image/')) {
-    showToast('请选择图片文件')
+    showToast(t('profilePage.profileEdit.selectImage'))
     return
   }
   if (selectedFile.size / 1024 / 1024 > 5) {
-    showToast('图片不能超过5MB')
+    showToast(t('profilePage.profileEdit.imageTooLarge'))
     return
   }
 
-  showToast('头像上传中...')
+  showToast(t('profilePage.profileEdit.avatarUploading'))
   isUploadingAvatar.value = true
   try {
     const res = await uploadAvatarApi(selectedFile)
     if (!isOk(res)) {
-      throw new Error(res?.message || '上传失败')
+      throw new Error(res?.message || t('profilePage.profileEdit.uploadFail'))
     }
 
     const uploaded = res.data || {}
@@ -106,20 +107,20 @@ const uploadAvatar = async (selectedFile) => {
       (typeof uploaded === 'string' ? uploaded : '')
 
     if (!avatar) {
-      throw new Error('未获取到头像地址')
+      throw new Error(t('profilePage.profileEdit.noAvatarUrl'))
     }
 
     const updateRes = await userApi.updateAvatar(avatar)
     if (!isOk(updateRes)) {
-      throw new Error(updateRes?.message || '头像更新失败')
+      throw new Error(updateRes?.message || t('profilePage.profileEdit.avatarUpdateFail'))
     }
 
     form.value.avatar = avatar
     userStore.updateUser({ avatar })
-    showSuccessToast('头像更新成功')
+    showSuccessToast(t('profilePage.profileEdit.avatarUpdateSuccess'))
   } catch (error) {
     console.error('头像上传失败:', error)
-    showToast(error.message || '上传失败')
+    showToast(error.message || t('profilePage.profileEdit.uploadFail'))
   } finally {
     isUploadingAvatar.value = false
   }
@@ -139,7 +140,7 @@ const triggerAvatarPicker = () => {
 const handleSave = async () => {
   if (isSaving.value) return
   if (!form.value.nickname.trim()) {
-    showToast('请输入昵称')
+    showToast(t('profilePage.profileEdit.nicknameRequired'))
     return
   }
 
@@ -154,15 +155,15 @@ const handleSave = async () => {
 
     const res = await userApi.updateUserInfo(payload)
     if (!isOk(res)) {
-      throw new Error(res?.message || '保存失败')
+      throw new Error(res?.message || t('profilePage.profileEdit.saveFail'))
     }
 
-    showSuccessToast('保存成功')
+    showSuccessToast(t('profilePage.profileEdit.saveSuccess'))
     await loadUserInfo()
     setTimeout(() => router.back(), 800)
   } catch (error) {
     console.error('保存用户信息失败:', error)
-    showToast(error.message || '保存失败')
+    showToast(error.message || t('profilePage.profileEdit.saveFail'))
   } finally {
     isSaving.value = false
   }
@@ -183,10 +184,7 @@ const handleSave = async () => {
           <ChevronLeftIcon class="w-7 h-7" />
         </button>
         
-        <h1 class="w-full text-center text-lg font-bold text-white tracking-wide">编辑资料</h1>
-        <div class="absolute right-0 top-1/2 -translate-y-1/2">
-          <LangSwitcher glass />
-        </div>
+        <h1 class="w-full text-center text-lg font-bold text-white tracking-wide">{{ t('profilePage.profileEdit.title') }}</h1>
       </div>
 
       <div class="flex justify-center relative z-10">
@@ -208,7 +206,7 @@ const handleSave = async () => {
             <CameraIcon class="w-4 h-4 text-primary" />
           </div>
           <div v-if="isUploadingAvatar" class="absolute inset-0 rounded-full bg-black/35 flex items-center justify-center text-white text-xs font-bold">
-            上传中
+            {{ t('profilePage.profileEdit.uploading') }}
           </div>
           <input
             ref="avatarInputRef"
@@ -229,8 +227,8 @@ const handleSave = async () => {
             <IdentificationIcon class="w-5 h-5 text-blue-600" />
           </div>
           <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-1 font-medium">昵称</div>
-            <input v-model="form.nickname" type="text" placeholder="请输入昵称"
+            <div class="text-xs text-gray-400 mb-1 font-medium">{{ t('profilePage.profileEdit.nickname') }}</div>
+            <input v-model="form.nickname" type="text" :placeholder="t('profilePage.profileEdit.nicknamePlaceholder')"
               class="w-full text-gray-900 placeholder-gray-300 outline-none text-base font-medium bg-transparent" />
           </div>
         </div>
@@ -240,8 +238,8 @@ const handleSave = async () => {
             <PhoneIcon class="w-5 h-5 text-indigo-600" />
           </div>
           <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-1 font-medium">手机号</div>
-            <input v-model="form.phone" type="tel" placeholder="请输入联系电话"
+            <div class="text-xs text-gray-400 mb-1 font-medium">{{ t('profilePage.profileEdit.phone') }}</div>
+            <input v-model="form.phone" type="tel" :placeholder="t('profilePage.profileEdit.phonePlaceholder')"
               class="w-full text-gray-900 placeholder-gray-300 outline-none text-base font-medium bg-transparent" />
           </div>
         </div>
@@ -251,8 +249,8 @@ const handleSave = async () => {
             <AcademicCapIcon class="w-5 h-5 text-purple-600" />
           </div>
           <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-1 font-medium">学校</div>
-            <input v-model="form.schoolName" type="text" placeholder="请输入学校名称"
+            <div class="text-xs text-gray-400 mb-1 font-medium">{{ t('profilePage.profileEdit.school') }}</div>
+            <input v-model="form.schoolName" type="text" :placeholder="t('profilePage.profileEdit.schoolPlaceholder')"
               class="w-full text-gray-900 placeholder-gray-300 outline-none text-base font-medium bg-transparent" />
           </div>
         </div>
@@ -262,8 +260,8 @@ const handleSave = async () => {
             <BuildingOfficeIcon class="w-5 h-5 text-orange-600" />
           </div>
           <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-1 font-medium">宿舍楼</div>
-            <input v-model="form.dormitory" type="text" placeholder="例如：西区5号楼"
+            <div class="text-xs text-gray-400 mb-1 font-medium">{{ t('profilePage.profileEdit.dormitory') }}</div>
+            <input v-model="form.dormitory" type="text" :placeholder="t('profilePage.profileEdit.dormitoryPlaceholder')"
               class="w-full text-gray-900 placeholder-gray-300 outline-none text-base font-medium bg-transparent" />
           </div>
         </div>
@@ -272,7 +270,7 @@ const handleSave = async () => {
       <div class="mt-8 px-2">
         <button @click="handleSave" :disabled="isSaving"
           class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-transform">
-          {{ isSaving ? '保存中...' : '保存修改' }}
+          {{ isSaving ? t('profilePage.profileEdit.saving') : t('profilePage.profileEdit.saveBtn') }}
         </button>
       </div>
     </div>

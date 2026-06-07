@@ -1,11 +1,11 @@
 import request from './request'
 
 export const messageApi = {
-  getMyMessages(data) {
+  getMyMessages(params) {
     return request({
       url: '/message/my',
       method: 'post',
-      data
+      params
     })
   },
 

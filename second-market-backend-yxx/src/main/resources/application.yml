@@ -10,10 +10,10 @@ spring:
     name: second-market-backend
   
   datasource:
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:${DB_DRIVER:org.postgresql.Driver}}
+    driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:second_market}}
     password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:second_market}}
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://127.0.0.1:5432/second_market}}
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:mysql://127.0.0.1:3306/second_market?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true}}
     
   servlet:
     multipart:
@@ -27,7 +27,11 @@ spring:
     
   mvc:
     pathmatch:
-      matching-strategy: ant_path_matcher
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
 
 # MyBatis Plus 配置
 mybatis-plus:
@@ -54,7 +58,7 @@ logging:
     
 # Knife4j Swagger 配置
 knife4j:
-  enable: ${KNIFE4J_ENABLE:false}
+  enable: true
   setting:
     language: zh-CN
     enable-swagger-models: true
@@ -65,7 +69,7 @@ knife4j:
 project:
   jwt:
     secret: ${JWT_SECRET:echoofmemories2025}
-    expire-time: 86400000  # 24小时
+    expire-time: 600000  # 10分钟
   file:
     upload-path: ${PROJECT_FILE_UPLOAD_PATH:${user.dir}/uploads/}
     max-size: 100MB
@@ -77,13 +81,13 @@ project:
 ai:
   enabled: ${AI_ENABLED:true}
   api:
-    base-url: ${AI_BASE_URL:https://api.siliconflow.cn/v1/chat/completions}
-    api-key: ${AI_API_KEY:}
-    model: ${AI_MODEL:Qwen/Qwen2-VL-72B-Instruct}
+    base-url: ${AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions}
+    api-key: ${AI_API_KEY:sk-336c2b25991442deb1fc6e27c783cfa3}
+    model: ${AI_MODEL:qwen3.7-plus}
     max-tokens: ${AI_MAX_TOKENS:4096}
     temperature: ${AI_TEMPERATURE:0.7}
     timeout: ${AI_TIMEOUT:6000000}
   # 功能配置
   features:
-    rate-limit: ${AI_RATE_LIMIT:3}                                # 每分钟请求限制
+    rate-limit: ${AI_RATE_LIMIT:20}                                # 每分钟请求限制
     content-filter: ${AI_CONTENT_FILTER:true}                            # 内容过滤开关

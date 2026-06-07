@@ -8,71 +8,69 @@
 
         <div class="search-box hidden lg:block" @click="router.push('/user/search')" style="cursor: pointer;">
           <div class="search-input-placeholder">
-            <el-icon><Search /></el-icon>
+            <el-icon>
+              <Search />
+            </el-icon>
             <span class="text-gray-400 text-sm">{{ t('nav.searchProducts') }}</span>
           </div>
         </div>
       </div>
 
       <div class="header-nav hidden lg:flex">
-        <div
-          v-for="item in navMenu"
-          :key="item.path"
-          :class="['nav-item', { active: isActive(item.path) },currentLang]"
-          @click="router.push(item.path)"
-        >
+        <div v-for="item in navMenu" :key="item.path"
+          :class="['nav-item', { active: isActive(item.path) }, currentLang]" @click="router.push(item.path)">
           {{ item.label }}
         </div>
       </div>
 
       <div class="header-right">
         <!-- 学校选择器 → 改成可搜索下拉框 -->
-        <el-select
-          v-model="selectedSchool"
-          :placeholder="t('nav.selectSchool')"
-          class="school-select"
-          filterable
-          clearable
-          popper-class="school-select-popper"
-          @change="handleSchoolChange"
-        >
-          <el-option
-            v-for="item in schoolStore.schoolList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+        <el-select v-model="selectedSchool" :placeholder="t('nav.selectSchool')" class="school-select" filterable
+          clearable popper-class="school-select-popper" @change="handleSchoolChange">
+          <el-option v-for="item in schoolStore.schoolList" :key="item.value" :label="item.label" :value="item.value" />
         </el-select>
 
         <LangSwitcher />
 
         <el-button type="primary" @click="router.push('/user/publish')" class="publish-btn hidden lg:inline-flex">
-          <el-icon><Plus /></el-icon>
+          <el-icon>
+            <Plus />
+          </el-icon>
           {{ t('common.postProduct') }}
         </el-button>
 
         <el-badge :value="unreadCount" :hidden="unreadCount === 0" class="message-badge">
           <div class="icon-btn" @click="handleMessage">
-            <el-icon :size="20"><Bell /></el-icon>
+            <el-icon :size="20">
+              <Bell />
+            </el-icon>
           </div>
         </el-badge>
 
         <el-dropdown @command="handleUserCommand" trigger="click">
           <div class="user-info">
             <el-avatar :size="32" :src="avatarUrl">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </el-avatar>
             <span class="username">{{ userStore.user?.nickname || userStore.user?.username }}</span>
-            <el-icon class="dropdown-icon" :size="14"><ArrowDown /></el-icon>
+            <el-icon class="dropdown-icon" :size="14">
+              <ArrowDown />
+            </el-icon>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="profile">
-                <el-icon><User /></el-icon>
+                <el-icon>
+                  <User />
+                </el-icon>
                 {{ t('common.profile') }}
               </el-dropdown-item>
               <el-dropdown-item divided command="logout">
-                <el-icon><SwitchButton /></el-icon>
+                <el-icon>
+                  <SwitchButton />
+                </el-icon>
                 {{ t('common.logout') }}
               </el-dropdown-item>
             </el-dropdown-menu>
@@ -94,10 +92,10 @@ import { useI18n } from 'vue-i18n'
 import { useSchoolStore } from '@/stores/school'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import BrandLogo from '@/components/BrandLogo.vue'
-import { 
+import {
   Search,
   Bell,
-  User, 
+  User,
   SwitchButton,
   Plus
 } from '@element-plus/icons-vue'
@@ -172,11 +170,11 @@ const fetchUnreadCount = async () => {
       messageApi.getUnreadCount(),
       chatApi.getUnreadCount()
     ])
-    
+
     let total = 0
     if (msgRes.code === '200') total += (msgRes.data || 0)
     if (chatRes.code === '200') total += (chatRes.data || 0)
-    
+
     unreadCount.value = total
   } catch (error) {
     console.error('获取未读消息数失败:', error)
@@ -191,17 +189,19 @@ onMounted(() => {
 
 <style scoped>
 .user-header {
-  height: 64px;
-  background: var(--app-header-gradient);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  height: 60px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
-  padding: 10px 0;
+  border-bottom: 1px solid rgba(235, 238, 245, 0.6);
 }
 
 .header-container {
-  height: 44px;
+  height: 100%;
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
@@ -211,11 +211,6 @@ onMounted(() => {
   gap: 20px;
   flex-wrap: nowrap;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 18px;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
 }
 
 .header-left {
@@ -295,7 +290,8 @@ onMounted(() => {
 /* 英文菜单项加大左右 padding */
 .nav-item.en {
   font-size: 11.4px;
-  padding: 8px 3px; /* 左右更宽，让英文词看起来不挤 */
+  padding: 8px 3px;
+  /* 左右更宽，让英文词看起来不挤 */
 }
 
 /* 韩文菜单项稍微加一点 */
@@ -341,6 +337,7 @@ onMounted(() => {
 .school-select {
   width: 100px;
 }
+
 .school-select :deep(.el-input__wrapper) {
   height: 32px;
   border-radius: 20px;
@@ -349,11 +346,13 @@ onMounted(() => {
   box-shadow: none;
   transition: all 0.3s;
 }
+
 .school-select :deep(.el-input__wrapper):hover {
   background: #fff;
   border-color: #409eff;
   box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
 }
+
 .school-select :deep(.el-input__inner) {
   font-size: 13px;
   font-weight: 600;
@@ -501,19 +500,19 @@ onMounted(() => {
   .header-container {
     gap: 16px;
   }
-  
+
   .header-left {
     gap: 16px;
   }
-  
+
   .header-nav {
     gap: 12px;
   }
-  
+
   .search-box {
     width: 220px;
   }
-  
+
   .nav-item {
     font-size: 14px;
     padding: 6px 12px;
@@ -524,21 +523,21 @@ onMounted(() => {
   .header-container {
     gap: 12px;
   }
-  
+
   .header-nav {
     gap: 8px;
     max-width: 300px;
   }
-  
+
   .nav-item {
     font-size: 13px;
     padding: 6px 10px;
   }
-  
+
   .search-box {
     width: 180px;
   }
-  
+
   .publish-btn {
     padding: 8px 16px;
   }
@@ -549,30 +548,30 @@ onMounted(() => {
     padding: 0 12px;
     gap: 8px;
   }
-  
+
   .logo-text {
     display: none;
   }
-  
+
   .header-nav {
     display: none;
   }
-  
+
   .search-box {
     flex: 1;
     min-width: 120px;
     max-width: 200px;
   }
-  
+
   .username {
     display: none;
   }
-  
+
   .publish-btn {
     padding: 8px 12px;
     min-width: auto;
   }
-  
+
   .publish-btn .el-icon {
     margin-right: 0;
   }
@@ -583,26 +582,29 @@ onMounted(() => {
     padding: 0 10px;
     gap: 6px;
   }
-  
+
   .search-box {
     max-width: 150px;
   }
-  
+
   .header-right {
     gap: 8px;
   }
-  
+
   .user-info {
     padding: 6px 8px;
   }
 }
+
 @media screen and (max-width: 768px) {
   .header-nav {
     display: none;
   }
+
   .publish-btn {
     display: none;
   }
+
   .username {
     display: none;
   }

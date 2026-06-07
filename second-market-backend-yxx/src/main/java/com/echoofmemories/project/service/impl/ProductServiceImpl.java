@@ -17,20 +17,11 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
 /**
  * 商品服务实现类
  * 
  * @author EchoOfMemories
  */
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> implements ProductService {
@@ -40,25 +31,6 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     
     private static final Map<String, Long> VIEW_CACHE = new ConcurrentHashMap<>();
     private static final long VIEW_INTERVAL = 5 * 60 * 1000;
-    private ScheduledExecutorService cacheCleanerExecutor;
-
-    @PostConstruct
-    public void init() {
-        cacheCleanerExecutor = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread t = new Thread(r, "view-cache-cleaner");
-            t.setDaemon(true);
-            return t;
-        });
-        // 每10分钟清理一次过期缓存
-        cacheCleanerExecutor.scheduleAtFixedRate(this::cleanExpiredCache, 10, 10, TimeUnit.MINUTES);
-    }
-
-    @PreDestroy
-    public void destroy() {
-        if (cacheCleanerExecutor != null) {
-            cacheCleanerExecutor.shutdown();
-        }
-    }
 
     @Override
     public Page<Product> getProductPage(Integer pageNum, Integer pageSize, String keyword, 
@@ -89,7 +61,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             }
         }
         if (product.getStatus() == null) {
-            product.setStatus(2);
+            product.setStatus(1);
         }
         if (product.getViewCount() == null) {
             product.setViewCount(0);
@@ -136,7 +108,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
     @Override
     @Transactional
     public Product viewProduct(Long productId, String userIdentifier) {
-        Product product = getById(productId);
+        Product product = getProductWithUserById(productId);
         if (product == null || product.getDeleted() == 1) {
             throw new CustomException("商品不存在");
         }
@@ -153,21 +125,19 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
             VIEW_CACHE.put(cacheKey, currentTime);
 
-            product = getById(productId);
+            if (VIEW_CACHE.size() > 10000) {
+                cleanExpiredCache();
+            }
+
+            product = getProductWithUserById(productId);
         }
 
         return product;
     }
 
     private void cleanExpiredCache() {
-        log.debug("开始清理过期的视图浏览缓存...");
         long currentTime = System.currentTimeMillis();
-        int initialSize = VIEW_CACHE.size();
         VIEW_CACHE.entrySet().removeIf(entry -> 
             (currentTime - entry.getValue()) > VIEW_INTERVAL);
-        int removedCount = initialSize - VIEW_CACHE.size();
-        if (removedCount > 0) {
-            log.info("清理了 {} 条过期的视图浏览缓存", removedCount);
-        }
     }
 }

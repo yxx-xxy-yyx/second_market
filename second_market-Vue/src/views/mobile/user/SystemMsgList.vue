@@ -5,7 +5,6 @@
         <el-icon @click="router.back()" :size="20" class="mr-4 cursor-pointer text-gray-600"><ArrowLeft /></el-icon>
         <span class="text-lg font-bold text-gray-900">{{ $t('messages.systemNotification') }}</span>
       </div>
-      <LangSwitcher />
     </div>
 
     <div class="filter-sticky-bar bg-white px-4 py-3 border-b border-gray-50 flex justify-between items-center sticky top-14 z-20">
@@ -28,7 +27,7 @@
         @click="handleMarkAllRead"
         :disabled="sysMessages.length === 0"
       >
-        全部已读
+        {{ $t('messages.markAllRead') }}
       </el-button>
     </div>
 
@@ -37,7 +36,7 @@
         <van-loading type="spinner" color="#14b8a6" />
       </div>
 
-      <el-empty v-else-if="sysMessages.length === 0" description="暂无相关消息" />
+      <el-empty v-else-if="sysMessages.length === 0" :description="$t('messages.noMessages')" />
 
       <div v-else class="space-y-3">
         <div 
@@ -70,44 +69,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ArrowLeft, Notification } from '@element-plus/icons-vue'
 import { showToast, showConfirmDialog } from 'vant'
-import request from '@/api/request'
-import LangSwitcher from '@/components/LangSwitcher.vue'
+import { messageApi } from '@/api/message'
 
 const router = useRouter()
 const sysMessages = ref([])
 const loading = ref(true)
 const currentFilter = ref(null) // null: 全部, 0: 未读, 1: 已读
 
-const filterList = [
-  { label: '全部', value: null },
-  { label: '未读', value: 0 },
-  { label: '已读', value: 1 }
-]
+const { t } = useI18n()
+
+const filterList = computed(() => [
+  { label: t('messages.all'), value: null },
+  { label: t('messages.unread'), value: 0 },
+  { label: t('messages.read'), value: 1 }
+])
 
 // 获取系统消息列表
 const fetchSysMessages = async () => {
   try {
     loading.value = true
-    const postData = {
-      // 如果后端需要分页参数，可以在此添加
-      // current: 1,
-      // size: 10
+    const params = {
+      pageNum: 1,
+      pageSize: 50
     }
     
     // 如果选择了已读/未读状态
     if (currentFilter.value !== null) {
-      postData.isRead = currentFilter.value
+      params.isRead = currentFilter.value
     }
 
-    const res = await request({
-      url: '/message/my',
-      method: 'post',
-      data: postData
-    })
+    const res = await messageApi.getMyMessages(params)
 
     if (res.code === "200") {
       /**
@@ -117,11 +113,11 @@ const fetchSysMessages = async () => {
       sysMessages.value = res.data.records || []
       console.log('解析后的列表数据:', sysMessages.value)
     } else {
-      showToast(res.message || '加载失败')
+      showToast(res.message || t('messages.loadFailed'))
     }
   } catch (e) {
     console.error('fetch error:', e)
-    showToast('网络开小差了')
+    showToast(t('messages.networkError'))
   } finally {
     loading.value = false
   }
@@ -135,17 +131,14 @@ const handleFilterChange = (val) => {
 const handleMarkAllRead = async () => {
   try {
     await showConfirmDialog({
-      title: '确认',
-      message: '是否将全部消息标记为已读？',
+      title: t('messages.confirm'),
+      message: t('messages.confirmMarkAllRead'),
     })
 
-    const res = await request({
-      url: '/message/readAll',
-      method: 'post'
-    })
+    const res = await messageApi.markAllAsRead()
 
     if (res.code === "200") {
-      showToast('已全部标记已读')
+      showToast(t('messages.markAllReadSuccess'))
       fetchSysMessages()
     }
   } catch (e) { }
@@ -164,7 +157,7 @@ const formatTime = (time) => {
   if (date.toDateString() === now.toDateString()) {
     return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
   }
-  return `${date.getMonth() + 1}月${date.getDate()}日`
+  return `${date.getMonth() + 1}${t('common.month')}${date.getDate()}${t('common.day')}`
 }
 
 onMounted(fetchSysMessages)

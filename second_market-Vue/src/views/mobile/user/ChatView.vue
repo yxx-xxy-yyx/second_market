@@ -1,23 +1,21 @@
 <template>
   <div class="chat-wrapper bg-[#f8fafc]">
     <div
-      class="top-nav-placeholder bg-white/80 backdrop-blur-xl px-4 flex items-center justify-between border-b border-gray-100 z-20">
-      <div class="w-10 h-10 flex items-center justify-center rounded-full active:bg-gray-100 cursor-pointer"
-        @click="handleBack">
-        <el-icon :size="20">
-          <ArrowLeft />
-        </el-icon>
-      </div>
-      <div class="flex flex-col items-center">
-        <div class="font-bold text-lg text-gray-900">{{ targetUser.nickname || '聊天' }}</div>
-        <div class="flex items-center space-x-1">
-          <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-          <span class="text-[10px] text-gray-400">在线</span>
+      class="top-nav-placeholder bg-white/80 backdrop-blur-xl px-4 grid grid-cols-3 items-center border-b border-gray-100 z-20">
+      <div class="flex items-center justify-start">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full active:bg-gray-100 cursor-pointer"
+          @click="handleBack">
+          <el-icon :size="20">
+            <ArrowLeft />
+          </el-icon>
         </div>
       </div>
-      <div class="flex items-center">
-        <LangSwitcher />
-        <div class="w-10"></div>
+      <div class="flex flex-col items-center justify-center">
+        <div class="font-bold text-lg text-gray-900 truncate w-full text-center">{{ targetUserName }}</div>
+        <div class="flex items-center space-x-1">
+          <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+          <span class="text-[10px] text-gray-400">{{ $t('messages.online') }}</span>
+        </div>
       </div>
     </div>
 
@@ -32,7 +30,7 @@
             <span class="text-orange-500 font-bold text-sm">¥{{ goodsInfo.price }}</span>
           </div>
           <button class="px-3 py-1.5 bg-teal-50 text-teal-600 text-xs font-bold rounded-full"
-            @click="router.push(`/user/product/${goodsInfo.id}`)">查看</button>
+            @click="router.push(`/user/product/${goodsInfo.id}`)">{{ $t('messages.view') }}</button>
         </div>
       </div>
 
@@ -50,8 +48,7 @@
 
             <div v-if="!isMyMessage(msg)"
               class="w-9 h-9 rounded-full flex-shrink-0 overflow-hidden border border-gray-100 mr-2">
-              <img :src="formatAvatarUrl(targetUser.avatar)"
-                class="w-full h-full object-cover" />
+              <img :src="formatAvatarUrl(targetUser.avatar)" class="w-full h-full object-cover" />
             </div>
 
             <div class="max-w-[75%] flex flex-col" :class="isMyMessage(msg) ? 'items-end' : 'items-start'">
@@ -74,7 +71,8 @@
       </div>
     </div>
 
-    <div class="input-section-fixed bg-white/80 px-4 py-3 border-t border-gray-100 flex items-end space-x-3 z-20">
+    <div
+      class="input-section-fixed bg-white/80 px-4 py-3 border-t border-gray-100 flex items-end space-x-3 z-30 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       <button type="button"
         class="relative w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 active:bg-teal-50 active:text-teal-600 transition-colors overflow-hidden"
         :disabled="uploadingImage" @click="triggerImagePicker">
@@ -86,7 +84,7 @@
       </button>
 
       <div class="flex-1 bg-gray-100/80 rounded-[1.25rem] px-4 py-2.5">
-        <textarea v-model="content" rows="1" placeholder="发消息..."
+        <textarea v-model="content" rows="1" :placeholder="$t('messages.inputPlaceholder')"
           class="w-full bg-transparent border-none outline-none text-[15px] resize-none max-h-24 leading-relaxed"
           @keydown.enter.prevent="sendMessage(0)"></textarea>
       </div>
@@ -99,27 +97,27 @@
         </el-icon>
       </button>
     </div>
-
-    <div class="bottom-tab-placeholder"></div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { showToast, showImagePreview } from 'vant'
 import { ArrowLeft, Promotion, Picture } from '@element-plus/icons-vue'
 import request from '@/api/request'
-import LangSwitcher from '@/components/LangSwitcher.vue'
+import { productApi } from '@/api/product'
 import { formatAvatarUrl, formatImageUrl } from '@/utils/url'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const userStore = useUserStore()
 
 const targetUserId = computed(() => route.params.id)
-const goodsId = route.query.goodsId
+const goodsId = computed(() => route.query.goodsId)
 
 const targetUser = ref({})
 const messages = ref([])
@@ -131,6 +129,10 @@ const goodsInfo = ref(null)
 const messageContainer = ref(null)
 const imageInputRef = ref(null)
 let pollingInterval = null
+
+const targetUserName = computed(() => {
+  return targetUser.value.nickname || route.query.name || targetUser.value.username || t('messages.chatDefaultTitle')
+})
 
 const DEFAULT_AVATAR = formatAvatarUrl('')
 
@@ -156,7 +158,7 @@ const formatTime = (timeStr) => {
     if (date.toDateString() === now.toDateString()) {
       return `${hours}:${minutes}`
     }
-    return `${date.getMonth() + 1}月${date.getDate()}日 ${hours}:${minutes}`
+    return `${date.getMonth() + 1}${t('common.month')}${date.getDate()}${t('common.day')} ${hours}:${minutes}`
   } catch (e) {
     return ''
   }
@@ -174,11 +176,24 @@ const fetchTargetUser = async () => {
 }
 
 const fetchGoodsInfo = async () => {
-  if (!goodsId) return
+  if (!goodsId.value) return
   try {
-    const res = await request.get(`/goods/detail/${goodsId}`)
-    goodsInfo.value = res.data?.goods || res.data || null
-  } catch (e) { }
+    const res = await productApi.getProductById(goodsId.value)
+    const data = res.data || res || null
+    if (data) {
+      // 处理商品图片，获取第一张
+      let img = ''
+      try {
+        const imgs = typeof data.images === 'string' ? JSON.parse(data.images) : data.images
+        img = formatImageUrl(Array.isArray(imgs) ? imgs[0] : imgs)
+      } catch (e) {
+        img = formatImageUrl(data.images?.[0] || data.images)
+      }
+      goodsInfo.value = { ...data, image: img }
+    }
+  } catch (e) {
+    console.error('获取商品信息失败:', e)
+  }
 }
 
 const fetchHistory = async () => {
@@ -196,8 +211,8 @@ const fetchHistory = async () => {
 
       // 只有当消息变化时才更新
       const hasNewMessages = newMessages.length > messages.value.length
-      const lastMsgChanged = newMessages.length > 0 && messages.value.length > 0 && 
-                            (newMessages[newMessages.length - 1].id !== messages.value[messages.value.length - 1].id)
+      const lastMsgChanged = newMessages.length > 0 && messages.value.length > 0 &&
+        (newMessages[newMessages.length - 1].id !== messages.value[messages.value.length - 1].id)
 
       if (hasNewMessages || lastMsgChanged || (messages.value.length === 0 && newMessages.length > 0)) {
         messages.value = newMessages
@@ -207,7 +222,7 @@ const fetchHistory = async () => {
         } else {
           nextTick(scrollToBottom)
         }
-        
+
         // 如果有新消息且当前在聊天界面，标记为已读
         if (newMessages.length > 0) {
           const lastMsg = newMessages[newMessages.length - 1]
@@ -218,7 +233,7 @@ const fetchHistory = async () => {
       }
     }
   } catch (e) {
-    console.error('获取聊天历史失败:', e)
+    console.error(t('messages.fetchHistoryFailed'), e)
   }
 }
 
@@ -226,7 +241,7 @@ const markRead = async () => {
   try {
     await request.post(`/chat/read/${targetUserId.value}`)
   } catch (e) {
-    console.error('标记已读失败:', e)
+    console.error(t('messages.markReadFailed'), e)
   }
 }
 
@@ -241,16 +256,16 @@ const sendMessage = async (type = 0, msgContent = '') => {
       content: text,
       msgType: type
     })
-    
+
     if (res.code === '200' || res.success) {
       if (type === 0) content.value = ''
       await fetchHistory()
       setTimeout(scrollToBottom, 100)
     } else {
-      showToast(res.message || '发送失败')
+      showToast(res.message || t('messages.sendFailed'))
     }
   } catch (e) {
-    showToast('发送失败')
+    showToast(t('messages.sendFailed'))
   } finally {
     sending.value = false
   }
@@ -260,12 +275,12 @@ const handleImageUpload = async (selectedFile) => {
   if (!selectedFile || uploadingImage.value) return
 
   if (!selectedFile.type?.startsWith('image/')) {
-    showToast('请选择图片文件')
+    showToast(t('messages.selectImageFile'))
     return
   }
 
   if (selectedFile.size / 1024 / 1024 > 10) {
-    showToast('图片不能超过10MB')
+    showToast(t('messages.imageSizeLimit'))
     return
   }
 
@@ -273,7 +288,7 @@ const handleImageUpload = async (selectedFile) => {
   formData.append('file', selectedFile)
 
   uploadingImage.value = true
-  showToast('图片上传中...')
+  showToast(t('messages.imageUploading'))
   try {
     const res = await request.post('/file/upload', formData, {
       headers: {
@@ -291,12 +306,12 @@ const handleImageUpload = async (selectedFile) => {
       data?.path
 
     if (!imageUrl) {
-      throw new Error('未获取到图片地址')
+      throw new Error(t('messages.imageUrlNotFound'))
     }
 
     await sendMessage(1, imageUrl)
   } catch (e) {
-    showToast(e.message || '图片上传失败')
+    showToast(e.message || t('messages.imageUploadFailed'))
   } finally {
     uploadingImage.value = false
   }

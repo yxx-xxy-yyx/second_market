@@ -19,7 +19,7 @@ import java.util.Date;
 public class JwtUtils {
 
     private static final String SECRET = resolveSecret();
-    private static final Long EXPIRE_TIME = 7 * 24 * 3600 * 1000L; // 7天 (7 days)
+    private static final Long EXPIRE_TIME = 7200000L; // 2小时
     
     private static String resolveSecret() {
         String fromEnv = System.getenv("JWT_SECRET");

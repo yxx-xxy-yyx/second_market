@@ -5,7 +5,6 @@
         <el-icon :size="20" class="text-gray-700" @click="router.back()"><ArrowLeft /></el-icon>
         <div class="text-base font-bold text-gray-900">{{ $t('feedbackPage.title') }}</div>
       </div>
-      <LangSwitcher />
     </div>
 
     <div class="px-4 py-4 space-y-3">

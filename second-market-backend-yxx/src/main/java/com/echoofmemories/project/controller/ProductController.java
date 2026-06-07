@@ -6,6 +6,7 @@ import com.echoofmemories.project.dto.ProductPageRequest;
 import com.echoofmemories.project.dto.ProductRequest;
 import com.echoofmemories.project.entity.Product;
 import com.echoofmemories.project.security.SecurityUtils;
+import com.echoofmemories.project.service.BrowseHistoryService;
 import com.echoofmemories.project.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +28,7 @@ import javax.validation.Valid;
 public class ProductController {
 
     private final ProductService productService;
+    private final BrowseHistoryService browseHistoryService;
 
     @Operation(summary = "新增商品")
     @PostMapping("/add")
@@ -220,10 +222,33 @@ public class ProductController {
         try {
             String userIdentifier = getUserIdentifier(request);
             Product product = productService.viewProduct(id, userIdentifier);
+            Long currentUserId = getCurrentUserId(request);
+            if (currentUserId != null) {
+                try {
+                    browseHistoryService.addHistory(currentUserId, id);
+                } catch (Exception ignored) {
+                    // 不影响主流程
+                }
+            }
             return Result.success(product);
         } catch (Exception e) {
             return Result.error("500", e.getMessage());
         }
+    }
+
+    private Long getCurrentUserId(javax.servlet.http.HttpServletRequest request) {
+        Long currentUserId = SecurityUtils.getCurrentUserId();
+        if (currentUserId != null) {
+            return currentUserId;
+        }
+        Object userIdAttr = request.getAttribute("userId");
+        if (userIdAttr instanceof String) {
+            try {
+                return Long.valueOf((String) userIdAttr);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return null;
     }
 
     private String getUserIdentifier(javax.servlet.http.HttpServletRequest request) {

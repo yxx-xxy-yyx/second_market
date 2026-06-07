@@ -96,7 +96,7 @@ import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, MagicStick, Delete, Promotion } from '@element-plus/icons-vue'
 import { showToast, showConfirmDialog } from 'vant'
-import request from '@/api/request'
+import { aiApi } from '@/api/ai'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const router = useRouter()
@@ -125,9 +125,17 @@ const handleSend = async () => {
 
   aiLoading.value = true
   try {
-    const res = await request.post('/ai/generate', {
-      prompt: content,
-      type: 'GENERAL_CONTENT'
+    const conversation = messages.value
+      .filter((msg) => !msg.loading)
+      .map((msg) => ({
+        role: msg.role === 'user' ? 'user' : 'assistant',
+        content: msg.content
+      }))
+
+    const res = await aiApi.chat({
+      messages: conversation,
+      maxTokens: 512,
+      temperature: 0.7
     })
 
     if (res.success || res.code === '200' || res.code === 200) {
@@ -148,8 +156,33 @@ const handleSend = async () => {
 }
 
 const handleTagClick = (tag) => { userInput.value = tag; handleSend() }
+
 const handleClear = async () => {
-  try { await showConfirmDialog({ message: '确定清空所有对话吗？' }); messages.value = [messages.value[0]]; } catch (e) { }
+  try {
+    await showConfirmDialog({ message: '确定清空所有对话吗？' })
+    await aiApi.clearHistory()
+    messages.value = [{ role: 'ai', content: '您好！我是您的智能管家，有什么可以帮您？', time: formatTime() }]
+  } catch (e) {
+    // 用户取消操作
+  }
+}
+
+const loadHistory = async () => {
+  try {
+    const res = await aiApi.getHistory()
+    if (res.success || res.code === '200' || res.code === 200) {
+      const history = res.data || []
+      if (history.length) {
+        messages.value = history.map((record) => ({
+          role: record.role === 'assistant' ? 'ai' : 'user',
+          content: record.content,
+          time: record.createTime || formatTime()
+        }))
+      }
+    }
+  } catch (error) {
+    console.error('加载 AI 聊天记录失败：', error)
+  }
 }
 
 const scrollToBottom = () => {
@@ -158,7 +191,10 @@ const scrollToBottom = () => {
 const formatTime = () => {
   const d = new Date(); return `${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`
 }
-onMounted(scrollToBottom)
+onMounted(async () => {
+  await loadHistory()
+  scrollToBottom()
+})
 </script>
 
 <style scoped>

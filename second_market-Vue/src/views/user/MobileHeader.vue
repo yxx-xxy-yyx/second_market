@@ -192,7 +192,7 @@ const isActive = (path) => {
 const handleUserCommand = async (command) => {
     switch (command) {
         case 'profile':
-            router.push('/user/profile')
+            router.push('/user/profileEdit')
             break
         case 'logout':
             userStore.logout()
@@ -742,12 +742,18 @@ const goNotices = () => {
     .school-select :deep(.el-input__wrapper) {
         min-height: 38px;
         padding: 10px 16px;
-        /* Adjusted to match LangSwitcher button padding */
         border-radius: 18px;
         background: rgba(245, 247, 250, 0.95) !important;
         border: 1px solid #ebeef5;
         box-shadow: none;
-        transition: all 0.3s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .school-select:hover :deep(.el-input__wrapper),
+    .school-select :deep(.el-input__wrapper.is-focus) {
+        background: #ffffff !important;
+        border-color: #409eff;
+        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.15);
     }
 
     .school-select :deep(.el-input__inner) {
@@ -769,7 +775,13 @@ const goNotices = () => {
         -webkit-backdrop-filter: blur(14px);
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 24px rgba(59, 60, 118, 0.18);
         border-radius: 18px !important;
-        /* 确保在毛玻璃模式下也应用圆角 */
+    }
+
+    .user-header.glass .school-select:hover :deep(.el-input__wrapper),
+    .user-header.glass .school-select :deep(.el-input__wrapper.is-focus) {
+        background: rgba(77, 86, 151, 0.34) !important;
+        border-color: rgba(255, 255, 255, 0.32) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 10px 24px rgba(59, 60, 118, 0.2);
     }
 
     .user-header.glass .school-select :deep(.el-input__inner) {
@@ -786,34 +798,52 @@ const goNotices = () => {
 /* 白底模式 */
 :global(.school-mobile-white-popper.el-popper) {
     border: none !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
     background: transparent !important;
-    box-shadow: none !important;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08) !important;
 }
 
 :global(.school-mobile-white-popper .el-select-dropdown) {
     border: 1px solid #ebeef5 !important;
     border-radius: 18px !important;
     background: #ffffff !important;
-    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08) !important;
+    box-shadow: none !important;
     padding: 8px 0 !important;
+    overflow: hidden !important;
 }
 
 :global(.school-mobile-white-popper .el-select-dropdown__item) {
-    font-size: 14px !important;
-    padding: 5px 16px !important;
+    font-size: 13px !important;
+    padding: 10px 16px !important;
     color: #303133 !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+}
+
+:global(.school-mobile-white-popper .el-select-dropdown__item.hover),
+:global(.school-mobile-white-popper .el-select-dropdown__item:hover) {
+    background: #f5f7fa !important;
 }
 
 :global(.school-mobile-white-popper .el-select-dropdown__item.selected) {
     background: #ecf5ff !important;
     color: #409eff !important;
+    font-weight: 600 !important;
+}
+
+:global(.school-mobile-white-popper .el-popper__arrow::before) {
+    background: #ffffff !important;
+    border-color: #ebeef5 !important;
 }
 
 /* 毛玻璃模式 */
 :global(.school-mobile-glass-popper.el-popper) {
     border: none !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
     background: transparent !important;
     box-shadow: none !important;
+    padding: 0 !important;
 }
 
 :global(.school-mobile-glass-popper .el-select-dropdown) {
@@ -824,12 +854,14 @@ const goNotices = () => {
     -webkit-backdrop-filter: blur(18px) !important;
     box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12) !important;
     padding: 8px 0 !important;
+    overflow: hidden !important;
 }
 
 :global(.school-mobile-glass-popper .el-select-dropdown__item) {
     color: rgba(255, 255, 255, 0.86) !important;
     font-size: 14px !important;
-    padding: 5px 16px !important;
+    padding: 10px 16px !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
 }
 
 :global(.school-mobile-glass-popper .el-select-dropdown__item.hover),
@@ -839,11 +871,16 @@ const goNotices = () => {
 }
 
 :global(.school-mobile-glass-popper .el-select-dropdown__item.selected) {
-    background: rgba(255, 255, 255, 0.18) !important;
-    /* 恢复为与语言选择器一致的选中颜色 */
-    /* 修复：在毛玻璃背景下，选中文字改用蓝色以提高辨识度 */
-    color: #409eff !important;
+    background: rgba(255, 255, 255, 0.82) !important;
+    color: #111827 !important;
     font-weight: 600 !important;
+}
+
+:global(.school-mobile-glass-popper .el-popper__arrow::before) {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(77, 86, 151, 0.7) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
 }
 
 /* 选中项边缘圆角对齐 (填满框) */

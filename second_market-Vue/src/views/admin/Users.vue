@@ -7,31 +7,20 @@
     <el-card class="search-card">
       <el-form :model="searchForm" :inline="true">
         <el-form-item :label="$t('adminUsers.username')">
-          <el-input
-            v-model="searchForm.username"
-            :placeholder="$t('adminUsers.placeholder.username')"
-            clearable
-            style="width: 200px"
-          />
+          <el-input v-model="searchForm.username" :placeholder="$t('adminUsers.placeholder.username')" clearable
+            style="width: 200px" />
         </el-form-item>
         <el-form-item :label="$t('adminUsers.nickname')">
-          <el-input
-            v-model="searchForm.nickname"
-            :placeholder="$t('adminUsers.placeholder.nickname')"
-            clearable
-            style="width: 200px"
-          />
+          <el-input v-model="searchForm.nickname" :placeholder="$t('adminUsers.placeholder.nickname')" clearable
+            style="width: 200px" />
         </el-form-item>
         <el-form-item :label="$t('adminUsers.phone')">
-          <el-input
-            v-model="searchForm.phone"
-            :placeholder="$t('adminUsers.placeholder.phone')"
-            clearable
-            style="width: 200px"
-          />
+          <el-input v-model="searchForm.phone" :placeholder="$t('adminUsers.placeholder.phone')" clearable
+            style="width: 200px" />
         </el-form-item>
         <el-form-item :label="$t('adminUsers.currentStatus')">
-          <el-select v-model="searchForm.status" :placeholder="$t('adminUsers.placeholder.status')" clearable style="width: 150px">
+          <el-select v-model="searchForm.status" :placeholder="$t('adminUsers.placeholder.status')" clearable
+            style="width: 150px">
             <el-option :label="$t('adminUsers.status.normal')" value="normal" />
             <el-option :label="$t('adminUsers.status.banned')" value="banned" />
           </el-select>
@@ -48,28 +37,25 @@
     </el-card>
 
     <el-card class="table-card">
-      <el-table
-        v-loading="loading"
-        :data="userList"
-        stripe
-        style="width: 100%"
-      >
+      <el-table v-loading="loading" :data="userList" stripe style="width: 100%">
         <el-table-column prop="id" :label="$t('adminUsers.table.id')" width="80" />
-        
+
         <el-table-column :label="$t('adminUsers.table.avatar')" width="60">
           <template #default="{ row }">
             <el-avatar :size="40" :src="formatAvatarUrl(row.avatar)">
-              <el-icon><User /></el-icon>
+              <el-icon>
+                <User />
+              </el-icon>
             </el-avatar>
           </template>
         </el-table-column>
-        
+
         <el-table-column prop="username" :label="$t('adminUsers.table.username')" width="120" show-overflow-tooltip />
-        
+
         <el-table-column prop="nickname" :label="$t('adminUsers.table.nickname')" width="120" show-overflow-tooltip />
-        
+
         <el-table-column prop="phone" :label="$t('adminUsers.table.phone')" width="120" />
-        
+
         <el-table-column :label="$t('adminUsers.table.registerTime')" width="160">
           <template #default="{ row }">
             {{ formatDate(row.createTime) }}
@@ -90,16 +76,11 @@
 
         <el-table-column :label="$t('adminUsers.table.creditScore')" width="100" align="center">
           <template #default="{ row }">
-            <el-rate
-              v-model="row.creditScore"
-              disabled
-              show-score
-              text-color="#ff9900"
-              :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-            />
+            <el-rate v-model="row.creditScore" disabled show-score text-color="#ff9900"
+              :colors="['#99A9BF', '#F7BA2A', '#FF9900']" />
           </template>
         </el-table-column>
-        
+
         <el-table-column :label="$t('adminUsers.table.status')" width="80">
           <template #default="{ row }">
             <el-tag :type="row.status === 'normal' ? 'success' : 'danger'" size="small">
@@ -107,28 +88,17 @@
             </el-tag>
           </template>
         </el-table-column>
-        
+
         <el-table-column :label="$t('adminUsers.table.operation')" width="240" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="handleViewDetail(row)" :icon="View">
               {{ $t('adminUsers.button.detail') }}
             </el-button>
-            <el-button 
-              v-if="row.status === 'normal'"
-              type="danger" 
-              size="small" 
-              @click="handleBan(row)" 
-              :icon="CircleClose"
-            >
+            <el-button v-if="row.status === 'normal'" type="danger" size="small" @click="handleBan(row)"
+              :icon="CircleClose">
               {{ $t('adminUsers.button.ban') }}
             </el-button>
-            <el-button 
-              v-else
-              type="success" 
-              size="small" 
-              @click="handleUnban(row)" 
-              :icon="CircleCheck"
-            >
+            <el-button v-else type="success" size="small" @click="handleUnban(row)" :icon="CircleCheck">
               {{ $t('adminUsers.button.unban') }}
             </el-button>
           </template>
@@ -136,27 +106,19 @@
       </el-table>
 
       <div class="pagination">
-        <el-pagination
-          v-model:current-page="pagination.page"
-          v-model:page-size="pagination.size"
-          :page-sizes="[10, 20, 50, 100]"
-          :total="pagination.total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        />
+        <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+          :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange" @current-change="handleCurrentChange" />
       </div>
     </el-card>
 
-    <el-dialog
-      v-model="detailVisible"
-      :title="$t('adminUsers.dialog.title')"
-      width="600px"
-    >
+    <el-dialog v-model="detailVisible" :title="$t('adminUsers.dialog.title')" width="600px">
       <div class="user-detail" v-if="currentUser">
         <div class="user-header">
           <el-avatar :size="100" :src="formatAvatarUrl(currentUser.avatar)">
-            <el-icon :size="50"><User /></el-icon>
+            <el-icon :size="50">
+              <User />
+            </el-icon>
           </el-avatar>
           <div class="user-name">
             <h3>{{ currentUser.nickname || currentUser.username }}</h3>
@@ -170,13 +132,20 @@
           <h4>{{ $t('adminUsers.detail.basicInfo') }}</h4>
           <el-descriptions :column="2" border>
             <el-descriptions-item :label="$t('adminUsers.detail.userId')">{{ currentUser.id }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.username')">{{ currentUser.username }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.nickname')">{{ currentUser.nickname || '-' }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.phone')">{{ currentUser.phone || '-' }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.email')">{{ currentUser.email || '-' }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.address')">{{ currentUser.address || '-' }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.registerTime')">{{ formatDate(currentUser.createTime) }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('adminUsers.detail.role')">{{ getRoleText(currentUser.role) }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.username')">{{ currentUser.username
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.nickname')">{{ currentUser.nickname || '-'
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.phone')">{{ currentUser.phone || '-'
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.email')">{{ currentUser.email || '-'
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.address')">{{ currentUser.address || '-'
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.registerTime')">{{ formatDate(currentUser.createTime)
+              }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('adminUsers.detail.role')">{{ getRoleText(currentUser.role)
+              }}</el-descriptions-item>
           </el-descriptions>
         </div>
 
@@ -186,7 +155,9 @@
             <el-col :span="12">
               <div class="stat-card">
                 <div class="stat-icon primary">
-                  <el-icon :size="24"><ShoppingBag /></el-icon>
+                  <el-icon :size="24">
+                    <ShoppingBag />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ currentUser.productCount || 0 }}</div>
@@ -197,7 +168,9 @@
             <el-col :span="12">
               <div class="stat-card">
                 <div class="stat-icon success">
-                  <el-icon :size="24"><ShoppingCart /></el-icon>
+                  <el-icon :size="24">
+                    <ShoppingCart />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ currentUser.orderCount || 0 }}</div>
@@ -208,7 +181,9 @@
             <el-col :span="12">
               <div class="stat-card">
                 <div class="stat-icon warning">
-                  <el-icon :size="24"><Star /></el-icon>
+                  <el-icon :size="24">
+                    <Star />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ currentUser.creditScore?.toFixed(1) || '0.0' }}</div>
@@ -219,7 +194,9 @@
             <el-col :span="12">
               <div class="stat-card">
                 <div class="stat-icon danger">
-                  <el-icon :size="24"><ChatDotRound /></el-icon>
+                  <el-icon :size="24">
+                    <ChatDotRound />
+                  </el-icon>
                 </div>
                 <div class="stat-content">
                   <div class="stat-value">{{ currentUser.reviewCount || 0 }}</div>
@@ -237,9 +214,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  Search, 
-  Refresh, 
+import {
+  Search,
+  Refresh,
   User,
   View,
   CircleClose,
@@ -296,7 +273,7 @@ const formatDate = (date) => {
 const getUserList = async () => {
   try {
     loading.value = true
-    
+
     // 构建搜索参数，过滤空值
     const searchParams = {}
     Object.keys(searchForm).forEach(key => {
@@ -304,13 +281,13 @@ const getUserList = async () => {
         searchParams[key] = searchForm[key].trim()
       }
     })
-    
+
     const params = {
       pageNum: pagination.page,
       pageSize: pagination.size,
       ...searchParams
     }
-    
+
     const response = await adminUserApi.getUserList(params)
     if (response.code === '200' || response.success) {
       const records = response.data?.records || response.data?.list || []
@@ -361,7 +338,7 @@ const generateMockUsers = () => {
       reviewCount: Math.floor(Math.random() * 20)
     })
   }
-  
+
   // 应用搜索过滤
   return mockUsers.filter(user => {
     if (searchForm.username && !user.username.includes(searchForm.username)) return false
@@ -399,7 +376,7 @@ const handleCurrentChange = (page) => {
 const handleViewDetail = async (row) => {
   try {
     // 尝试获取用户详细信息
-    currentUser.value = { 
+    currentUser.value = {
       ...row,
       // 确保所有必要字段都有值
       nickname: row.nickname || row.username,
@@ -428,7 +405,7 @@ const handleBan = async (row) => {
         type: 'warning'
       }
     )
-    
+
     try {
       const response = await adminUserApi.banUser(row.id)
       if (response.code === '200' || response.success) {
@@ -461,7 +438,7 @@ const handleUnban = async (row) => {
         type: 'success'
       }
     )
-    
+
     try {
       const response = await adminUserApi.unbanUser(row.id)
       if (response.code === '200' || response.success) {

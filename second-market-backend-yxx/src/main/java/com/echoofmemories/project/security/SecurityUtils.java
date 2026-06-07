@@ -5,10 +5,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.GrantedAuthority;
 
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import javax.servlet.http.HttpServletRequest;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
@@ -41,23 +37,13 @@ public class SecurityUtils {
      * @return 用户ID，如果未认证返回null
      */
     public static Long getCurrentUserId() {
-        // 1. 尝试从 Request 属性中获取 (由 JwtAuthenticationFilter 设置)
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attributes != null) {
-            HttpServletRequest request = attributes.getRequest();
-            Object userIdObj = request.getAttribute("userId");
-            if (userIdObj != null) {
-                try {
-                    return Long.valueOf(userIdObj.toString());
-                } catch (NumberFormatException e) {
-                    // ignore
-                }
-            }
-        }
+        // 开发模式：暂时返回固定用户ID，等服务启动后再优化
+        // TODO: 后续需要从JWT token中获取真实用户ID
+//        return 2L; // 数据库中的普通用户ID（张三）
 
-        // 2. 尝试从 SecurityContext 中获取
-        User user = getCurrentUser();
-        return user != null ? user.getId() : null;
+//         原逻辑（生产环境需要恢复）
+         User user = getCurrentUser();
+         return user != null ? user.getId() : null;
     }
 
     /**

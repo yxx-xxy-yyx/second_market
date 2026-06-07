@@ -12,103 +12,40 @@
             <el-card class="message-list-card" shadow="hover">
               <template #header>
                 <div class="list-header">
-                  <div class="main-tabs">
-                    <div
-                      :class="['main-tab', { active: activeTab === 'notifications' }]"
-                      @click="handleTabChange('notifications')"
-                    >
-                      {{ $t('messages.notifications') }}
-                    </div>
-                    <div
-                      :class="['main-tab', { active: activeTab === 'chats' }]"
-                      @click="handleTabChange('chats')"
-                    >
-                      {{ $t('messages.chats') }}
+                  <div class="filter-tabs">
+                    <div v-for="filter in filterList" :key="filter.value"
+                      :class="['filter-tab', { active: currentFilter === filter.value }]"
+                      @click="handleFilterChange(filter.value)">
+                      {{ filter.label }}
                     </div>
                   </div>
-                  <el-button
-                    v-if="activeTab === 'notifications'"
-                    type="primary"
-                    text
-                    size="small"
-                    @click="handleMarkAllRead"
-                    :disabled="unreadCount === 0"
-                  >
+                  <el-button type="primary" text size="small" @click="handleMarkAllRead" :disabled="unreadCount === 0">
                     {{ $t('messages.markAllRead') }}
                   </el-button>
-                </div>
-                <div class="filter-tabs" v-if="activeTab === 'notifications'">
-                  <div
-                    v-for="filter in filterList"
-                    :key="filter.value"
-                    :class="['filter-tab', { active: currentFilter === filter.value }]"
-                    @click="handleFilterChange(filter.value)"
-                  >
-                    {{ filter.label }}
-                  </div>
                 </div>
               </template>
 
               <div class="message-list" v-loading="loading">
-                <el-empty
-                  v-if="!loading && ((activeTab === 'notifications' && messages.length === 0) || (activeTab === 'chats' && chatList.length === 0))"
-                  :description="$t('common.noData')"
-                />
+                <el-empty v-if="!loading && messages.length === 0" :description="$t('common.noData')" />
 
-                <!-- 通知列表 -->
-                <template v-if="activeTab === 'notifications'">
-                  <div
-                    v-for="message in messages"
-                    :key="message.id"
-                    :class="['message-item', { active: selectedMessage?.id === message.id, unread: !message.isRead }]"
-                    @click="handleMessageClick(message)"
-                  >
-                    <div class="message-icon">
-                      <el-icon :size="24" :color="getMessageColor(message.type)">
-                        <component :is="getMessageIcon(message.type)" />
-                      </el-icon>
-                    </div>
-                    <div class="message-content">
-                      <div class="message-title">{{ message.displayTitle }}</div>
-                      <div class="message-time">{{ formatTime(message.createTime) }}</div>
-                    </div>
-                    <div class="unread-badge" v-if="!message.isRead"></div>
+                <div v-for="message in messages" :key="message.id"
+                  :class="['message-item', { active: selectedMessage?.id === message.id, unread: !message.isRead }]"
+                  @click="handleMessageClick(message)">
+                  <div class="message-icon">
+                    <el-icon :size="24" :color="getMessageColor(message.type)">
+                      <component :is="getMessageIcon(message.type)" />
+                    </el-icon>
                   </div>
-                </template>
-
-                <!-- 私聊列表 -->
-                <template v-else>
-                  <div
-                    v-for="chat in chatList"
-                    :key="chat.targetUserId"
-                    :class="['message-item', 'chat-item', { active: chatTarget.userId === chat.targetUserId }]"
-                    @click="handleChatClick(chat)"
-                  >
-                    <div class="chat-avatar">
-                      <el-avatar :size="40" :src="formatAvatar(chat.targetUserAvatar)">
-                        <el-icon><User /></el-icon>
-                      </el-avatar>
-                      <div class="unread-dot" v-if="chat.unreadCount > 0">{{ chat.unreadCount }}</div>
-                    </div>
-                    <div class="message-content">
-                      <div class="message-title-row">
-                        <span class="message-title">{{ chat.targetUserNickname }}</span>
-                        <span class="message-time">{{ formatTime(chat.lastTime) }}</span>
-                      </div>
-                      <div class="message-preview">{{ chat.lastContent }}</div>
-                    </div>
+                  <div class="message-content">
+                    <div class="message-title">{{ message.displayTitle }}</div>
+                    <div class="message-time">{{ formatTime(message.createTime) }}</div>
                   </div>
-                </template>
+                  <div class="unread-badge" v-if="!message.isRead"></div>
+                </div>
 
-                <div class="pagination-wrapper" v-if="activeTab === 'notifications' && total > pageSize">
-                  <el-pagination
-                    v-model:current-page="pageNum"
-                    :page-size="pageSize"
-                    :total="total"
-                    layout="prev, pager, next"
-                    small
-                    @current-change="handlePageChange"
-                  />
+                <div class="pagination-wrapper" v-if="total > pageSize">
+                  <el-pagination v-model:current-page="pageNum" :page-size="pageSize" :total="total"
+                    layout="prev, pager, next" small @current-change="handlePageChange" />
                 </div>
               </div>
             </el-card>
@@ -120,9 +57,14 @@
               <template #header>
                 <div class="detail-header">
                   <div class="header-left">
-                    <el-icon v-if="isChatMode"><ChatDotRound /></el-icon>
-                    <el-icon v-else><Bell /></el-icon>
-                    <span>{{ isChatMode ? $t('messages.chattingWith', { username: chatTarget.username }) : $t('messages.messageDetail') }}</span>
+                    <el-icon v-if="isChatMode">
+                      <ChatDotRound />
+                    </el-icon>
+                    <el-icon v-else>
+                      <Bell />
+                    </el-icon>
+                    <span>{{ isChatMode ? $t('messages.chattingWith', { username: chatTarget.username }) :
+                      $t('messages.messageDetail') }}</span>
                   </div>
                   <div class="header-actions" v-if="selectedMessage && !isChatMode">
                     <el-tag :type="getMessageTypeTag(selectedMessage.type)" size="small">
@@ -139,8 +81,10 @@
                   <div v-if="chatMessages.length === 0" class="empty-chat">
                     {{ $t('messages.startChat') }}
                   </div>
-                  <div v-for="(msg, index) in chatMessages" :key="index" :class="['chat-msg-item', String(msg.fromId) === String(userStore.user?.id) ? 'sent' : 'received']">
-                    <el-avatar :size="32" :src="String(msg.fromId) === String(userStore.user?.id) ? formatAvatar(userStore.user?.avatar) : formatAvatar(chatTarget.avatar)" />
+                  <div v-for="(msg, index) in chatMessages" :key="index"
+                    :class="['chat-msg-item', msg.fromId === userStore.user.id ? 'sent' : 'received']">
+                    <el-avatar :size="32"
+                      :src="msg.fromId === userStore.user.id ? formatAvatar(userStore.user.avatar) : formatAvatar(chatTarget.avatar)" />
                     <div class="chat-msg-content">
                       <div class="chat-msg-bubble">{{ msg.content }}</div>
                       <div class="chat-msg-time">{{ formatTime(msg.createTime) }}</div>
@@ -148,14 +92,8 @@
                   </div>
                 </div>
                 <div class="chat-input-box">
-                  <el-input
-                    v-model="chatInput"
-                    type="textarea"
-                    :rows="3"
-                    :placeholder="$t('messages.inputMessage')"
-                    resize="none"
-                    @keydown.enter.prevent="handleSendChat"
-                  />
+                  <el-input v-model="chatInput" type="textarea" :rows="3" :placeholder="$t('messages.inputMessage')"
+                    resize="none" @keydown.enter.prevent="handleSendChat" />
                   <div class="chat-actions">
                     <el-button type="primary" :loading="sending" @click="handleSendChat">
                       {{ $t('messages.send') }}
@@ -170,41 +108,45 @@
                   <div class="detail-title-section">
                     <h3 class="detail-title">{{ selectedMessage.displayTitle }}</h3>
                     <div class="detail-meta">
-                      <el-icon><Clock /></el-icon>
+                      <el-icon>
+                        <Clock />
+                      </el-icon>
                       <span>{{ formatTime(selectedMessage.createTime) }}</span>
                     </div>
                   </div>
-                  
+
                   <el-divider />
-                  
+
                   <div class="detail-content-wrapper">
                     <div class="content-label">{{ $t('messages.messageContent') }}</div>
                     <div class="detail-content" v-html="selectedMessage.displayContent"></div>
                   </div>
 
                   <el-divider />
-                  
+
                   <div class="detail-actions">
-                    <el-button v-if="selectedMessage.link" type="primary" size="small" @click="openLink(selectedMessage.link)">{{ $t('common.viewDetail') }}</el-button>
-                    <el-button type="primary" plain size="small" @click="handleMarkRead(selectedMessage.id)" v-if="!selectedMessage.isRead">
-                      <el-icon><CircleCheck /></el-icon>
+                    <el-button type="primary" plain size="small" @click="handleMarkRead(selectedMessage.id)"
+                      v-if="!selectedMessage.isRead">
+                      <el-icon>
+                        <CircleCheck />
+                      </el-icon>
                       {{ $t('messages.markAsRead') }}
                     </el-button>
                     <el-button type="danger" text size="small" @click="handleDeleteMessage(selectedMessage.id)">
-                      <el-icon><Delete /></el-icon>
+                      <el-icon>
+                        <Delete />
+                      </el-icon>
                       {{ $t('messages.deleteMessage') }}
                     </el-button>
                   </div>
                 </el-card>
               </div>
 
-              <el-empty
-                v-else
-                :description="$t('messages.selectMessageToView')"
-                :image-size="120"
-              >
+              <el-empty v-else :description="$t('messages.selectMessageToView')" :image-size="120">
                 <template #image>
-                  <el-icon :size="80" color="#909399"><ChatDotRound /></el-icon>
+                  <el-icon :size="80" color="#909399">
+                    <ChatDotRound />
+                  </el-icon>
                 </template>
               </el-empty>
             </el-card>
@@ -217,7 +159,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, nextTick } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -231,11 +173,9 @@ import {
   ChatDotRound
 } from '@element-plus/icons-vue'
 import { messageApi } from '@/api/message'
-import { chatApi } from '@/api/chat'
 import { formatAvatarUrl } from '@/utils/url'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 const { t, locale } = useI18n()
 
@@ -248,11 +188,9 @@ const pageNum = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const unreadCount = ref(0)
-const activeTab = ref('notifications') // 'notifications' | 'chats'
 
 // 私聊相关
 const isChatMode = ref(false)
-const chatList = ref([])
 const chatTarget = ref({
   userId: null,
   username: '',
@@ -261,31 +199,12 @@ const chatTarget = ref({
 const chatMessages = ref([])
 const chatInput = ref('')
 const chatBox = ref(null)
-let pollingInterval = null
 
-const filterList = computed(() => {
-  if (activeTab.value === 'notifications') {
-    return [
-      { label: t('common.all'), value: null },
-      { label: t('messages.unread'), value: 0 },
-      { label: t('messages.read'), value: 1 }
-    ]
-  } else {
-    return []
-  }
-})
-
-const handleTabChange = (tab) => {
-  activeTab.value = tab
-  selectedMessage.value = null
-  isChatMode.value = false
-  if (tab === 'notifications') {
-    pageNum.value = 1
-    loadMessages()
-  } else {
-    loadChatList()
-  }
-}
+const filterList = computed(() => [
+  { label: t('common.all'), value: null },
+  { label: t('messages.unread'), value: 0 },
+  { label: t('messages.read'), value: 1 }
+])
 
 const escapeHtml = (value) => {
   if (value === null || value === undefined) return ''
@@ -318,25 +237,12 @@ const toSafeHtml = (text) => {
   return escapeHtml(text).replace(/\n/g, '<br/>')
 }
 
-const extractRouteLink = (text) => {
-  if (!text) return ''
-  const str = String(text)
-  const m = str.match(/(\/user\/[A-Za-z0-9/_-]+)/)
-  return m?.[1] || ''
-}
-
-const openLink = (path) => {
-  if (!path) return
-  router.push(path)
-}
-
 const localizeMessage = (msg) => {
   const rawTitle = msg?.title || ''
   const rawContent = msg?.content || ''
 
   let displayTitle = rawTitle
   let displayContent = rawContent
-  const link = extractRouteLink(rawContent)
 
   if (rawTitle === '订单支付成功') {
     displayTitle = t('messages.templates.orderPaidTitle')
@@ -367,119 +273,40 @@ const localizeMessage = (msg) => {
         : t('messages.templates.newReviewContentGeneric')
     )
   } else {
-    displayContent = toSafeHtml(rawContent)
+    displayContent = rawContent
   }
 
   return {
     ...msg,
     displayTitle,
-    displayContent,
-    link
+    displayContent
   }
 }
 
 // 初始化
 onMounted(async () => {
+  await loadMessages()
+
   // 检查是否有跳转参数
-  const { userId, username, avatar, tab } = route.query
-  if (tab === 'chats' || userId) {
-    activeTab.value = 'chats'
-    await loadChatList()
-    if (userId) {
-      isChatMode.value = true
-      chatTarget.value = { userId: Number(userId), username, avatar }
-      await fetchChatHistory(userId)
-      startPolling()
-    }
-  } else {
-    await loadMessages()
+  const { userId, username, avatar } = route.query
+  if (userId) {
+    isChatMode.value = true
+    chatTarget.value = { userId: Number(userId), username, avatar }
+    await fetchChatMessages(userId)
   }
 })
 
-onUnmounted(() => {
-  stopPolling()
-})
+// 获取私聊消息 (模拟从消息列表中筛选或后端获取)
+const fetchChatMessages = async (userId) => {
+  // 实际项目中应该调用接口获取与特定用户的对话
+  // 这里暂时从已加载的消息中筛选类型为私聊的(如果有的话)
+  chatMessages.value = messages.value.filter(m =>
+    (m.fromId === Number(userId) && m.toId === userStore.user.id) ||
+    (m.fromId === userStore.user.id && m.toId === Number(userId))
+  ).sort((a, b) => new Date(a.createTime) - new Date(b.createTime))
 
-const startPolling = () => {
-  stopPolling()
-  pollingInterval = setInterval(() => {
-    if (isChatMode.value && chatTarget.value.userId) {
-      fetchChatHistory(chatTarget.value.userId, true)
-    }
-  }, 3000)
-}
-
-const stopPolling = () => {
-  if (pollingInterval) {
-    clearInterval(pollingInterval)
-    pollingInterval = null
-  }
-}
-
-// 获取私聊消息列表
-const loadChatList = async () => {
-  loading.value = true
-  try {
-    const res = await chatApi.getChatList()
-    if (res.code === '200') {
-      chatList.value = res.data || []
-    }
-  } catch (error) {
-    ElMessage.error(t('messages.getMessagesFailed'))
-  } finally {
-    loading.value = false
-  }
-}
-
-// 获取与特定用户的聊天记录
-const fetchChatHistory = async (userId, isPolling = false) => {
-  try {
-    const res = await chatApi.getChatHistory(userId)
-    if (res.code === '200' || res.success) {
-      const newMessages = (res.data || []).map(m => ({
-        ...m,
-        fromId: m.senderId
-      }))
-      
-      // 只有当消息内容发生变化（如新消息增加）时才更新
-      // 检查最后一条消息的内容和时间是否一致，或者长度增加
-      const hasNewMessages = newMessages.length > chatMessages.value.length
-      const lastMsgChanged = newMessages.length > 0 && chatMessages.value.length > 0 && 
-                            (newMessages[newMessages.length - 1].id !== chatMessages.value[chatMessages.value.length - 1].id)
-
-      if (hasNewMessages || lastMsgChanged || (chatMessages.value.length === 0 && newMessages.length > 0)) {
-        chatMessages.value = newMessages
-        await nextTick()
-        scrollToBottom()
-      }
-    }
-  } catch (error) {
-    console.error('获取聊天记录失败:', error)
-  }
-}
-
-const handleChatClick = async (chat) => {
-  isChatMode.value = true
-  chatTarget.value = {
-    userId: chat.targetUserId,
-    username: chat.targetUserNickname,
-    avatar: chat.targetUserAvatar
-  }
-  chatMessages.value = [] // 切换时先清空，避免看到旧消息
-  await fetchChatHistory(chat.targetUserId)
-  if (chat.unreadCount > 0) {
-    await markChatRead(chat.targetUserId)
-    chat.unreadCount = 0
-  }
-  startPolling()
-}
-
-const markChatRead = async (senderId) => {
-  try {
-    await chatApi.markAsRead(senderId)
-  } catch (error) {
-    console.error('标记聊天已读失败:', error)
-  }
+  await nextTick()
+  scrollToBottom()
 }
 
 const scrollToBottom = () => {
@@ -490,20 +317,25 @@ const scrollToBottom = () => {
 
 const handleSendChat = async () => {
   if (!chatInput.value.trim() || sending.value) return
-  
-  const content = chatInput.value
+
   sending.value = true
   try {
-    const res = await chatApi.sendMessage({
-      receiverId: chatTarget.value.userId,
-      content: content,
-      msgType: 0 // 0: 文本
+    const res = await messageApi.sendMessage({
+      toUserId: chatTarget.value.userId,
+      title: t('messages.privateChatTitle'),
+      content: chatInput.value,
+      type: 1 // 系统类型或新增私聊类型
     })
-    
-    if (res.code === '200' || res.success) {
+
+    if (res.code === '200') {
+      chatMessages.value.push({
+        fromId: userStore.user.id,
+        content: chatInput.value,
+        createTime: new Date().toISOString()
+      })
       chatInput.value = ''
-      // 发送成功后立即获取最新记录，而不是手动推送到数组，避免 id 缺失
-      await fetchChatHistory(chatTarget.value.userId)
+      await nextTick()
+      scrollToBottom()
     }
   } catch (error) {
     ElMessage.error(t('messages.sendFailed'))
@@ -520,10 +352,7 @@ const getMessageIcon = (type) => {
   const iconMap = {
     1: Bell,
     2: ShoppingCart,
-    3: Star,
-    101: ChatDotRound,
-    102: Star,
-    103: Bell
+    3: Star
   }
   return iconMap[type] || Bell
 }
@@ -532,10 +361,7 @@ const getMessageColor = (type) => {
   const colorMap = {
     1: '#409eff',
     2: '#67c23a',
-    3: '#e6a23c',
-    101: '#36B3C2',
-    102: '#36B3C2',
-    103: '#36B3C2'
+    3: '#e6a23c'
   }
   return colorMap[type] || '#909399'
 }
@@ -544,10 +370,7 @@ const getMessageTypeTag = (type) => {
   const tags = {
     1: 'primary',
     2: 'success',
-    3: 'warning',
-    101: 'info',
-    102: 'info',
-    103: 'info'
+    3: 'warning'
   }
   return tags[type] || 'info'
 }
@@ -556,10 +379,7 @@ const getMessageTypeLabel = (type) => {
   const labels = {
     1: t('messages.systemNotification'),
     2: t('messages.orderMessage'),
-    3: t('messages.platformAnnouncement'),
-    101: '论坛评论',
-    102: '论坛点赞',
-    103: '@提及'
+    3: t('messages.platformAnnouncement')
   }
   return labels[type] || t('messages.other')
 }
@@ -567,7 +387,7 @@ const getMessageTypeLabel = (type) => {
 const handleMarkRead = async (id) => {
   try {
     const res = await messageApi.markAsRead(id)
-    if (res.code === '200' || res.success) {
+    if (res.code === '200') {
       ElMessage.success(t('messages.markedAsRead'))
       if (selectedMessage.value?.id === id) {
         selectedMessage.value.isRead = true
@@ -583,15 +403,15 @@ const handleMarkRead = async (id) => {
 const handleDeleteMessage = async (id) => {
   try {
     await ElMessageBox.confirm(
-      t('messages.confirmDeleteMessage'), 
-      t('messages.confirmDelete'), 
+      t('messages.confirmDeleteMessage'),
+      t('messages.confirmDelete'),
       {
         confirmButtonText: t('common.confirm'),
         cancelButtonText: t('common.cancel'),
         type: 'warning'
       }
     )
-    
+
     await messageApi.deleteMessage(id)
     ElMessage.success(t('messages.deleteSuccess'))
     selectedMessage.value = null
@@ -642,7 +462,7 @@ const loadMessages = async () => {
 
     const res = await messageApi.getMyMessages(params)
 
-    if (res.code === '200' || res.success) {
+    if (res.code === '200') {
       messages.value = (res.data.records || []).map(localizeMessage)
       total.value = res.data.total || 0
 
@@ -666,16 +486,10 @@ const loadMessages = async () => {
 
 const loadUnreadCount = async () => {
   try {
-    const [msgRes, chatRes] = await Promise.all([
-      messageApi.getUnreadCount(),
-      chatApi.getUnreadCount()
-    ])
-    
-    let total = 0
-    if (msgRes.code === '200' || msgRes.success) total += (msgRes.data || 0)
-    if (chatRes.code === '200' || chatRes.success) total += (chatRes.data || 0)
-    
-    unreadCount.value = total
+    const res = await messageApi.getUnreadCount()
+    if (res.code === '200') {
+      unreadCount.value = res.data || 0
+    }
   } catch (error) {
     console.error('获取未读数量失败:', error)
   }
@@ -726,7 +540,7 @@ const handleMarkAllRead = async () => {
 
     const res = await messageApi.markAllAsRead()
 
-    if (res.code === '200' || res.success) {
+    if (res.code === '200') {
       ElMessage.success(t('messages.markAllReadSuccess'))
       messages.value.forEach(msg => {
         msg.isRead = true
@@ -792,38 +606,13 @@ watch(locale, () => {
 
 .list-header {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.main-tabs {
-  display: flex;
-  background: #f4f4f5;
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.main-tab {
-  flex: 1;
-  text-align: center;
-  padding: 6px 0;
-  cursor: pointer;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #606266;
-  transition: all 0.3s;
-}
-
-.main-tab.active {
-  background: #fff;
-  color: #409eff;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  justify-content: space-between;
+  align-items: center;
 }
 
 .filter-tabs {
   display: flex;
-  gap: 15px;
+  gap: 8px;
 }
 
 .filter-tab {
@@ -860,45 +649,6 @@ watch(locale, () => {
   position: relative;
   border: 2px solid transparent;
   margin-bottom: 8px;
-}
-
-.chat-item {
-  align-items: center;
-  gap: 12px;
-}
-
-.chat-avatar {
-  position: relative;
-}
-
-.unread-dot {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: #f56c6c;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 10px;
-  border: 2px solid #fff;
-  min-width: 18px;
-  text-align: center;
-}
-
-.message-title-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
-
-.message-preview {
-  font-size: 13px;
-  color: #909399;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
 }
 
 .message-item:hover {
@@ -1079,6 +829,7 @@ watch(locale, () => {
   transform: translateX(4px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
+
 .chat-container {
   display: flex;
   flex-direction: column;

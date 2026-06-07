@@ -43,11 +43,5 @@ public class School implements Serializable {
 
     private Integer deleted;
 
-    @TableField(exist = false)
-    private String name;
-
-    @TableField(exist = false)
-    private String city;
-
     private static final long serialVersionUID = 1L;
 }

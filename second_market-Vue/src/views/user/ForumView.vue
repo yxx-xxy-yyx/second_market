@@ -85,6 +85,7 @@
         v-model:loading="loading"
         :finished="finished"
         :finished-text="forumPosts.length > 0 ? '没有更多帖子了' : ''"
+        :immediate-check="false"
         @load="onLoad"
         class="px-4 pb-24 pt-2"
       >
@@ -103,7 +104,7 @@
           <div 
             v-for="post in leftColumnPosts" 
             :key="post.id" 
-            @click.stop="goDetail(post.id)"
+            @click.stop="goDetail(post)"
             class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-50 active:scale-[0.98] transition-all cursor-pointer"
           >
             <!-- Post Image -->
@@ -140,7 +141,7 @@
           <div 
             v-for="post in rightColumnPosts" 
             :key="post.id" 
-            @click.stop="goDetail(post.id)"
+            @click.stop="goDetail(post)"
             class="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-50 active:scale-[0.98] transition-all cursor-pointer"
           >
             <!-- Post Image -->
@@ -223,7 +224,7 @@
                       <img v-if="school.logoUrl" :src="school.logoUrl" class="w-full h-full object-contain" />
                       <el-icon v-else class="text-gray-300 text-xl"><Location /></el-icon>
                     </div>
-                    <span class="text-gray-800 text-base font-bold" :class="{ 'text-primary': schoolStore.selectedSchool === String(school.id) }">{{ school.name_zh || school.name }}</span>
+                    <span class="text-gray-800 text-base font-bold" :class="{ 'text-primary': schoolStore.selectedSchool === String(school.id) }">{{ school.label }}</span>
                   </div>
                   <div v-if="schoolStore.selectedSchool === String(school.id)" class="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                     <el-icon class="text-white text-xs"><Check /></el-icon>
@@ -261,6 +262,8 @@ import { schoolApi } from '@/api/school'
 import { formatAvatarUrl, formatImageUrl } from '@/utils/url'
 import { useSchoolStore } from '@/stores/school'
 import { useUserStore } from '@/stores/user'
+import { useContentHistoryStore } from '@/stores/contentHistory'
+import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import 'dayjs/locale/zh-cn'
@@ -271,6 +274,7 @@ dayjs.locale('zh-cn')
 const router = useRouter()
 const schoolStore = useSchoolStore()
 const userStore = useUserStore()
+const contentHistory = useContentHistoryStore()
 
 const forumScope = ref('all') // 'all' or 'school'
 const categories = ['全部', '二手专区', '校园闲聊', '跑腿互助']
@@ -283,7 +287,7 @@ const rightColumnPosts = computed(() => forumPosts.value.filter((_, i) => i % 2 
 const loading = ref(false)
 const finished = ref(false)
 const refreshing = ref(false)
-const currentPage = ref(0)
+const currentPage = ref(1)
 const pageSize = 10
 
 // School Picker State
@@ -302,8 +306,12 @@ const filteredSchools = computed(() => {
   if (!schoolSearchKeyword.value) return schools.value
   const kw = schoolSearchKeyword.value.toLowerCase()
   return schools.value.filter(s => 
+    (s.label && s.label.toLowerCase().includes(kw)) ||
     (s.name && s.name.toLowerCase().includes(kw)) ||
-    (s.name_zh && s.name_zh.toLowerCase().includes(kw))
+    (s.nameZh && s.nameZh.toLowerCase().includes(kw)) ||
+    (s.name_zh && s.name_zh.toLowerCase().includes(kw)) ||
+    (s.nameKo && s.nameKo.toLowerCase().includes(kw)) ||
+    (s.nameEn && s.nameEn.toLowerCase().includes(kw))
   )
 })
 
@@ -313,7 +321,10 @@ const openSchoolPicker = async () => {
     try {
       const res = await schoolApi.getList()
       if (res.code == 200 || res.success) {
-        schools.value = res.data
+        schools.value = (res.data || []).map(item => ({
+          ...item,
+          label: schoolStore.getLocalizedSchoolName(item) || 'Unknown School'
+        }))
       }
     } catch (e) {
       console.error(e)
@@ -331,6 +342,10 @@ onMounted(() => {
   if (!schoolStore.selectedSchool && userStore.user?.schoolId) {
     schoolStore.setSchool(String(userStore.user.schoolId))
   }
+  if (!schoolStore.schoolList.length) {
+    schoolStore.getSchoolList()
+  }
+  onRefresh()
 })
 
 const formatTime = (time) => {
@@ -356,12 +371,13 @@ const fetchPosts = async (isRefresh = false) => {
 
     const res = await forumApi.getList(params)
     if (res.code == 200 || res.success) {
-      const { records, current, pages } = res.data
+      const { records = [], current = page, pages = 0 } = res.data || {}
       
       // 处理图片JSON
       const processedRecords = records.map(post => {
         try {
-          post.imagesList = post.images ? JSON.parse(post.images) : []
+          const parsedImages = typeof post.images === 'string' ? JSON.parse(post.images) : post.images
+          post.imagesList = Array.isArray(parsedImages) ? parsedImages : []
         } catch (e) {
           post.imagesList = []
         }
@@ -379,10 +395,20 @@ const fetchPosts = async (isRefresh = false) => {
       if (current >= pages) {
         finished.value = true
       }
+    } else {
+      if (isRefresh) {
+        forumPosts.value = []
+      }
+      finished.value = true
+      ElMessage.error(res.message || '帖子加载失败')
     }
   } catch (e) {
     console.error(e)
     finished.value = true
+    if (isRefresh) {
+      forumPosts.value = []
+    }
+    ElMessage.error('帖子加载失败')
   } finally {
     loading.value = false
     refreshing.value = false
@@ -396,6 +422,7 @@ const onLoad = () => {
 const onRefresh = () => {
   refreshing.value = true
   finished.value = false
+  currentPage.value = 1
   fetchPosts(true)
 }
 
@@ -409,8 +436,10 @@ watch([forumScope, activeCategory, () => schoolStore.selectedSchool], () => {
 })
 watch(sortBy, () => onRefresh())
 
-const goDetail = (id) => {
-  router.push({ name: 'user-forum-detail', params: { id } })
+const goDetail = (post) => {
+  if (!post?.id) return
+  contentHistory.recordPost(post)
+  router.push({ name: 'user-forum-detail', params: { id: post.id } })
 }
 
 const goPublish = () => {

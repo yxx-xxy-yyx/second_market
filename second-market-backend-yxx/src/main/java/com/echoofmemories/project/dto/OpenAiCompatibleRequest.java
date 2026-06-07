@@ -140,4 +140,27 @@ public class OpenAiCompatibleRequest {
                 .stream(false)
                 .build();
     }
+
+    public static OpenAiCompatibleRequest createSystemMessagesRequest(String model,
+            String systemMessage,
+            List<Message> conversation,
+            Integer maxTokens,
+            Double temperature) {
+        List<Message> messages = new ArrayList<>();
+        messages.add(Message.builder()
+                .role("system")
+                .content(systemMessage)
+                .build());
+        if (conversation != null) {
+            messages.addAll(conversation);
+        }
+
+        return OpenAiCompatibleRequest.builder()
+                .model(model)
+                .messages(messages)
+                .maxTokens(maxTokens)
+                .temperature(temperature)
+                .stream(false)
+                .build();
+    }
 }

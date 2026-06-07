@@ -5,7 +5,7 @@
     </div>
 
     <el-row :gutter="20">
-      <!-- 宸︿晶涓诲唴瀹瑰尯 70% -->
+      <!-- 左侧主内容区 70% -->
       <el-col :xs="24" :sm="24" :md="17" :lg="17">
         <el-card class="filter-card" shadow="hover">
           <div class="status-filter">
@@ -19,14 +19,9 @@
         </el-card>
 
         <el-card class="table-card" shadow="hover" style="margin-top: 20px;">
-          <el-table
-            v-loading="loading"
-            :data="reportList"
-            stripe
-            style="width: 100%"
-          >
+          <el-table v-loading="loading" :data="reportList" stripe style="width: 100%">
             <el-table-column prop="id" :label="$t('ReportManage.id')" width="80" />
-            
+
             <el-table-column :label="$t('ReportManage.reportType')" width="120">
               <template #default="{ row }">
                 <div class="type-cell">
@@ -41,12 +36,8 @@
             <el-table-column :label="$t('ReportManage.target')" width="200" show-overflow-tooltip>
               <template #default="{ row }">
                 <div class="target-cell">
-                  <img 
-                    v-if="row.type === 'product' && row.targetImage" 
-                    :src="row.targetImage" 
-                    class="target-image"
-                    @error="handleImageError"
-                  />
+                  <img v-if="row.type === 'product' && row.targetImage" :src="row.targetImage" class="target-image"
+                    @error="handleImageError" />
                   <div class="target-info">
                     <div class="target-name">{{ row.targetName }}</div>
                     <div class="target-desc" v-if="row.targetDesc">{{ row.targetDesc }}</div>
@@ -86,22 +77,12 @@
                 <el-button type="primary" size="small" @click="handleViewDetail(row)" :icon="View">
                   {{ $t('ReportManage.detail') }}
                 </el-button>
-                <el-button 
-                  v-if="row.status === 'pending'"
-                  type="success" 
-                  size="small" 
-                  @click="handleProcess(row)" 
-                  :icon="Select"
-                >
+                <el-button v-if="row.status === 'pending'" type="success" size="small" @click="handleProcess(row)"
+                  :icon="Select">
                   {{ $t('ReportManage.process') }}
                 </el-button>
-                <el-button 
-                  v-if="row.status === 'pending'"
-                  type="warning" 
-                  size="small" 
-                  @click="handleReject(row)" 
-                  :icon="Close"
-                >
+                <el-button v-if="row.status === 'pending'" type="warning" size="small" @click="handleReject(row)"
+                  :icon="Close">
                   {{ $t('ReportManage.reject') }}
                 </el-button>
               </template>
@@ -109,27 +90,23 @@
           </el-table>
 
           <div class="pagination">
-            <el-pagination
-              v-model:current-page="pagination.page"
-              v-model:page-size="pagination.size"
-              :page-sizes="[10, 20, 50, 100]"
-              :total="pagination.total"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
+            <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.size"
+              :page-sizes="[10, 20, 50, 100]" :total="pagination.total" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange" @current-change="handleCurrentChange" />
           </div>
         </el-card>
       </el-col>
 
-      <!-- 鍙充晶缁熻鍗＄墖鍖?30% -->
+      <!-- 右侧统计卡片区 30% -->
       <el-col :xs="24" :sm="24" :md="7" :lg="7">
         <div class="stats-sidebar">
-          <!-- 涓炬姤缁熻鍗＄墖 -->
+          <!-- 举报统计卡片 -->
           <el-card class="stat-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <el-icon><TrendCharts /></el-icon>
+                <el-icon>
+                  <TrendCharts />
+                </el-icon>
                 <span>{{ $t('ReportManage.statistics') }}</span>
               </div>
             </template>
@@ -154,17 +131,21 @@
             </div>
           </el-card>
 
-          <!-- 涓炬姤绫诲瀷鍒嗗竷 -->
+          <!-- 举报类型分布 -->
           <el-card class="type-card" shadow="hover" style="margin-top: 20px;">
             <template #header>
               <div class="card-header">
-                <el-icon><PieChart /></el-icon>
+                <el-icon>
+                  <PieChart />
+                </el-icon>
                 <span>{{ $t('ReportManage.typeDistribution') }}</span>
               </div>
             </template>
             <div class="type-stats">
               <div class="type-item">
-                <el-icon :size="24" color="#409eff"><ShoppingBag /></el-icon>
+                <el-icon :size="24" color="#409eff">
+                  <ShoppingBag />
+                </el-icon>
                 <div class="type-info">
                   <div class="type-label">{{ $t('ReportManage.productReport') }}</div>
                   <div class="type-value">{{ stats.productReports || 0 }}</div>
@@ -172,7 +153,9 @@
               </div>
               <el-divider />
               <div class="type-item">
-                <el-icon :size="24" color="#f56c6c"><User /></el-icon>
+                <el-icon :size="24" color="#f56c6c">
+                  <User />
+                </el-icon>
                 <div class="type-info">
                   <div class="type-label">{{ $t('ReportManage.userReport') }}</div>
                   <div class="type-value">{{ stats.userReports || 0 }}</div>
@@ -181,24 +164,34 @@
             </div>
           </el-card>
 
-          <!-- 蹇€熸搷浣滃崱鐗?-->
+          <!-- 快速操作卡片 -->
           <el-card class="quick-actions-card" shadow="hover" style="margin-top: 20px;">
             <template #header>
               <div class="card-header">
-                <el-icon><Operation /></el-icon>
+                <el-icon>
+                  <Operation />
+                </el-icon>
                 <span>{{ $t('ReportManage.quickActions') }}</span>
               </div>
             </template>
-            <el-button type="primary" plain style="width: 100%; margin-bottom: 12px;" @click="statusFilter = 'pending'; handleStatusChange()">
-              <el-icon><Warning /></el-icon>
+            <el-button type="primary" plain style="width: 100%; margin-bottom: 12px;"
+              @click="statusFilter = 'pending'; handleStatusChange()">
+              <el-icon>
+                <Warning />
+              </el-icon>
               {{ $t('ReportManage.quick.viewPending') }}
             </el-button>
-            <el-button type="success" plain style="width: 100%; margin-bottom: 12px;" @click="statusFilter = 'handled'; handleStatusChange()">
-              <el-icon><CircleCheck /></el-icon>
+            <el-button type="success" plain style="width: 100%; margin-bottom: 12px;"
+              @click="statusFilter = 'handled'; handleStatusChange()">
+              <el-icon>
+                <CircleCheck />
+              </el-icon>
               {{ $t('ReportManage.quick.viewHandled') }}
             </el-button>
             <el-button plain style="width: 100%;" @click="statusFilter = ''; handleStatusChange()">
-              <el-icon><Refresh /></el-icon>
+              <el-icon>
+                <Refresh />
+              </el-icon>
               {{ $t('ReportManage.quick.refresh') }}
             </el-button>
           </el-card>
@@ -206,12 +199,8 @@
       </el-col>
     </el-row>
 
-    <!-- 涓炬姤璇︽儏瀵硅瘽妗?-->
-    <el-dialog
-      v-model="detailVisible"
-      :title="$t('ReportManage.detailTitle')"
-      width="700px"
-    >
+    <!-- 举报详情对话框 -->
+    <el-dialog v-model="detailVisible" :title="$t('ReportManage.detailTitle')" width="700px">
       <div class="report-detail" v-if="currentReport">
         <div class="detail-section">
           <h4>{{ $t('ReportManage.detailInfo') }}</h4>
@@ -222,8 +211,10 @@
                 {{ $t(getTypeTextKey(currentReport.type)) }}
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item :label="$t('ReportManage.reporter')">{{ currentReport.reporterName }}</el-descriptions-item>
-            <el-descriptions-item :label="$t('ReportManage.reportTime')">{{ formatDate(currentReport.createTime) }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('ReportManage.reporter')">{{ currentReport.reporterName
+            }}</el-descriptions-item>
+            <el-descriptions-item :label="$t('ReportManage.reportTime')">{{ formatDate(currentReport.createTime)
+            }}</el-descriptions-item>
             <el-descriptions-item :label="$t('ReportManage.status')" :span="2">
               <el-tag :type="getStatusType(currentReport.status)" size="small">
                 {{ $t(getStatusTextKey(currentReport.status)) }}
@@ -240,14 +231,10 @@
           <el-card class="target-card">
             <div class="target-info">
               <div class="target-image-container">
-                <!-- 鍟嗗搧涓炬姤鏄剧ず鍟嗗搧鍥剧墖 -->
-                <el-image 
-                  v-if="currentReport.type === 'product' && currentReport.targetImage"
-                  :src="formatTargetImage(currentReport.targetImage)"
-                  fit="cover"
-                  class="target-image"
-                  :preview-src-list="[formatTargetImage(currentReport.targetImage)]"
-                >
+                <!-- 商品举报显示商品图片 -->
+                <el-image v-if="currentReport.type === 'product' && currentReport.targetImage"
+                  :src="formatTargetImage(currentReport.targetImage)" fit="cover" class="target-image"
+                  :preview-src-list="[formatTargetImage(currentReport.targetImage)]">
                   <template #error>
                     <div class="target-icon">
                       <el-icon :size="32" color="#409eff">
@@ -256,18 +243,14 @@
                     </div>
                   </template>
                 </el-image>
-                <!-- 鐢ㄦ埛涓炬姤鏄剧ず鐢ㄦ埛澶村儚 -->
-                <el-avatar 
-                  v-else-if="currentReport.type === 'user' && currentReport.targetAvatar"
-                  :src="formatTargetImage(currentReport.targetAvatar)"
-                  :size="60"
-                  class="target-avatar"
-                >
+                <!-- 用户举报显示用户头像 -->
+                <el-avatar v-else-if="currentReport.type === 'user' && currentReport.targetAvatar"
+                  :src="formatTargetImage(currentReport.targetAvatar)" :size="60" class="target-avatar">
                   <el-icon :size="24" color="#f56c6c">
                     <User />
                   </el-icon>
                 </el-avatar>
-                <!-- 榛樿鍥炬爣鍗犱綅 -->
+                <!-- 默认图标占位 -->
                 <div v-else class="target-icon">
                   <el-icon :size="32" :color="currentReport.type === 'product' ? '#409eff' : '#f56c6c'">
                     <component :is="currentReport.type === 'product' ? 'ShoppingBag' : 'User'" />
@@ -291,28 +274,20 @@
           <h4>{{ $t('ReportManage.processResult') }}</h4>
           <el-card class="result-card">
             <div class="result-text">{{ currentReport.handleResult }}</div>
-            <div class="result-time">{{ $t('ReportManage.processTime') }}锛歿{ formatDate(currentReport.handleTime) }}</div>
+            <div class="result-time">{{ $t('ReportManage.processTime') }}：{{ formatDate(currentReport.handleTime) }}
+            </div>
           </el-card>
         </div>
       </div>
     </el-dialog>
 
-    <!-- 澶勭悊涓炬姤瀵硅瘽妗?-->
-    <el-dialog
-      v-model="processVisible"
-      :title="$t('ReportManage.processTitle')"
-      width="500px"
-    >
-      <el-form :model="processForm" :rules="processRules" ref="processFormRef" :label-width="$t('ReportManage.labelWidth')">
+    <!-- 处理举报对话框 -->
+    <el-dialog v-model="processVisible" :title="$t('ReportManage.processTitle')" width="500px">
+      <el-form :model="processForm" :rules="processRules" ref="processFormRef"
+        :label-width="$t('ReportManage.labelWidth')">
         <el-form-item :label="$t('ReportManage.processResult')" prop="result">
-          <el-input
-            v-model="processForm.result"
-            type="textarea"
-            :rows="5"
-            :placeholder="$t('ReportManage.placeholder.processResult')"
-            maxlength="500"
-            show-word-limit
-          />
+          <el-input v-model="processForm.result" type="textarea" :rows="5"
+            :placeholder="$t('ReportManage.placeholder.processResult')" maxlength="500" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -323,22 +298,13 @@
       </template>
     </el-dialog>
 
-    <!-- 椹冲洖涓炬姤瀵硅瘽妗?-->
-    <el-dialog
-      v-model="rejectVisible"
-      :title="$t('ReportManage.rejectTitle')"
-      width="500px"
-    >
-      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef" :label-width="$t('ReportManage.labelWidth')">
+    <!-- 驳回举报对话框 -->
+    <el-dialog v-model="rejectVisible" :title="$t('ReportManage.rejectTitle')" width="500px">
+      <el-form :model="rejectForm" :rules="rejectRules" ref="rejectFormRef"
+        :label-width="$t('ReportManage.labelWidth')">
         <el-form-item :label="$t('ReportManage.rejectReason')" prop="reason">
-          <el-input
-            v-model="rejectForm.reason"
-            type="textarea"
-            :rows="5"
-            :placeholder="$t('ReportManage.placeholder.rejectReason')"
-            maxlength="500"
-            show-word-limit
-          />
+          <el-input v-model="rejectForm.reason" type="textarea" :rows="5"
+            :placeholder="$t('ReportManage.placeholder.rejectReason')" maxlength="500" show-word-limit />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -407,7 +373,7 @@ const rejectForm = reactive({
   reason: ''
 })
 
-// 琛ㄥ崟鏍￠獙瑙勫垯锛堝搷搴斿紡锛?
+// 表单校验规则（响应式）
 const processRules = computed(() => ({
   result: [
     { required: true, message: t('ReportManage.rules.resultRequired'), trigger: 'blur' },
@@ -422,7 +388,7 @@ const rejectRules = computed(() => ({
   ]
 }))
 
-// 绫诲瀷缈昏瘧閿槧灏?
+// 类型翻译键映射
 const getTypeTextKey = (type) => {
   const map = {
     product: 'ReportManage.type.product',
@@ -431,7 +397,7 @@ const getTypeTextKey = (type) => {
   return map[type] || type
 }
 
-// 鐘舵€佹爣绛剧被鍨?
+// 状态标签类型
 const getStatusType = (status) => {
   const typeMap = {
     pending: 'warning',
@@ -441,7 +407,7 @@ const getStatusType = (status) => {
   return typeMap[status] || 'info'
 }
 
-// 鐘舵€佺炕璇戦敭鏄犲皠
+// 状态翻译键映射
 const getStatusTextKey = (status) => {
   const map = {
     pending: 'ReportManage.status.pending',
@@ -465,16 +431,16 @@ const formatDate = (date) => {
 const getReportList = async () => {
   try {
     loading.value = true
-    
+
     const allReports = [
       {
         id: 1,
         type: 'product',
-        targetName: '浜屾墜iPhone 13 Pro',
+        targetName: '二手iPhone 13 Pro',
         targetDesc: '128GB 石墨色',
         targetImage: '',
         reporterName: 'user001',
-        reason: '商品与描述不符，疑似欺诈行为',
+        reason: '商品与描述不符，存在欺诈行为，要求退款',
         status: 'pending',
         createTime: new Date(Date.now() - 2 * 60 * 60 * 1000)
       },
@@ -485,20 +451,20 @@ const getReportList = async () => {
         targetDesc: '用户昵称：小明',
         targetAvatar: '',
         reporterName: 'user003',
-        reason: '璇ョ敤鎴峰彂甯冭櫄鍋囦俊鎭紝楠氭壈浠栦汉',
+        reason: '该用户发布虚假信息，骚扰他人',
         status: 'pending',
         createTime: new Date(Date.now() - 5 * 60 * 60 * 1000)
       },
       {
         id: 3,
         type: 'product',
-        targetName: '澶у鐗╃悊鏁欐潗',
+        targetName: '大学物理教材',
         targetDesc: '第七版',
         targetImage: '',
         reporterName: 'user004',
-        reason: '鍟嗗搧璐ㄩ噺鏈夐棶棰橈紝鐮存崯涓ラ噸',
+        reason: '商品质量有问题，破损严重',
         status: 'handled',
-        handleResult: '宸叉牳瀹炴儏鍐碉紝鍟嗗搧纭疄瀛樺湪璐ㄩ噺闂锛屽凡瑕佹眰鍗栧閫€娆惧苟涓嬫灦鍟嗗搧',
+        handleResult: '已核实情况，商品确实存在质量问题，已要求卖家退款并下架商品',
         handleTime: new Date(Date.now() - 24 * 60 * 60 * 1000),
         createTime: new Date(Date.now() - 48 * 60 * 60 * 1000)
       },
@@ -509,20 +475,20 @@ const getReportList = async () => {
         targetDesc: '用户昵称：小红',
         targetAvatar: '',
         reporterName: 'user006',
-        reason: '恶意差评',
+        reason: '该用户恶意差评',
         status: 'rejected',
-        handleResult: '经调查，举报不属实',
+        handleResult: '经调查，该举报不属实，用户评价客观真实',
         handleTime: new Date(Date.now() - 72 * 60 * 60 * 1000),
         createTime: new Date(Date.now() - 96 * 60 * 60 * 1000)
       },
       {
         id: 5,
         type: 'product',
-        targetName: '二手山地车',
-        targetDesc: '成色一般，支持自提',
+        targetName: '自行车',
+        targetDesc: '二手山地车',
         targetImage: '',
         reporterName: 'user007',
-        reason: '商品实物与图片差距很大',
+        reason: '商品实物与照片差距很大',
         status: 'pending',
         createTime: new Date(Date.now() - 1 * 60 * 60 * 1000)
       },
@@ -553,7 +519,7 @@ const getReportList = async () => {
       }
     ]
 
-    // 搴旂敤鐘舵€佽繃婊?
+    // 应用状态过滤
     if (statusFilter.value) {
       reportList.value = allReports.filter(item => item.status === statusFilter.value)
     } else {
@@ -562,7 +528,7 @@ const getReportList = async () => {
 
     pagination.total = reportList.value.length
 
-    // 鏇存柊缁熻鏁版嵁
+    // 更新统计数据
     stats.value = {
       pending: allReports.filter(item => item.status === 'pending').length,
       handled: allReports.filter(item => item.status === 'handled').length,
@@ -572,7 +538,7 @@ const getReportList = async () => {
       userReports: allReports.filter(item => item.type === 'user').length
     }
   } catch (error) {
-    console.error('鑾峰彇涓炬姤鍒楄〃澶辫触:', error)
+    console.error('获取举报列表失败:', error)
     ElMessage.error(t('ReportManage.fetchFail'))
   } finally {
     loading.value = false
@@ -616,12 +582,12 @@ const confirmProcess = async () => {
   try {
     await processFormRef.value.validate()
     processing.value = true
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     ElMessage.success(t('ReportManage.processSuccess'))
     processVisible.value = false
-    
+
     const index = reportList.value.findIndex(item => item.id === currentReport.value.id)
     if (index !== -1) {
       reportList.value[index].status = 'handled'
@@ -630,7 +596,7 @@ const confirmProcess = async () => {
     }
   } catch (error) {
     if (error !== false) {
-      console.error('澶勭悊澶辫触:', error)
+      console.error('处理失败:', error)
       ElMessage.error(t('ReportManage.processFail'))
     }
   } finally {
@@ -642,12 +608,12 @@ const confirmReject = async () => {
   try {
     await rejectFormRef.value.validate()
     rejecting.value = true
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     ElMessage.success(t('ReportManage.rejectSuccess'))
     rejectVisible.value = false
-    
+
     const index = reportList.value.findIndex(item => item.id === currentReport.value.id)
     if (index !== -1) {
       reportList.value[index].status = 'rejected'
@@ -656,7 +622,7 @@ const confirmReject = async () => {
     }
   } catch (error) {
     if (error !== false) {
-      console.error('椹冲洖澶辫触:', error)
+      console.error('驳回失败:', error)
       ElMessage.error(t('ReportManage.rejectFail'))
     }
   } finally {
@@ -668,16 +634,16 @@ const handleImageError = (event) => {
   event.target.src = formatAvatarUrl('')
 }
 
-// 鏍煎紡鍖栬涓炬姤瀵硅薄鐨勫浘鐗囪矾寰?
+// 格式化被举报对象的图片路径
 const formatTargetImage = (imagePath) => {
   if (!imagePath) return ''
-  
-  // 濡傛灉鏄畬鏁碪RL锛岀洿鎺ヤ娇鐢?
+
+  // 如果是完整URL，直接使用
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
     return imagePath
   }
-  
-  // 濡傛灉鏄浉瀵硅矾寰勶紝浣跨敤formatImageUrl澶勭悊
+
+  // 如果是相对路径，使用formatImageUrl处理
   return formatImageUrl(imagePath)
 }
 
@@ -878,7 +844,7 @@ onMounted(() => {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .stats-sidebar {
     position: relative;
     top: 0;
@@ -886,7 +852,7 @@ onMounted(() => {
   }
 }
 
-/* 渚ц竟鏍忔牱寮?*/
+/* 侧边栏样式 */
 .stats-sidebar {
   position: sticky;
   top: 20px;
@@ -959,5 +925,3 @@ onMounted(() => {
   color: #409eff;
 }
 </style>
-
-

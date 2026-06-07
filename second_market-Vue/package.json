@@ -20,7 +20,7 @@
     "@capacitor/core": "^6.0.0",
     "@element-plus/icons-vue": "^2.3.2",
     "@heroicons/vue": "^2.2.0",
-
+    "@rollup/rollup-win32-x64-msvc": "^4.60.3",
     "@vueuse/core": "^13.7.0",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.12",

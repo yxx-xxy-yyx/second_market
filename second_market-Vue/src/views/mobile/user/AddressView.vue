@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useUserStore } from '@/stores/user'
 import { showToast, showSuccessToast } from 'vant'
 import {
@@ -10,10 +11,10 @@ import {
   MapIcon
 } from '@heroicons/vue/24/outline'
 import { userApi } from '@/api/user'
-import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const { t } = useI18n()
 
 const address = ref('')
 const maxLength = 100
@@ -24,7 +25,7 @@ onMounted(() => {
 
 const handleSave = async () => {
   if (!address.value.trim()) {
-    showToast('请输入详细地址')
+    showToast(t('profilePage.addressView.addressRequired'))
     return
   }
 
@@ -32,13 +33,13 @@ const handleSave = async () => {
     const res = await userApi.updateUserInfo({ address: address.value })
     
     if (res.code === '200' || res.success) {
-      showSuccessToast('地址保存成功')
+      showSuccessToast(t('profilePage.addressView.saveSuccess'))
       // 更新本地 store
       userStore.updateUser({ address: address.value })
       setTimeout(() => router.back(), 1500)
     }
   } catch (error) {
-    showToast('保存失败')
+    showToast(t('profilePage.addressView.saveFail'))
     console.error(error)
   }
 }
@@ -53,10 +54,7 @@ const handleSave = async () => {
         <button @click="router.back()" class="absolute left-0 p-1 rounded-full hover:bg-white/10 active:scale-90 transition-all text-white">
           <ChevronLeftIcon class="w-7 h-7" />
         </button>
-        <h1 class="w-full text-center text-lg font-bold text-white tracking-wide">我的地址</h1>
-        <div class="absolute right-0 top-1/2 -translate-y-1/2">
-          <LangSwitcher glass />
-        </div>
+        <h1 class="w-full text-center text-lg font-bold text-white tracking-wide">{{ t('profilePage.addressView.title') }}</h1>
       </div>
 
       <div class="flex justify-center relative z-10">
@@ -76,12 +74,12 @@ const handleSave = async () => {
           </div>
           
           <div class="flex-1">
-            <div class="text-xs text-gray-400 mb-2 font-medium tracking-wide">详细地址</div>
+            <div class="text-xs text-gray-400 mb-2 font-medium tracking-wide">{{ t('profilePage.addressView.detailAddress') }}</div>
             <div class="relative">
               <textarea 
                 v-model="address"
                 :maxlength="maxLength"
-                placeholder="请输入详细地址，如：xx校区xx号楼xx室"
+                :placeholder="t('profilePage.addressView.addressPlaceholder')"
                 class="w-full text-gray-900 placeholder-gray-300 outline-none text-base font-medium bg-gray-50/50 rounded-2xl p-4 min-h-[120px] resize-none focus:bg-gray-50 transition-colors border border-transparent focus:border-primary/30"
               ></textarea>
               
@@ -96,7 +94,7 @@ const handleSave = async () => {
       <div class="mt-8 px-2">
         <button @click="handleSave"
           class="w-full bg-gradient-to-r from-primary to-primaryDark text-white font-bold py-4 rounded-2xl shadow-lg shadow-cyan-soft active:scale-95 transition-transform flex items-center justify-center space-x-2">
-          <span>保存地址</span>
+          <span>{{ t('profilePage.addressView.saveBtn') }}</span>
         </button>
       </div>
     </div>
