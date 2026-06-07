@@ -1,0 +1,383 @@
+/* ================================================
+   DESIGN TOKENS - 完整设计令牌系统
+   ================================================ */
+
+/* ================================================
+   1. COLOR SYSTEM - 色彩系统
+   ================================================ */
+:root {
+  /* Primary - 主色调 */
+  --primary-50: #edfafb;
+  --primary-100: #d1f1f4;
+  --primary-200: #a3e2e9;
+  --primary-300: #74d2de;
+  --primary-400: #46c3d3;
+  --primary-500: #36b3c2; /* Main Primary */
+  --primary-600: #268f9c;
+  --primary-700: #1e737d;
+  --primary-800: #185860;
+  --primary-900: #103c41;
+  --primary-950: #0a2529;
+
+  /* Secondary - 辅助色 */
+  --secondary-50: #f0f3f7;
+  --secondary-100: #dde4ee;
+  --secondary-200: #b9c7dc;
+  --secondary-300: #8aa4c4;
+  --secondary-400: #5c81ad;
+  --secondary-500: #3b6391;
+  --secondary-600: #2d4e75;
+  --secondary-700: #253e5c;
+  --secondary-800: #1e334a;
+  --secondary-900: #182739;
+  --secondary-950: #0f1724;
+
+  /* Accent - 强调色 */
+  --accent-50: #fdf2ff;
+  --accent-100: #f9e4ff;
+  --accent-200: #f3c8ff;
+  --accent-300: #ea9eff;
+  --accent-400: #de67ff;
+  --accent-500: #cf33ff;
+  --accent-600: #b218e0;
+  --accent-700: #8f12b2;
+  --accent-800: #72118d;
+  --accent-900: #5d1172;
+  --accent-950: #3e044d;
+
+  /* Success - 成功色 */
+  --success-50: #ecfdf3;
+  --success-100: #d1fae0;
+  --success-200: #a7f3c1;
+  --success-300: #6ee7a0;
+  --success-400: #34d385;
+  --success-500: #22c55e;
+  --success-600: #16a34a;
+  --success-700: #15803d;
+  --success-800: #166534;
+  --success-900: #14532d;
+
+  /* Warning - 警告色 */
+  --warning-50: #fffbeb;
+  --warning-100: #fef3c7;
+  --warning-200: #fde68a;
+  --warning-300: #fcd34d;
+  --warning-400: #fbbf24;
+  --warning-500: #f59e0b;
+  --warning-600: #d97706;
+  --warning-700: #b45309;
+  --warning-800: #92400e;
+  --warning-900: #78350f;
+
+  /* Error - 错误色 */
+  --error-50: #fef2f2;
+  --error-100: #fee2e2;
+  --error-200: #fecaca;
+  --error-300: #fca5a5;
+  --error-400: #f87171;
+  --error-500: #ef4444;
+  --error-600: #dc2626;
+  --error-700: #b91c1c;
+  --error-800: #991b1b;
+  --error-900: #7f1d1d;
+
+  /* Neutral - 中性色 */
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+  --neutral-950: #020617;
+
+  /* ================================================
+     2. SPACING SYSTEM - 间距系统
+     ================================================ */
+  --space-0: 0px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ================================================
+     3. BORDER RADIUS - 圆角系统
+     ================================================ */
+  --radius-none: 0px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
+  /* ================================================
+     4. BOX SHADOW - 阴影系统
+     ================================================ */
+  --shadow-none: none;
+  --shadow-xs: 0 1px 2px 0px rgba(15, 23, 42, 0.05);
+  --shadow-sm: 0 1px 3px 0px rgba(15, 23, 42, 0.1), 0 1px 2px -1px rgba(15, 23, 42, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  --shadow-primary: 0 4px 20px rgba(54, 179, 194, 0.25);
+  --shadow-primary-hover: 0 8px 30px rgba(54, 179, 194, 0.35);
+
+  /* ================================================
+     5. TYPOGRAPHY - 字体系统
+     ================================================ */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Font Sizes */
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 14px;
+  --font-lg: 16px;
+  --font-xl: 18px;
+  --font-2xl: 20px;
+  --font-3xl: 24px;
+  --font-4xl: 28px;
+  --font-5xl: 32px;
+  --font-6xl: 40px;
+  --font-7xl: 48px;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Font Weights */
+  --font-thin: 100;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Letter Spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+
+  /* ================================================
+     6. TRANSITION & ANIMATION - 过渡动画系统
+     ================================================ */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ================================================
+     7. Z-INDEX LAYERS - 层级系统
+     ================================================ */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 450;
+  --z-popover: 500;
+  --z-tooltip: 600;
+  --z-overlay: 9999;
+
+  /* ================================================
+     8. SEMANTIC COLORS - 语义化颜色
+     ================================================ */
+  --bg-primary: var(--neutral-50);
+  --bg-secondary: var(--neutral-100);
+  --bg-tertiary: var(--neutral-50);
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  
+  --text-primary: var(--neutral-900);
+  --text-secondary: var(--neutral-600);
+  --text-tertiary: var(--neutral-500);
+  --text-placeholder: var(--neutral-400);
+  --text-disabled: var(--neutral-300);
+  
+  --border-primary: var(--neutral-200);
+  --border-secondary: var(--neutral-200);
+  --border-tertiary: var(--neutral-100);
+  
+  --icon-primary: var(--neutral-700);
+  --icon-secondary: var(--neutral-500);
+  --icon-tertiary: var(--neutral-400);
+  
+  /* Primary semantic */
+  --primary: var(--primary-500);
+  --primary-hover: var(--primary-600);
+  --primary-active: var(--primary-700);
+  --primary-bg: var(--primary-50);
+  --primary-bg-hover: var(--primary-100);
+  --primary-border: var(--primary-200);
+  
+  /* Header gradient */
+  --header-gradient: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+}
+
+/* ================================================
+   DARK MODE - 暗黑模式
+   ================================================ */
+html.dark {
+  --bg-primary: var(--neutral-950);
+  --bg-secondary: var(--neutral-900);
+  --bg-tertiary: var(--neutral-800);
+  --bg-card: var(--neutral-900);
+  --bg-elevated: var(--neutral-800);
+  
+  --text-primary: var(--neutral-50);
+  --text-secondary: var(--neutral-400);
+  --text-tertiary: var(--neutral-500);
+  --text-placeholder: var(--neutral-600);
+  --text-disabled: var(--neutral-700);
+  
+  --border-primary: var(--neutral-700);
+  --border-secondary: var(--neutral-800);
+  --border-tertiary: var(--neutral-800);
+  
+  --icon-primary: var(--neutral-200);
+  --icon-secondary: var(--neutral-400);
+  --icon-tertiary: var(--neutral-500);
+  
+  --primary: var(--primary-400);
+  --primary-hover: var(--primary-300);
+  --primary-active: var(--primary-200);
+  --primary-bg: rgba(77, 208, 225, 0.15);
+  --primary-bg-hover: rgba(77, 208, 225, 0.25);
+  --primary-border: rgba(77, 208, 225, 0.3);
+  
+  --header-gradient: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+  
+  /* Shadows for dark mode */
+  --shadow-xs: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px 0px rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  --shadow-primary: 0 4px 20px rgba(77, 208, 225, 0.25);
+  --shadow-primary-hover: 0 8px 30px rgba(77, 208, 225, 0.35);
+}
+
+/* ================================================
+   LEGACY VARIABLES COMPATIBILITY - 兼容旧变量
+   ================================================ */
+:root {
+  /* For backwards compatibility */
+  --primary-color: var(--primary-500);
+  --primary-color-light: var(--primary-400);
+  --primary-color-dark: var(--primary-600);
+  --secondary-color: var(--secondary-900);
+  --success-color: var(--success-500);
+  --warning-color: var(--warning-500);
+  --danger-color: var(--error-500);
+  --info-color: var(--neutral-500);
+  
+  --bg-color: var(--bg-primary);
+  --bg-white: var(--bg-card);
+  --bg-secondary: var(--bg-secondary);
+  --bg-ivory: var(--neutral-50);
+  --bg-cyan-soft: var(--primary-bg);
+  
+  --card-radius: var(--radius-lg);
+  --button-radius: var(--radius-md);
+  --input-radius: var(--radius-md);
+  
+  --card-shadow: var(--shadow-md);
+  --card-shadow-hover: var(--shadow-lg);
+  
+  --spacing-xs: var(--space-1);
+  --spacing-sm: var(--space-2);
+  --spacing-md: var(--space-3);
+  --spacing-lg: var(--space-4);
+  --spacing-xl: var(--space-5);
+  --spacing-xxl: var(--space-6);
+  
+  --font-size-xs: var(--font-sm);
+  --font-size-sm: var(--font-md);
+  --font-size-md: var(--font-lg);
+  --font-size-lg: var(--font-xl);
+  --font-size-xl: var(--font-2xl);
+  --font-size-xxl: var(--font-3xl);
+  
+  --transition-fast: var(--duration-fast);
+  --transition-base: var(--duration-normal);
+  --transition-slow: var(--duration-slow);
+  
+  --app-header-gradient: var(--header-gradient);
+  
+  /* Element Plus & Vant compatibility */
+  --el-color-primary: var(--primary-500);
+  --el-color-primary-light-3: var(--primary-300);
+  --el-color-primary-light-5: var(--primary-200);
+  --el-color-primary-light-7: var(--primary-100);
+  --el-color-primary-light-9: var(--primary-50);
+  
+  --van-primary-color: var(--primary-500);
+  --van-button-primary-background: var(--primary-500);
+  --van-button-primary-border-color: var(--primary-500);
+  --van-tabs-bottom-bar-color: var(--primary-500);
+  --van-checkbox-checked-icon-color: var(--primary-500);
+  --van-radio-checked-icon-color: var(--primary-500);
+  --van-loading-spinner-color: var(--primary-500);
+}
+
+html.dark {
+  --primary-color: var(--primary-400);
+  --primary-color-light: var(--primary-300);
+  --primary-color-dark: var(--primary-500);
+  --secondary-color: var(--neutral-200);
+  --success-color: var(--success-400);
+  --warning-color: var(--warning-400);
+  --danger-color: var(--error-400);
+  --info-color: var(--neutral-400);
+  
+  --bg-color: var(--bg-primary);
+  --bg-white: var(--bg-card);
+  --bg-secondary: var(--bg-secondary);
+  --bg-ivory: var(--bg-card);
+  --bg-cyan-soft: var(--primary-bg);
+  
+  --el-color-primary: var(--primary-400);
+  --el-color-primary-light-3: rgba(77, 208, 225, 0.7);
+  --el-color-primary-light-5: rgba(77, 208, 225, 0.45);
+  --el-color-primary-light-7: rgba(77, 208, 225, 0.24);
+  --el-color-primary-light-9: rgba(77, 208, 225, 0.1);
+  
+  --van-primary-color: var(--primary-400);
+  --van-button-primary-background: var(--primary-400);
+  --van-button-primary-border-color: var(--primary-400);
+  --van-tabs-bottom-bar-color: var(--primary-400);
+  --van-checkbox-checked-icon-color: var(--primary-400);
+  --van-radio-checked-icon-color: var(--primary-400);
+  --van-loading-spinner-color: var(--primary-400);
+}

@@ -8,17 +8,15 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n/index'
-import './index.css'
 import { useThemeStore } from './stores/theme'
 
-// 导入 Vant
+// 导入 Vant (建议后期考虑是否移除一套UI库以减少体积)
 import Vant from 'vant'
 import 'vant/lib/index.css'
 
-// 导入全局样式
-import '@/styles/index.css'
-import '@/styles/variables.css'
-import '@/assets/styles/global-animations.css'
+// 导入新的设计系统样式
+import '@/styles/design-tokens.css'
+import '@/styles/global.css'
 import 'flag-icons/css/flag-icons.min.css'
 
 const app = createApp(App)

@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+/* @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -6,22 +6,195 @@ export default {
   ],
   theme: {
     extend: {
+      /* Colors System */
       colors: {
-        primary: 'rgb(54 179 194 / <alpha-value>)',
-        primaryDark: 'rgb(38 143 156 / <alpha-value>)',
-        primaryLight: 'rgb(98 198 210 / <alpha-value>)',
-        ivory: 'rgb(250 249 246 / <alpha-value>)'
+        /* Primary - 主色调 */
+        primary: {
+          50: '#edfafb',
+          100: '#d1f1f4',
+          200: '#a3e2e9',
+          300: '#74d2de',
+          400: '#46c3d3',
+          500: '#36b3c2',
+          600: '#268f9c',
+          700: '#1e737d',
+          800: '#185860',
+          900: '#103c41',
+          950: '#0a2529',
+          DEFAULT: '#36b3c2',
+        },
+        /* Secondary - 辅助色 */
+        secondary: {
+          50: '#f0f3f7',
+          100: '#dde4ee',
+          200: '#b9c7dc',
+          300: '#8aa4c4',
+          400: '#5c81ad',
+          500: '#3b6391',
+          600: '#2d4e75',
+          700: '#253e5c',
+          800: '#1e334a',
+          900: '#182739',
+          950: '#0f1724',
+          DEFAULT: '#3b6391',
+        },
+        /* Accent - 强调色 */
+        accent: {
+          50: '#fdf2ff',
+          100: '#f9e4ff',
+          200: '#f3c8ff',
+          300: '#ea9eff',
+          400: '#de67ff',
+          500: '#cf33ff',
+          600: '#b218e0',
+          700: '#8f12b2',
+          800: '#72118d',
+          900: '#5d1172',
+          950: '#3e044d',
+          DEFAULT: '#cf33ff',
+        },
+        /* Success */
+        success: {
+          50: '#ecfdf3',
+          100: '#d1fae0',
+          200: '#a7f3c1',
+          300: '#6ee7a0',
+          400: '#34d385',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+          DEFAULT: '#22c55e',
+        },
+        /* Warning */
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          DEFAULT: '#f59e0b',
+        },
+        /* Error */
+        error: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444',
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+          DEFAULT: '#ef4444',
+        },
+        /* Neutral - 中性色 */
+        neutral: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        /* Legacy colors for compatibility */
+        primaryDark: '#268f9c',
+        primaryLight: '#62c6d2',
+        ivory: '#faf9f6',
       },
+      /* Box Shadows */
       boxShadow: {
-        'cyan-soft': '0 1px 12px rgba(54, 179, 194, 0.14)'
+        'cyan-soft': '0 1px 12px rgba(54, 179, 194, 0.14)',
+        'xs': '0 1px 2px 0px rgba(15, 23, 42, 0.05)',
+        'sm': '0 1px 3px 0px rgba(15, 23, 42, 0.1), 0 1px 2px -1px rgba(15, 23, 42, 0.1)',
+        'md': '0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1)',
+        'lg': '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1)',
+        'xl': '0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1)',
+        '2xl': '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
+        'primary': '0 4px 20px rgba(54, 179, 194, 0.25)',
+        'primary-hover': '0 8px 30px rgba(54, 179, 194, 0.35)',
       },
+      /* Border Radius */
       borderRadius: {
-        xl: '12px',
-        '2xl': '16px',
-        '3xl': '24px'
-      }
+        'xs': '4px',
+        'sm': '6px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
+        '3xl': '24px',
+      },
+      /* Spacing */
+      spacing: {
+        '4.5': '18px',
+        '5.5': '22px',
+        '6.5': '26px',
+        '7.5': '30px',
+        '8.5': '34px',
+        '9.5': '38px',
+        '12.5': '50px',
+        '13': '52px',
+        '14': '56px',
+        '15': '60px',
+        '18': '72px',
+        '22': '88px',
+        '26': '104px',
+        '30': '120px',
+      },
+      /* Typography */
+      fontFamily: {
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+      },
+      fontSize: {
+        'xs': ['11px', { lineHeight: '1.25' }],
+        'sm': ['12px', { lineHeight: '1.375' }],
+        'md': ['14px', { lineHeight: '1.5' }],
+        'lg': ['16px', { lineHeight: '1.5' }],
+        'xl': ['18px', { lineHeight: '1.375' }],
+        '2xl': ['20px', { lineHeight: '1.375' }],
+        '3xl': ['24px', { lineHeight: '1.25' }],
+        '4xl': ['28px', { lineHeight: '1.25' }],
+        '5xl': ['32px', { lineHeight: '1.25' }],
+        '6xl': ['40px', { lineHeight: '1.25' }],
+        '7xl': ['48px', { lineHeight: '1.25' }],
+      },
+      /* Z-index */
+      zIndex: {
+        'dropdown': '100',
+        'sticky': '200',
+        'fixed': '300',
+        'modal-backdrop': '400',
+        'modal': '450',
+        'popover': '500',
+        'tooltip': '600',
+        'overlay': '9999',
+      },
+      /* Transition */
+      transitionTimingFunction: {
+        'default': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'spring': 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+      },
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '300ms',
+        'slow': '500ms',
+      },
     },
   },
+  darkMode: 'class',
   plugins: [],
 }
 
