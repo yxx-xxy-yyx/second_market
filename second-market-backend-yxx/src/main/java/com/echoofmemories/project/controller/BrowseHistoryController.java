@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
  * 浏览记录控制器
  */
@@ -26,9 +24,9 @@ public class BrowseHistoryController {
 
     @Operation(summary = "记录浏览历史")
     @PostMapping("/add/{productId}")
-    public Result<String> addHistory(@PathVariable Long productId, HttpServletRequest request) {
+    public Result<String> addHistory(@PathVariable Long productId) {
         try {
-            Long userId = getCurrentUserId(request);
+            Long userId = SecurityUtils.getCurrentUserId();
             if (userId == null) {
                 return Result.error("401", "请先登录");
             }
@@ -44,29 +42,9 @@ public class BrowseHistoryController {
     public Result<IPage<BrowseHistory>> getHistoryList(
             @RequestParam(defaultValue = "1") Integer current,
             @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) Long schoolId,
-            HttpServletRequest request) {
+            @RequestParam(required = false) Long schoolId) {
         try {
-            Long userId = getCurrentUserId(request);
-            if (userId == null) {
-                return Result.error("401", "请先登录");
-            }
-            Page<BrowseHistory> page = new Page<>(current, size);
-            return Result.success(browseHistoryService.getHistoryPage(page, userId, schoolId));
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
-    }
-
-    @Operation(summary = "获取当前用户的浏览记录")
-    @GetMapping("/mine")
-    public Result<IPage<BrowseHistory>> getMyHistory(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "20") Integer size,
-            @RequestParam(required = false) Long schoolId,
-            HttpServletRequest request) {
-        try {
-            Long userId = getCurrentUserId(request);
+            Long userId = SecurityUtils.getCurrentUserId();
             if (userId == null) {
                 return Result.error("401", "请先登录");
             }
@@ -79,9 +57,9 @@ public class BrowseHistoryController {
 
     @Operation(summary = "删除单条浏览记录")
     @DeleteMapping("/delete/{id}")
-    public Result<String> deleteHistory(@PathVariable Long id, HttpServletRequest request) {
+    public Result<String> deleteHistory(@PathVariable Long id) {
         try {
-            Long userId = getCurrentUserId(request);
+            Long userId = SecurityUtils.getCurrentUserId();
             if (userId == null) {
                 return Result.error("401", "请先登录");
             }
@@ -94,9 +72,9 @@ public class BrowseHistoryController {
 
     @Operation(summary = "清空浏览记录")
     @DeleteMapping("/clear")
-    public Result<String> clearHistory(HttpServletRequest request) {
+    public Result<String> clearHistory() {
         try {
-            Long userId = getCurrentUserId(request);
+            Long userId = SecurityUtils.getCurrentUserId();
             if (userId == null) {
                 return Result.error("401", "请先登录");
             }
@@ -105,20 +83,5 @@ public class BrowseHistoryController {
         } catch (Exception e) {
             return Result.error("500", e.getMessage());
         }
-    }
-
-    private Long getCurrentUserId(HttpServletRequest request) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId != null) {
-            return currentUserId;
-        }
-        Object userIdAttr = request.getAttribute("userId");
-        if (userIdAttr instanceof String) {
-            try {
-                return Long.valueOf((String) userIdAttr);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return null;
     }
 }

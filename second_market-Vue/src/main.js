@@ -1,50 +1,50 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/dark/css-vars.css'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 import App from './App.vue'
 import router from './router'
 import i18n from './i18n/index'
-import './index.css'
+import { useThemeStore } from './stores/theme'
 
-// 导入 Vant
-import Vant from 'vant'
-import 'vant/lib/index.css'
-
-// 导入全局样式
-import '@/styles/index.css'
-import '@/styles/variables.css'
-import '@/assets/styles/global-animations.css'
+// 导入新的设计系统样式
+import '@/styles/design-tokens.css'
+import '@/styles/global.css'
 import 'flag-icons/css/flag-icons.min.css'
+
+// Element Plus 按需导入（优化打包体积）
+import ElementPlus from '@/plugins/element-plus'
+
+// Vant 按需导入（仅导入使用的组件）
+import { Button, Field, Cell, CellGroup, Dialog, Toast, Skeleton, List, PullRefresh, Empty, Loading } from 'vant'
+import 'vant/lib/index.css'
 
 const app = createApp(App)
 const pinia = createPinia()
-
-// 注册常用的 Element Plus 图标
-const icons = [
-  'User', 'Edit', 'Bell', 'Document', 'Upload', 'Setting',
-  'Calendar', 'Check', 'Warning', 'House', 'ArrowDown',
-  'SwitchButton', 'Plus', 'Search', 'Refresh', 'Download',
-  'Delete', 'CircleCheck', 'CircleClose', 'Monitor',
-  'Lightning', 'Grid', 'Lock', 'ArrowRight', 'ArrowLeft',
-  'UserFilled', 'Camera', 'Fold', 'Expand', 'Odometer',
-  'FullScreen', 'CircleCheckFilled', 'RefreshLeft'
-]
-
-icons.forEach(iconName => {
-  if (ElementPlusIconsVue[iconName]) {
-    app.component(iconName, ElementPlusIconsVue[iconName])
-  }
-})
 
 // 使用插件
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+
+// 安装 Element Plus
 app.use(ElementPlus)
-app.use(Vant)
+
+// 安装 Vant 组件
+app.use(Button)
+app.use(Field)
+app.use(Cell)
+app.use(CellGroup)
+app.use(Dialog)
+app.use(Toast)
+app.use(Skeleton)
+app.use(List)
+app.use(PullRefresh)
+app.use(Empty)
+app.use(Loading)
 
 app.mount('#app')
+
+// 初始化主题
+const themeStore = useThemeStore()
+themeStore.initTheme()
+themeStore.watchSystemTheme()

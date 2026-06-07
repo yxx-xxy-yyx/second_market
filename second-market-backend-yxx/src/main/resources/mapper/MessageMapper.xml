@@ -5,7 +5,7 @@
     <select id="selectMyMessagePage" resultType="com.echoofmemories.project.entity.Message">
         SELECT *
         FROM message
-        WHERE deleted = 0 AND receiver_id = #{receiverId}
+        WHERE deleted = 0 AND user_id = #{receiverId}
         <if test="isRead != null">
             AND is_read = #{isRead}
         </if>
@@ -15,7 +15,8 @@
     <select id="selectUnreadCount" resultType="java.lang.Long">
         SELECT COUNT(*)
         FROM message
-        WHERE deleted = 0 AND receiver_id = #{receiverId} AND is_read = 0
+        WHERE deleted = 0 AND user_id = #{receiverId} AND is_read = 0
     </select>
 
 </mapper>
+

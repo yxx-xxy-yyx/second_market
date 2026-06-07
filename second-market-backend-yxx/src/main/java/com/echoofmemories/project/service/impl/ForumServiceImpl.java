@@ -14,6 +14,7 @@ import com.echoofmemories.project.mapper.ForumCommentMapper;
 import com.echoofmemories.project.mapper.ForumFavoriteMapper;
 import com.echoofmemories.project.mapper.ForumLikeMapper;
 import com.echoofmemories.project.mapper.ForumPostMapper;
+import com.echoofmemories.project.security.SecurityUtils;
 import com.echoofmemories.project.service.ForumService;
 import com.echoofmemories.project.service.MessageService;
 import com.echoofmemories.project.service.UserService;
@@ -79,7 +80,9 @@ public class ForumServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost> im
     public boolean updatePost(ForumPost post, Long userId) {
         ForumPost oldPost = getById(post.getId());
         if (oldPost == null || oldPost.getUserId() == null) return false;
-        if (!oldPost.getUserId().equals(userId)) return false;
+        
+        // 检查权限：作者或管理员可以更新
+        if (!oldPost.getUserId().equals(userId) && !SecurityUtils.isAdmin()) return false;
 
         post.setUserId(oldPost.getUserId());
         boolean success = updateById(post);
@@ -105,9 +108,12 @@ public class ForumServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost> im
     @Transactional
     public boolean deletePost(Long id, Long userId) {
         ForumPost post = getById(id);
-        if (post != null && post.getUserId().equals(userId)) {
-            post.setDeleted(1);
-            return updateById(post);
+        if (post != null) {
+            // 检查权限：作者或管理员可以删除
+            if (post.getUserId().equals(userId) || SecurityUtils.isAdmin()) {
+                post.setDeleted(1);
+                return updateById(post);
+            }
         }
         return false;
     }
@@ -119,8 +125,10 @@ public class ForumServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost> im
         if (comment != null) {
             // 获取帖子作者ID
             ForumPost post = getById(comment.getPostId());
-            // 只有评论作者或帖子作者可以删除
-            if (comment.getUserId().equals(userId) || (post != null && post.getUserId().equals(userId))) {
+            // 只有评论作者、帖子作者或管理员可以删除
+            if (comment.getUserId().equals(userId) || 
+                (post != null && post.getUserId().equals(userId)) ||
+                SecurityUtils.isAdmin()) {
                 int res = forumCommentMapper.deleteById(id);
                 if (res > 0) {
                     forumPostMapper.updateCommentCount(comment.getPostId(), -1);
@@ -270,5 +278,61 @@ public class ForumServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost> im
 
     private String safe(String v) {
         return v == null ? "" : v;
+    }
+
+    @Override
+    public IPage<ForumPost> getAllPosts(Page<ForumPost> page, String category, Long schoolId, String keyword) {
+        LambdaQueryWrapper<ForumPost> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ForumPost::getDeleted, 0);
+        if (category != null && !category.isEmpty()) {
+            wrapper.eq(ForumPost::getCategory, category);
+        }
+        if (schoolId != null) {
+            wrapper.eq(ForumPost::getSchoolId, schoolId);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.and(w -> w.like(ForumPost::getTitle, keyword)
+                    .or().like(ForumPost::getContent, keyword));
+        }
+        wrapper.orderByDesc(ForumPost::getCreateTime);
+        return page(page, wrapper);
+    }
+
+    @Override
+    public IPage<ForumComment> getAllComments(Page<ForumComment> page, Long postId, String keyword) {
+        LambdaQueryWrapper<ForumComment> wrapper = new LambdaQueryWrapper<>();
+        if (postId != null) {
+            wrapper.eq(ForumComment::getPostId, postId);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.like(ForumComment::getContent, keyword);
+        }
+        wrapper.orderByDesc(ForumComment::getCreateTime);
+        return forumCommentMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    @Transactional
+    public boolean adminDeletePost(Long id) {
+        ForumPost post = getById(id);
+        if (post != null) {
+            post.setDeleted(1);
+            return updateById(post);
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public boolean adminDeleteComment(Long id) {
+        ForumComment comment = forumCommentMapper.selectById(id);
+        if (comment != null) {
+            int res = forumCommentMapper.deleteById(id);
+            if (res > 0) {
+                forumPostMapper.updateCommentCount(comment.getPostId(), -1);
+            }
+            return res > 0;
+        }
+        return false;
     }
 }

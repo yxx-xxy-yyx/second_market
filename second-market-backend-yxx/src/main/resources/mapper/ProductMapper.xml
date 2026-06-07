@@ -55,7 +55,14 @@
             AND p.condition_score &lt;= #{maxCondition}
         </if>
         <if test="status != null">
-            AND p.status = #{status}
+            <choose>
+                <when test="status == 2">
+                    AND p.status IN (1, 2)
+                </when>
+                <otherwise>
+                    AND p.status = #{status}
+                </otherwise>
+            </choose>
         </if>
         <if test="userId != null">
             AND p.user_id = #{userId}

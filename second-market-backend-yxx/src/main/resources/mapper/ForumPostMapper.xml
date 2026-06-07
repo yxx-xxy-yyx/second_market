@@ -28,34 +28,19 @@
 
     <select id="selectForumPage" resultMap="ForumPostResult">
         SELECT 
-            p.id,
-            p.title,
-            p.content,
-            p.user_id,
-            p.create_time,
-            p.update_time,
-            p.is_anonymous,
-            p.school_id,
-            p.deleted,
-            p.is_school_only,
+            p.*,
             (SELECT COUNT(1) FROM forum_like fl WHERE fl.post_id = p.id) AS like_count,
-            <choose>
-                <when test="currentUserId != null">
-                    CASE WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1 ELSE 0 END AS liked,
-                </when>
-                <otherwise>
-                    0 AS liked,
-                </otherwise>
-            </choose>
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS liked,
             (SELECT COUNT(1) FROM forum_favorite ff WHERE ff.post_id = p.id) AS favorite_count,
-            <choose>
-                <when test="currentUserId != null">
-                    CASE WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1 ELSE 0 END AS favorited,
-                </when>
-                <otherwise>
-                    0 AS favorited,
-                </otherwise>
-            </choose>
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS favorited,
             CASE WHEN p.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
             CASE WHEN p.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar,
             s.name_zh AS school_name
@@ -67,7 +52,7 @@
             AND p.category = #{category}
         </if>
         <choose>
-            <when test="schoolId != null">
+            <when test="schoolId != null and schoolId != ''">
                 AND p.school_id = #{schoolId}
             </when>
             <otherwise>
@@ -88,23 +73,17 @@
         SELECT 
             p.*,
             (SELECT COUNT(1) FROM forum_like fl WHERE fl.post_id = p.id) AS like_count,
-            <choose>
-                <when test="currentUserId != null">
-                    CASE WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1 ELSE 0 END AS liked,
-                </when>
-                <otherwise>
-                    0 AS liked,
-                </otherwise>
-            </choose>
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_like fl2 WHERE fl2.post_id = p.id AND fl2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS liked,
             (SELECT COUNT(1) FROM forum_favorite ff WHERE ff.post_id = p.id) AS favorite_count,
-            <choose>
-                <when test="currentUserId != null">
-                    CASE WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1 ELSE 0 END AS favorited,
-                </when>
-                <otherwise>
-                    0 AS favorited,
-                </otherwise>
-            </choose>
+            CASE
+                WHEN #{currentUserId} IS NULL THEN 0
+                WHEN EXISTS (SELECT 1 FROM forum_favorite ff2 WHERE ff2.post_id = p.id AND ff2.user_id = #{currentUserId}) THEN 1
+                ELSE 0
+            END AS favorited,
             CASE WHEN p.is_anonymous = 1 THEN '匿名用户' ELSE u.nickname END AS user_nickname,
             CASE WHEN p.is_anonymous = 1 THEN '' ELSE u.avatar END AS user_avatar,
             s.name_zh AS school_name

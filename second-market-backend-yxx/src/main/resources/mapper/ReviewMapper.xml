@@ -8,6 +8,7 @@
         <result property="reviewerId" column="reviewer_id"/>
         <result property="revieweeId" column="reviewee_id"/>
         <result property="productId" column="product_id"/>
+        <result property="campusServiceId" column="campus_service_id"/>
         <result property="rating" column="rating"/>
         <result property="content" column="content"/>
         <result property="createTime" column="create_time"/>
@@ -40,6 +41,19 @@
         LEFT JOIN sys_user u ON r.reviewer_id = u.id
         LEFT JOIN product p ON r.product_id = p.id
         WHERE r.deleted = 0 AND r.reviewee_id = #{userId}
+        ORDER BY r.create_time DESC
+    </select>
+
+    <select id="selectReviewPageByCampusService" resultMap="ReviewWithDetailsResult">
+        SELECT
+            r.*,
+            u.nickname AS reviewer_nickname,
+            u.avatar AS reviewer_avatar,
+            p.title AS product_title
+        FROM review r
+        LEFT JOIN sys_user u ON r.reviewer_id = u.id
+        LEFT JOIN product p ON r.product_id = p.id
+        WHERE r.deleted = 0 AND r.campus_service_id = #{campusServiceId}
         ORDER BY r.create_time DESC
     </select>
 

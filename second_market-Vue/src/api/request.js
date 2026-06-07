@@ -50,9 +50,7 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    if (!config.noLoading) {
-      startGlobalLoading()
-    }
+    startGlobalLoading()
     // 从 pinia store 获取 token
     try {
       const userStore = useUserStore()
@@ -76,9 +74,7 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {
-    if (!response.config?.noLoading) {
-      stopGlobalLoading()
-    }
+    stopGlobalLoading()
     const { data } = response
 
     // 统一处理响应数据结构 - 后端返回格式：{code, message, data, success}
@@ -131,9 +127,7 @@ request.interceptors.response.use(
     }
   },
   (error) => {
-    if (!error?.config?.noLoading) {
-      stopGlobalLoading()
-    }
+    stopGlobalLoading()
     const { response, message } = error
     const isSilent = error?.config?._silent
 

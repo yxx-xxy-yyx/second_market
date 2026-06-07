@@ -6,12 +6,16 @@
         SELECT 
             id,
             school_code,
-            name_zh,
-            name_ko,
-            name_en,
-            city_zh,
-            city_ko,
-            city_en,
+            CASE 
+                WHEN #{language} = 'ko' THEN name_ko
+                WHEN #{language} = 'en' THEN name_en
+                ELSE name_zh
+            END as name,
+            CASE 
+                WHEN #{language} = 'ko' THEN city_ko
+                WHEN #{language} = 'en' THEN city_en
+                ELSE city_zh
+            END as city,
             logo_url,
             status,
             created_time,
@@ -19,12 +23,7 @@
             deleted
         FROM school
         WHERE deleted = 0 AND status = 1
-        ORDER BY
-            CASE
-                WHEN #{language} = 'ko' THEN name_ko
-                WHEN #{language} = 'en' THEN name_en
-                ELSE name_zh
-            END ASC
+        ORDER BY name ASC
     </select>
 
 </mapper>

@@ -18,6 +18,7 @@
         >
           {{ $t('common.delete') }}
         </el-button>
+        <LangSwitcher />
       </div>
     </div>
 
@@ -34,10 +35,10 @@
 
           <div class="flex items-center justify-between mb-8">
             <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded">{{ $t('messages.officialPublish') }}</span>
-              <span v-if="detail.type === 0" class="px-2 py-0.5 bg-teal-50 text-teal-600 text-[10px] font-bold rounded">{{ $t('messages.systemNotice') }}</span>
-              <span v-else-if="detail.type === 1" class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded">{{ $t('messages.securityAlert') }}</span>
-              <span v-else class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded">{{ $t('messages.other') }}</span>
+              <span class="px-2 py-0.5 bg-blue-50 text-blue-500 text-[10px] font-bold rounded">官方发布</span>
+              <span v-if="detail.type === 0" class="px-2 py-0.5 bg-teal-50 text-teal-600 text-[10px] font-bold rounded">系统通知</span>
+              <span v-else-if="detail.type === 1" class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold rounded">安全提醒</span>
+              <span v-else class="px-2 py-0.5 bg-gray-100 text-gray-500 text-[10px] font-bold rounded">其他</span>
             </div>
             <span class="text-[11px] text-gray-400 font-medium">{{ formatFullTime(detail.createTime) }}</span>
           </div>
@@ -54,12 +55,12 @@
 
           <div class="mt-12 flex flex-col items-center">
             <div class="w-12 h-[1px] bg-gray-100 mb-4"></div>
-            <p class="text-[10px] text-gray-300 tracking-widest uppercase">{{ $t('messages.brandSlogan') }}</p>
+            <p class="text-[10px] text-gray-300 tracking-widest uppercase">Intelligent Second-hand Market</p>
           </div>
         </div>
       </div>
 
-      <el-empty v-else :description="$t('messages.contentGone')" />
+      <el-empty v-else description="内容已被外星人带走了" />
     </div>
   </div>
 </template>
@@ -67,14 +68,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { showToast, showConfirmDialog } from 'vant'
 import request from '@/api/request'
+import LangSwitcher from '@/components/LangSwitcher.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
 const detail = ref(null)
 const loading = ref(true)
 
@@ -93,10 +93,10 @@ const fetchDetail = async () => {
       // 兼容 records 数组结构或直接对象结构
       detail.value = res.data.records ? res.data.records[0] : res.data
     } else {
-      showToast(res.message || t('messages.loadFailed'))
+      showToast(res.message)
     }
   } catch (e) {
-    showToast(t('messages.fetchDetailFailed'))
+    showToast('获取详情失败')
   } finally {
     loading.value = false
   }
@@ -105,8 +105,8 @@ const fetchDetail = async () => {
 const handleDelete = async () => {
   try {
     await showConfirmDialog({
-      title: t('messages.deleteConfirm'),
-      message: t('messages.confirmDeleteThisMessage'),
+      title: '删除确认',
+      message: '确定要删除这条消息吗？',
       confirmButtonColor: '#ef4444'
     })
     const res = await request({
@@ -115,7 +115,7 @@ const handleDelete = async () => {
       data: { id: route.params.id }
     })
     if (res.code === "200") {
-      showToast(t('messages.deleted'))
+      showToast('已删除')
       router.back()
     }
   } catch (e) {}

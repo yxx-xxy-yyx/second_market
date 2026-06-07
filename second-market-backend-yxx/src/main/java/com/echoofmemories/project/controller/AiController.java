@@ -1,9 +1,12 @@
 package com.echoofmemories.project.controller;
 
 import com.echoofmemories.project.common.Result;
-import com.echoofmemories.project.dto.AiChatRequest;
 import com.echoofmemories.project.dto.AiRequest;
 import com.echoofmemories.project.dto.AiResponse;
+import com.echoofmemories.project.dto.ProductAnalysisDTO;
+import com.echoofmemories.project.dto.ProductAnalysisRequest;
+import com.echoofmemories.project.dto.AiRecommendationRequest;
+import com.echoofmemories.project.dto.AiRecommendationResponse;
 import com.echoofmemories.project.security.SecurityUtils;
 import com.echoofmemories.project.security.annotation.RequireRole;
 import com.echoofmemories.project.service.AiService;
@@ -19,14 +22,7 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * AI功能控制器
- * 提供AI内容生成相关接口
- * 
- * @author echo
- * @since 2025-01-27
- */
-@Tag(name = "AI功能管理", description = "AI内容生成相关接口")
+@Tag(name = "AI功能管理", description = "AI内容生成及商品分析相关接口")
 @Slf4j
 @RestController
 @RequestMapping("/ai")
@@ -35,12 +31,43 @@ public class AiController {
 
     private final AiService aiService;
 
+    @Operation(summary = "图片智能分析", description = "利用AI分析商品图片，提取标题、描述和成色建议")
+    @PostMapping("/analyze/image")
+    public Result<ProductAnalysisDTO> analyzeProductImage(@Valid @RequestBody ProductAnalysisRequest request) {
+        log.info("收到AI商品分析请求，图片数量：{}", request.getImageUrls() != null ? request.getImageUrls().size() : 0);
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            if (userId == null) {
+                userId = 0L;
+            }
+            
+            log.info("开始处理AI商品分析请求，用户ID：{}，图片URLs：{}", userId, request.getImageUrls());
+
+            String language = request.getLanguage();
+            if (language == null || language.isEmpty()) {
+                language = "zh";
+            }
+
+            ProductAnalysisDTO result = aiService.analyzeProductImages(
+                    request.getImageUrls(),
+                    request.getAdditionalInfo(),
+                    userId,
+                    language
+            );
+            
+            log.info("AI商品分析请求处理成功");
+            return Result.success("分析成功", result);
+        } catch (Exception e) {
+            log.error("AI商品分析请求处理失败：{}", e.getMessage(), e);
+            return Result.error("500", e.getMessage());
+        }
+    }
+
     @Operation(summary = "通用AI内容生成", description = "根据用户提示词生成内容")
     @PostMapping("/generate")
     @RequireRole({ "admin", "user" })
     public Result<AiResponse> generateContent(@Valid @RequestBody AiRequest request) {
         try {
-            // 自动设置当前用户ID（安全性考虑，不允许前端传递用户ID）
             Long currentUserId = SecurityUtils.getCurrentUserId();
             request.setUserId(currentUserId);
 
@@ -52,28 +79,6 @@ public class AiController {
         } catch (Exception e) {
             log.error("AI内容生成失败，用户：{}，错误：{}", SecurityUtils.getCurrentUserId(), e.getMessage(), e);
             return Result.error("AI内容生成失败：" + e.getMessage());
-        }
-    }
-
-    @Operation(summary = "AI聊天助手", description = "基于对话历史返回AI助手回复")
-    @PostMapping("/chat")
-    @RequireRole({ "admin", "user" })
-    public Result<AiResponse> chat(@Valid @RequestBody AiChatRequest request) {
-        try {
-            Long currentUserId = SecurityUtils.getCurrentUserId();
-            request.setUserId(currentUserId);
-            log.info("用户{}请求AI聊天，消息数：{}", currentUserId, request.getMessages().size());
-
-            AiResponse response = aiService.chat(
-                    request.getMessages(),
-                    currentUserId,
-                    request.getMaxTokens(),
-                    request.getTemperature()
-            );
-            return Result.success(response);
-        } catch (Exception e) {
-            log.error("AI聊天失败，用户：{}，错误：{}", SecurityUtils.getCurrentUserId(), e.getMessage(), e);
-            return Result.error("AI聊天失败：" + e.getMessage());
         }
     }
 
@@ -131,7 +136,6 @@ public class AiController {
             status.put("available", aiService.isAvailable());
             status.put("status", aiService.getServiceStatus());
 
-            // 如果是管理员，返回更详细的信息
             if (SecurityUtils.isAdmin()) {
                 status.put("connectionTest", aiService.testConnection());
             }
@@ -182,20 +186,17 @@ public class AiController {
         try {
             Map<String, Object> help = new HashMap<>();
 
-            // AI生成类型说明
             Map<String, String> generateTypes = new HashMap<>();
             generateTypes.put("POST_CONTENT", "帖子内容生成 - 根据提示词创作文章内容");
             generateTypes.put("POST_SUMMARY", "帖子摘要生成 - 为文章内容生成简洁摘要");
             generateTypes.put("POST_TAGS", "帖子标签生成 - 为文章内容生成相关标签");
             generateTypes.put("GENERAL_CONTENT", "通用内容生成 - 通用的内容创作");
 
-            // 使用示例
             Map<String, String> examples = new HashMap<>();
             examples.put("文章创作", "请帮我写一篇关于Vue 3新特性的技术文章，包含组合式API、响应式系统等内容");
             examples.put("摘要生成", "为你的长文章内容生成200字以内的摘要");
             examples.put("标签生成", "为文章内容生成3-5个相关标签，便于分类和检索");
 
-            // 使用建议
             String[] tips = {
                     "提示词要具体明确，避免过于模糊的描述",
                     "可以在提示词中指定期望的内容格式和风格",
@@ -214,6 +215,162 @@ public class AiController {
         } catch (Exception e) {
             log.error("获取AI帮助信息失败：{}", e.getMessage(), e);
             return Result.error("获取AI帮助信息失败");
+        }
+    }
+
+    @Operation(summary = "智能托管", description = "开启商品智能托管，自动回复、议价、调价")
+    @PostMapping("/trust")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiIntelligentTrustResponse> intelligentTrust(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiIntelligentTrustRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求智能托管服务", userId);
+
+            com.echoofmemories.project.dto.AiIntelligentTrustResponse response = 
+                aiService.intelligentTrust(request, userId);
+            return Result.success("智能托管开启成功", response);
+
+        } catch (Exception e) {
+            log.error("智能托管服务失败：{}", e.getMessage(), e);
+            return Result.error("智能托管服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "鉴定质检", description = "上传商品图片进行AI鉴定和成色评估")
+    @PostMapping("/authenticate")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiAuthenticationResponse> authenticateProduct(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiAuthenticationRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求商品鉴定服务", userId);
+
+            com.echoofmemories.project.dto.AiAuthenticationResponse response = 
+                aiService.authenticateProduct(request, userId);
+            return Result.success("商品鉴定完成", response);
+
+        } catch (Exception e) {
+            log.error("商品鉴定服务失败：{}", e.getMessage(), e);
+            return Result.error("商品鉴定服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "市场行情参考", description = "获取商品市场行情、价格趋势和同款最低价")
+    @PostMapping("/market")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiMarketTrendResponse> getMarketTrend(
+            @RequestBody com.echoofmemories.project.dto.AiMarketTrendRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求市场行情参考", userId);
+
+            com.echoofmemories.project.dto.AiMarketTrendResponse response = 
+                aiService.getMarketTrend(request, userId);
+            return Result.success("获取市场行情成功", response);
+
+        } catch (Exception e) {
+            log.error("获取市场行情失败：{}", e.getMessage(), e);
+            return Result.error("获取市场行情失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "智能搜索", description = "AI智能搜索，支持模糊和语音搜索")
+    @PostMapping("/search")
+    public Result<com.echoofmemories.project.dto.AiSmartSearchResponse> smartSearch(
+            @RequestBody com.echoofmemories.project.dto.AiSmartSearchRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            if (userId == null) {
+                userId = 0L;
+            }
+            log.info("用户{}请求智能搜索", userId);
+
+            com.echoofmemories.project.dto.AiSmartSearchResponse response = 
+                aiService.smartSearch(request, userId);
+            return Result.success("搜索完成", response);
+
+        } catch (Exception e) {
+            log.error("智能搜索失败：{}", e.getMessage(), e);
+            return Result.error("智能搜索失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "校园匹配", description = "按学校、距离、专业匹配相关商品和用户")
+    @PostMapping("/match")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiCampusMatchResponse> campusMatch(
+            @RequestBody com.echoofmemories.project.dto.AiCampusMatchRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求校园匹配服务", userId);
+
+            com.echoofmemories.project.dto.AiCampusMatchResponse response = 
+                aiService.campusMatch(request, userId);
+            return Result.success("校园匹配完成", response);
+
+        } catch (Exception e) {
+            log.error("校园匹配失败：{}", e.getMessage(), e);
+            return Result.error("校园匹配失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "纠纷仲裁", description = "AI辅助纠纷判断和处理建议")
+    @PostMapping("/dispute")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiDisputeResolutionResponse> resolveDispute(
+            @Valid @RequestBody com.echoofmemories.project.dto.AiDisputeResolutionRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求纠纷仲裁服务", userId);
+
+            com.echoofmemories.project.dto.AiDisputeResolutionResponse response = 
+                aiService.resolveDispute(request, userId);
+            return Result.success("纠纷分析完成", response);
+
+        } catch (Exception e) {
+            log.error("纠纷仲裁服务失败：{}", e.getMessage(), e);
+            return Result.error("纠纷仲裁服务失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "校园专属服务", description = "AI教材循环、闲置置换、校园跑腿等服务")
+    @PostMapping("/campus-service")
+    @RequireRole({ "admin", "user" })
+    public Result<com.echoofmemories.project.dto.AiCampusServiceResponse> campusService(
+            @RequestBody com.echoofmemories.project.dto.AiCampusServiceRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("用户{}请求校园专属服务", userId);
+
+            com.echoofmemories.project.dto.AiCampusServiceResponse response = 
+                aiService.campusService(request, userId);
+            return Result.success("校园服务匹配完成", response);
+
+        } catch (Exception e) {
+            log.error("校园服务匹配失败：{}", e.getMessage(), e);
+            return Result.error("校园服务匹配失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "AI智能推荐商品", description = "根据用户浏览和搜索历史进行个性化推荐")
+    @PostMapping("/recommendations")
+    public Result<AiRecommendationResponse> getRecommendations(
+            @RequestBody AiRecommendationRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("AI推荐请求 - 用户ID: {}, 类型: {}", userId, request.getType());
+            
+            AiRecommendationResponse response = aiService.getRecommendations(request, userId);
+            
+            if (response.getSuccess()) {
+                return Result.success(response);
+            } else {
+                return Result.error("500", response.getExplanation());
+            }
+        } catch (Exception e) {
+            log.error("AI推荐失败", e);
+            return Result.error("500", "推荐服务暂时不可用");
         }
     }
 }

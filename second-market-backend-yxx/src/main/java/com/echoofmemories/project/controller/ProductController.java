@@ -1,12 +1,12 @@
 package com.echoofmemories.project.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.echoofmemories.project.annotation.AuditLog;
 import com.echoofmemories.project.common.Result;
 import com.echoofmemories.project.dto.ProductPageRequest;
 import com.echoofmemories.project.dto.ProductRequest;
 import com.echoofmemories.project.entity.Product;
 import com.echoofmemories.project.security.SecurityUtils;
-import com.echoofmemories.project.service.BrowseHistoryService;
 import com.echoofmemories.project.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,10 +28,10 @@ import javax.validation.Valid;
 public class ProductController {
 
     private final ProductService productService;
-    private final BrowseHistoryService browseHistoryService;
 
     @Operation(summary = "新增商品")
     @PostMapping("/add")
+    @AuditLog("发布商品")
     public Result<String> addProduct(@Valid @RequestBody ProductRequest request) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
@@ -56,6 +56,7 @@ public class ProductController {
 
     @Operation(summary = "更新商品")
     @PutMapping("/update")
+    @AuditLog("更新商品")
     public Result<String> updateProduct(@Valid @RequestBody ProductRequest request) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
@@ -72,10 +73,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员修改所有商品
-            // if (!existProduct.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限修改此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以修改
+            if (!SecurityUtils.canAccessUser(existProduct.getUserId())) {
+                return Result.error("403", "无权限修改此商品");
+            }
 
             Product product = new Product();
             BeanUtils.copyProperties(request, product);
@@ -93,6 +94,7 @@ public class ProductController {
 
     @Operation(summary = "删除商品")
     @DeleteMapping("/delete/{id}")
+    @AuditLog("删除商品")
     public Result<String> deleteProduct(@PathVariable Long id) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
@@ -105,10 +107,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员删除所有商品
-            // if (!product.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限删除此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以删除
+            if (!SecurityUtils.canAccessUser(product.getUserId())) {
+                return Result.error("403", "无权限删除此商品");
+            }
 
             boolean success = productService.deleteProduct(id);
             if (success) {
@@ -198,10 +200,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员修改所有商品
-            // if (!product.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限修改此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以修改状态
+            if (!SecurityUtils.canAccessUser(product.getUserId())) {
+                return Result.error("403", "无权限修改此商品");
+            }
 
             product.setStatus(status);
             boolean success = productService.updateById(product);
@@ -222,33 +224,10 @@ public class ProductController {
         try {
             String userIdentifier = getUserIdentifier(request);
             Product product = productService.viewProduct(id, userIdentifier);
-            Long currentUserId = getCurrentUserId(request);
-            if (currentUserId != null) {
-                try {
-                    browseHistoryService.addHistory(currentUserId, id);
-                } catch (Exception ignored) {
-                    // 不影响主流程
-                }
-            }
             return Result.success(product);
         } catch (Exception e) {
             return Result.error("500", e.getMessage());
         }
-    }
-
-    private Long getCurrentUserId(javax.servlet.http.HttpServletRequest request) {
-        Long currentUserId = SecurityUtils.getCurrentUserId();
-        if (currentUserId != null) {
-            return currentUserId;
-        }
-        Object userIdAttr = request.getAttribute("userId");
-        if (userIdAttr instanceof String) {
-            try {
-                return Long.valueOf((String) userIdAttr);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-        return null;
     }
 
     private String getUserIdentifier(javax.servlet.http.HttpServletRequest request) {

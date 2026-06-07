@@ -109,7 +109,12 @@
               <el-icon><Bell /></el-icon>
               <template #title>{{ $t('layout.menu.notices') }}</template>
             </el-menu-item>
-            
+
+            <el-menu-item index="/admin/forum">
+              <el-icon><ChatDotSquare /></el-icon>
+              <template #title>论坛管理</template>
+            </el-menu-item>
+
             <el-menu-item index="/admin/profile">
               <el-icon><User /></el-icon>
               <template #title>{{ $t('layout.menu.profile') }}</template>
@@ -147,6 +152,10 @@
             <el-menu-item index="/admin/notices">
               <el-icon><Bell /></el-icon>
               <template #title>{{ $t('layout.menu.notices') }}</template>
+            </el-menu-item>
+            <el-menu-item index="/admin/forum">
+              <el-icon><ChatDotSquare /></el-icon>
+              <template #title>论坛管理</template>
             </el-menu-item>
             <el-menu-item index="/admin/profile">
               <el-icon><User /></el-icon>
@@ -208,7 +217,8 @@ import {
   Document,
   CircleCheckFilled,
   Warning,
-  Bell
+  Bell,
+  ChatDotSquare
 } from '@element-plus/icons-vue'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
@@ -265,6 +275,9 @@ const breadcrumbList = computed(() => {
           break
         case 'notices':
           title = t('layout.menu.notices')
+          break
+        case 'forum':
+          title = '论坛管理'
           break
         case 'profile':
           title = t('layout.menu.profile')

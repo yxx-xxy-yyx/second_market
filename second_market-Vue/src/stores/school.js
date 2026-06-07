@@ -12,7 +12,7 @@ export const useSchoolStore = defineStore('school', {
 
     getters: {
         currentSchoolName(state) {
-            if (!state.selectedSchool) return i18n.global.t('nav.campus')
+            if (!state.selectedSchool) return i18n.global.t('nav.selectSchool')
 
             const school = state.schoolList.find(
                 s => s.value === state.selectedSchool
@@ -21,22 +21,12 @@ export const useSchoolStore = defineStore('school', {
             return school ? school.label : i18n.global.t('nav.selectSchool')
         },
         getSchoolName: (state) => (id) => {
-            const school = state.schoolList.find(item => item.value === String(id))
+            const school = state.schoolList.find(item => item.value === id)
             return school ? school.label : id
         }
     },
 
     actions: {
-        getLocalizedSchoolName(item) {
-            const language = this.selectedLanguage || 'zh'
-            if (language === 'ko') {
-                return item.nameKo || item.name_ko || item.name || item.nameZh || item.name_zh || item.nameEn || item.name_en
-            }
-            if (language === 'en') {
-                return item.nameEn || item.name_en || item.name || item.nameZh || item.name_zh || item.nameKo || item.name_ko
-            }
-            return item.nameZh || item.name_zh || item.name || item.nameKo || item.name_ko || item.nameEn || item.name_en
-        },
         async setLanguage(language) {
             this.selectedLanguage = language || 'zh'
             localStorage.setItem('language', this.selectedLanguage)
@@ -51,8 +41,7 @@ export const useSchoolStore = defineStore('school', {
 
                 if (res.code === 200 || res.code === '200') {
                     this.schoolList = (res.data || []).map(item => ({
-                        ...item,
-                        label: this.getLocalizedSchoolName(item) || 'Unknown School',
+                        label: item.name || item.nameZh || 'Unknown School',
                         value: String(item.id)
                     }))
                     localStorage.setItem(`schoolListCache:${this.selectedLanguage}`, JSON.stringify(this.schoolList))

@@ -329,11 +329,7 @@ const handlePublish = async () => {
 
     if (res.code == 200 || res.success) {
       ElMessage.success(isEdit.value ? t('forum.updateSuccess') : t('forum.publishSuccess'))
-      if (isEdit.value) {
-        router.back()
-      } else {
-        router.replace({ name: 'user-forum', query: { refresh: Date.now() } })
-      }
+      router.back()
     } else if (res.code == 401) {
       ElMessage.warning(t('common.pleaseLogin'))
       router.push('/login')

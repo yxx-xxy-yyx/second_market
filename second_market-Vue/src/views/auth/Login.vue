@@ -1,105 +1,283 @@
 <template>
-  <div class="login-page flex flex-col lg:flex-row">
-    <!-- 右上角语言切换下拉 -->
+  <div class="login-page">
+    <!-- 语言切换 -->
     <div class="lang-switch">
       <LangSwitcher />
     </div>
 
-    <div class="brand-section hidden lg:flex">
-      <div class="brand-content">
-        <div class="logo-container">
-          <div class="logo">
+    <!-- 移动端/平板端设计 -->
+    <div class="mobile-container lg:hidden">
+      <div class="mobile-background">
+        <div class="floating-circle circle-1"></div>
+        <div class="floating-circle circle-2"></div>
+        <div class="floating-circle circle-3"></div>
+      </div>
+      
+      <div class="mobile-content">
+        <div class="mobile-brand">
+          <div class="mobile-logo">
             <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
           </div>
+          <h1 class="mobile-title">{{ $t('login.appName') }}</h1>
+          <p class="mobile-subtitle">{{ $t('login.appSlogan') }}</p>
         </div>
-        <h1 class="brand-title">{{ $t('login.appName') }}</h1>
-        <p class="brand-slogan">{{ $t('login.appSlogan') }}</p>
-        <div class="brand-features">
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('login.feature1Desc') }}</div>
-            <span>{{ $t('login.feature1') }}</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('login.feature2Desc') }}</div>
-            <span>{{ $t('login.feature2') }}</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-icon-box">{{ $t('login.feature3Desc') }}</div>
-            <span>{{ $t('login.feature3') }}</span>
+
+        <div class="mobile-form-wrapper">
+          <div class="mobile-form-card">
+            <h2 class="mobile-form-title">{{ $t('login.title') }}</h2>
+            
+            <el-form
+              ref="loginFormRef"
+              :model="loginForm"
+              :rules="loginRules"
+              class="login-form"
+              label-position="top"
+              size="large"
+            >
+              <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+                <el-input
+                  v-model="loginForm.uid"
+                  :placeholder="$t('common.pleaseInputUid')"
+                  clearable
+                  class="mobile-input"
+                  @keyup.enter="handleLogin"
+                >
+                  <template #prefix>
+                    <el-icon><User /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.school')">
+                <el-select
+                  v-model="selectedSchool"
+                  filterable
+                  :placeholder="$t('nav.selectSchool')"
+                  style="width: 100%;"
+                  class="mobile-select"
+                >
+                  <el-option
+                    v-for="item in schoolStore.schoolList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+                <el-input
+                  v-model="loginForm.password"
+                  type="password"
+                  :placeholder="$t('common.pleaseInputPassword')"
+                  show-password
+                  clearable
+                  class="mobile-input"
+                  @keyup.enter="handleLogin"
+                >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <el-form-item>
+                <el-button
+                  type="primary"
+                  class="mobile-login-btn"
+                  :loading="loading"
+                  @click="handleLogin"
+                >
+                  {{ loading ? $t('common.loading') : $t('common.login') }}
+                </el-button>
+              </el-form-item>
+            </el-form>
+
+            <div class="form-footer">
+              <span>{{ $t('login.noAccount') }}</span>
+              <el-link type="primary" :underline="false" @click="$router.push('/register')">
+                {{ $t('common.register') }}
+              </el-link>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="form-section flex-1">
-      <div class="decorative-circle circle-1"></div>
-      <div class="decorative-circle circle-2"></div>
+    <!-- 桌面端设计 -->
+    <div class="desktop-container hidden lg:block">
+      <div class="desktop-background">
+        <div class="bg-gradient-1"></div>
+        <div class="bg-gradient-2"></div>
+        <div class="bg-particles">
+          <div v-for="i in 20" :key="i" class="particle" :style="getParticleStyle(i)"></div>
+        </div>
+      </div>
 
-      <div class="form-content">
-        <div class="form-header">
-          <h2 class="form-title">{{ $t('login.title') }}</h2>
-          <p class="form-subtitle">{{ $t('login.subtitle') }}</p>
+      <div class="desktop-content">
+        <div class="desktop-brand">
+          <div class="brand-logo-wrapper">
+            <div class="brand-logo">
+              <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
+            </div>
+            <div class="logo-glow"></div>
+          </div>
+          <h1 class="desktop-title">{{ $t('login.appName') }}</h1>
+          <p class="desktop-slogan">{{ $t('login.appSlogan') }}</p>
+          
+          <div class="desktop-features">
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><MagicStick /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('login.feature1') }}</span>
+            </div>
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><ShoppingCart /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('login.feature2') }}</span>
+            </div>
+            <div class="desktop-feature-item">
+              <div class="feature-icon">
+                <el-icon :size="28"><Star /></el-icon>
+              </div>
+              <span class="feature-text">{{ $t('login.feature3') }}</span>
+            </div>
+          </div>
         </div>
 
-        <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" class="login-form" label-position="top"
-          size="large">
-          <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
-            <el-input v-model="loginForm.uid" :placeholder="$t('common.pleaseInputUid')" clearable
-              @keyup.enter="handleLogin">
-              <template #prefix>
-                <el-icon>
-                  <User />
-                </el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+        <div class="desktop-form-wrapper">
+          <div class="desktop-form-card">
+            <div class="form-decoration">
+              <div class="decoration-circle dec-1"></div>
+              <div class="decoration-circle dec-2"></div>
+              <div class="decoration-circle dec-3"></div>
+            </div>
+            
+            <div class="form-card-content">
+              <h2 class="desktop-form-title">{{ $t('login.title') }}</h2>
+              <p class="desktop-form-subtitle">{{ $t('login.subtitle') }}</p>
 
-          <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
-            <el-input v-model="loginForm.password" type="password" :placeholder="$t('common.pleaseInputPassword')"
-              show-password clearable @keyup.enter="handleLogin">
-              <template #prefix>
-                <el-icon>
-                  <Lock />
-                </el-icon>
-              </template>
-            </el-input>
-          </el-form-item>
+              <el-form
+                ref="loginFormRef"
+                :model="loginForm"
+                :rules="loginRules"
+                class="login-form"
+                label-position="top"
+                size="large"
+              >
+                <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+                  <el-input
+                    v-model="loginForm.uid"
+                    :placeholder="$t('common.pleaseInputUid')"
+                    clearable
+                    class="desktop-input"
+                    @keyup.enter="handleLogin"
+                  >
+                    <template #prefix>
+                      <el-icon><User /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
 
-          <el-form-item>
-            <el-button type="primary" class="login-btn" :loading="loading" @click="handleLogin">
-              {{ loading ? $t('common.loading') : $t('common.login') }}
-            </el-button>
-          </el-form-item>
-        </el-form>
+                <el-form-item :label="$t('common.school')">
+                  <el-select
+                    v-model="selectedSchool"
+                    filterable
+                    :placeholder="$t('nav.selectSchool')"
+                    style="width: 100%;"
+                    class="desktop-select"
+                  >
+                    <el-option
+                      v-for="item in schoolStore.schoolList"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
 
-        <div class="form-footer">
-          <span>{{ $t('login.noAccount') }}</span>
-          <el-link type="primary" :underline="false" @click="$router.push('/register')">
-            {{ $t('common.register') }}
-          </el-link>
+                <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+                  <el-input
+                    v-model="loginForm.password"
+                    type="password"
+                    :placeholder="$t('common.pleaseInputPassword')"
+                    show-password
+                    clearable
+                    class="desktop-input"
+                    @keyup.enter="handleLogin"
+                  >
+                    <template #prefix>
+                      <el-icon><Lock /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+
+                <el-form-item>
+                  <el-button
+                    type="primary"
+                    class="desktop-login-btn"
+                    :loading="loading"
+                    @click="handleLogin"
+                  >
+                    {{ loading ? $t('common.loading') : $t('common.login') }}
+                  </el-button>
+                </el-form-item>
+              </el-form>
+
+              <div class="desktop-form-footer">
+                <span>{{ $t('login.noAccount') }}</span>
+                <el-link type="primary" :underline="false" @click="$router.push('/register')">
+                  {{ $t('common.register') }}
+                </el-link>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <!--<div class="demo-accounts">  隐藏测试账户
-          <el-divider>{{ $t('login.testAccount') }}</el-divider>
-          <p class="demo-text">{{ $t('login.admin') }}：admin / EchoOfMemories11</p>
-          <p class="demo-text">{{ $t('login.user') }}：user01 / EchoOfMemories11</p>
-        </div>-->
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { User, Lock } from '@element-plus/icons-vue'
+import { User, Lock, MagicStick, ShoppingCart, Star } from '@element-plus/icons-vue'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
+import { useSchoolStore } from '@/stores/school'
 
-const { t } = useI18n()
+const { locale, t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
+const schoolStore = useSchoolStore()
+
+// 为桌面端粒子效果生成随机样式
+const getParticleStyle = (i) => {
+  const size = Math.random() * 60 + 20
+  return {
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    width: `${size}px`,
+    height: `${size}px`,
+    animationDelay: `${Math.random() * 10}s`,
+    animationDuration: `${Math.random() * 20 + 20}s`,
+    opacity: Math.random() * 0.4 + 0.1
+  }
+}
+
+const selectedSchool = computed({
+  get: () => schoolStore.selectedSchool,
+  set: (value) => schoolStore.setSchool(value)
+})
+
+onMounted(() => {
+  if (!schoolStore.schoolList.length) {
+    schoolStore.getSchoolList()
+  }
+})
 
 const loginFormRef = ref()
 const loading = ref(false)
@@ -122,11 +300,11 @@ const loginRules = {
 const handleLogin = async () => {
   try {
     await loginFormRef.value.validate()
-
+    
     loading.value = true
-
+    
     const result = await userStore.login(loginForm)
-
+    
     if (result.success) {
       if (userStore.user?.role === 'admin') {
         await router.replace('/admin/dashboard')
@@ -135,7 +313,7 @@ const handleLogin = async () => {
       }
     }
   } catch (error) {
-
+    
   } finally {
     loading.value = false
   }
@@ -143,264 +321,642 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* 语言切换样式 */
+/* 基础样式 */
+* {
+  box-sizing: border-box;
+}
+
 .lang-switch {
   position: fixed;
   top: 20px;
   right: 24px;
-  z-index: 999;
+  z-index: 9999;
 }
 
 .login-page {
   min-height: 100vh;
-  display: flex;
-  background: #FFFFFF;
   overflow: hidden;
   position: relative;
 }
 
-.brand-section {
-  flex: 0 0 60%;
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px;
+/* 移动端/平板端样式 */
+.mobile-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   position: relative;
-  overflow: hidden;
 }
 
-.brand-section::before {
-  content: '';
+.mobile-background {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(1200px 600px at 70% 20%, rgba(25, 118, 210, 0.22) 0%, rgba(255, 255, 255, 0) 60%),
-    radial-gradient(900px 500px at 20% 70%, rgba(25, 118, 210, 0.16) 0%, rgba(255, 255, 255, 0) 55%);
-  z-index: 0;
+  inset: 0;
+  overflow: hidden;
 }
 
-.brand-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  max-width: 500px;
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
 }
 
-.logo-container {
-  margin-bottom: 30px;
-}
-
-.logo {
+.floating-circle.circle-1 {
   width: 200px;
   height: 200px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.floating-circle.circle-2 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  top: 40%;
+  right: -30px;
+  animation-delay: 2s;
+}
+
+.floating-circle.circle-3 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  bottom: -60px;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+.mobile-content {
+  position: relative;
+  z-index: 1;
+  padding: 80px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-brand {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.mobile-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 24px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+  animation: pulse-glow 3s ease-in-out infinite;
 }
 
-.logo img {
-  width: 150px;
-  height: 150px;
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 50px rgba(102, 126, 234, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.mobile-logo img {
+  width: 80px;
+  height: 80px;
   object-fit: contain;
 }
 
-.brand-title {
-  font-size: 42px;
-  font-weight: 700;
-  color: #1976D2;
-  margin: 20px 0 10px 0;
-  letter-spacing: 2px;
-}
-
-.brand-slogan {
-  font-size: 20px;
-  color: #0D47A1;
-  margin: 0 0 40px 0;
-}
-
-.brand-features {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  flex-wrap: wrap;
-}
-
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 12px;
-  min-width: 120px;
-}
-
-.feature-icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #42a5f5 0%, #478ed1 100%);
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.mobile-title {
+  font-size: 32px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 8px;
+  letter-spacing: 1px;
 }
 
-.feature-item span:last-child {
-  font-size: 14px;
-  color: #424242;
+.mobile-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
 }
 
-.form-section {
-  flex: 0 0 40%;
+.mobile-form-wrapper {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px 40px;
-  position: relative;
-  background: #FFFFFF;
 }
 
-.decorative-circle {
-  position: absolute;
-  border-radius: 50%;
-  z-index: 0;
-}
-
-.circle-1 {
-  width: 300px;
-  height: 300px;
-  background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
-  opacity: 0.15;
-  top: -100px;
-  right: -100px;
-}
-
-.circle-2 {
-  width: 200px;
-  height: 200px;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  opacity: 0.15;
-  bottom: -50px;
-  left: -50px;
-}
-
-.form-content {
-  position: relative;
-  z-index: 1;
+.mobile-form-card {
   width: 100%;
   max-width: 400px;
-  background: white;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  border-radius: 32px;
+  padding: 40px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+              0 0 60px rgba(102, 126, 234, 0.1);
+  animation: slide-up 0.8s ease-out;
 }
 
-.form-header {
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-form-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: white;
   text-align: center;
   margin-bottom: 32px;
 }
 
-.form-title {
-  font-size: 32px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.mobile-input :deep(.el-input__wrapper),
+.mobile-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: none;
+  transition: all 0.3s ease;
 }
 
-.form-subtitle {
-  font-size: 14px;
-  color: #666;
-  margin-top: 8px;
+.mobile-input :deep(.el-input__wrapper:hover),
+.mobile-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
 }
 
-.login-form {
-  margin-bottom: 24px;
+.mobile-input :deep(.el-input__wrapper.is-focus),
+.mobile-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
 }
 
-.login-btn {
+.mobile-input :deep(.el-input__inner),
+.mobile-input :deep(.el-input__prefix),
+.mobile-input :deep(.el-input__suffix),
+.mobile-select :deep(.el-input__inner) {
+  color: white;
+}
+
+.mobile-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mobile-input :deep(.el-form-item__label),
+.mobile-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.mobile-login-btn {
   width: 100%;
-  height: 44px;
-  font-size: 16px;
-  font-weight: 500;
+  height: 54px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.mobile-login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+}
+
+.mobile-login-btn:active {
+  transform: translateY(-1px);
 }
 
 .form-footer {
   text-align: center;
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 24px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.demo-accounts {
+.form-footer a {
+  color: #667eea;
+  font-weight: 700;
+}
+
+/* 桌面端样式 */
+.desktop-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.desktop-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.bg-gradient-1 {
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.35) 0%, transparent 70%);
+  top: -200px;
+  left: -200px;
+  animation: pulse 15s ease-in-out infinite;
+}
+
+.bg-gradient-2 {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(240, 147, 251, 0.3) 0%, transparent 70%);
+  bottom: -100px;
+  right: -100px;
+  animation: pulse 12s ease-in-out infinite reverse;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.bg-particles {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  animation: float-particle 20s linear infinite;
+}
+
+@keyframes float-particle {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.desktop-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  padding: 40px 80px;
+  gap: 80px;
+}
+
+.desktop-brand {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.brand-logo-wrapper {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.brand-logo {
+  width: 180px;
+  height: 180px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  border-radius: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 2;
+  animation: logo-float 6s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.brand-logo img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.logo-glow {
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.6) 0%, transparent 70%);
+  z-index: 1;
+  animation: glow-pulse 4s ease-in-out infinite;
+  filter: blur(30px);
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.desktop-title {
+  font-size: 64px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #f093fb 80%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.desktop-slogan {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 500;
+  margin-bottom: 60px;
+}
+
+.desktop-features {
+  display: flex;
+  gap: 32px;
+}
+
+.desktop-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 28px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s ease;
+}
+
+.desktop-feature-item:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.feature-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.desktop-form-wrapper {
+  flex: 0 0 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.desktop-form-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(50px);
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  animation: card-appear 0.8s ease-out;
+}
+
+@keyframes card-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.form-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.1;
+}
+
+.decoration-circle.dec-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -100px;
+}
+
+.decoration-circle.dec-2 {
+  width: 200px;
+  height: 200px;
+  bottom: -100px;
+  left: -50px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.decoration-circle.dec-3 {
+  width: 100px;
+  height: 100px;
+  top: 50%;
+  right: -30px;
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.form-card-content {
+  position: relative;
+  z-index: 1;
+  padding: 56px 48px;
+}
+
+.desktop-form-title {
+  font-size: 36px;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.desktop-form-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 40px;
+}
+
+.desktop-input :deep(.el-input__wrapper),
+.desktop-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 16px 20px;
+  box-shadow: none;
+  transition: all 0.4s ease;
+}
+
+.desktop-input :deep(.el-input__wrapper:hover),
+.desktop-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.desktop-input :deep(.el-input__wrapper.is-focus),
+.desktop-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #667eea;
+  box-shadow: 0 0 30px rgba(102, 126, 234, 0.25);
+}
+
+.desktop-input :deep(.el-input__inner),
+.desktop-input :deep(.el-input__prefix),
+.desktop-input :deep(.el-input__suffix),
+.desktop-select :deep(.el-input__inner) {
+  color: white;
+  font-size: 16px;
+}
+
+.desktop-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.desktop-input :deep(.el-form-item__label),
+.desktop-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+.desktop-login-btn {
+  width: 100%;
+  height: 60px;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 10px 35px rgba(102, 126, 234, 0.4);
+  transition: all 0.4s ease;
+  margin-top: 8px;
+}
+
+.desktop-login-btn:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5);
+}
+
+.desktop-login-btn:active {
+  transform: translateY(-2px) scale(0.99);
+}
+
+.desktop-form-footer {
   text-align: center;
-  font-size: 12px;
-  color: #999;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 8px;
 }
 
-.demo-text {
-  margin: 4px 0;
+.desktop-form-footer a {
+  color: #667eea;
+  font-weight: 700;
 }
 
-@media (max-width: 768px) {
-  .login-page {
-    flex-direction: column;
+/* 平板端适配 */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .desktop-content {
+    padding: 40px;
+    gap: 40px;
   }
-
-  .brand-section {
-    flex: 0 0 auto;
-    min-height: 300px;
-    padding: 40px 20px;
+  
+  .desktop-title {
+    font-size: 48px;
   }
-
-  .logo {
-    width: 120px;
-    height: 120px;
+  
+  .desktop-slogan {
+    font-size: 20px;
   }
-
-  .logo img {
-    width: 80px;
-    height: 80px;
+  
+  .desktop-form-wrapper {
+    flex-basis: 420px;
   }
-
-  .brand-title {
-    font-size: 28px;
-  }
-
-  .brand-slogan {
-    font-size: 16px;
-  }
-
-  .form-section {
-    flex: 1;
-    padding: 40px 20px;
-  }
-
-  .form-content {
-    padding: 30px 20px;
-  }
-
-  .form-title {
-    font-size: 26px;
-  }
-
-  .lang-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 12px;
+  
+  .form-card-content {
+    padding: 48px 36px;
   }
 }
 </style>

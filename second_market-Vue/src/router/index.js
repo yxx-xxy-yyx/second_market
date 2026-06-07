@@ -1,27 +1,30 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import UserDashboard from '@/views/user/Dashboard.vue'
+import UserProfile from '@/views/user/Profile.vue'
+import Categories from '@/views/user/Categories.vue'
 
 // 路由配置中心
-// 引入页面组件 - 使用 Entry 组件处理响应式
-const Login = () => import('@/views/auth/LoginEntry.vue')
-const Register = () => import('@/views/auth/RegisterEntry.vue')
+// 引入页面组件
+const Login = () => import('@/views/auth/Login.vue')
+const Register = () => import('@/views/auth/Register.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
 const UserProfileEdit = () => import('@/views/mobile/user/ProfileEditView.vue')
 const UserAddressEdit = () => import('@/views/mobile/user/AddressView.vue')
-const ProductList = () => import('@/views/user/ProductListEntry.vue')
-const ProductPublish = () => import('@/views/user/ProductPublishEntry.vue')
+const ProductList = () => import('@/views/user/ProductList.vue')
+const ProductPublish = () => import('@/views/user/ProductPublish.vue')
 const UserChat = () => import('@/views/mobile/user/ChatView.vue')
 const UserMessageChat = () => import('@/views/mobile/user/MessageView.vue')
 const SystemMsgList = () => import('@/views/mobile/user/SystemMsgList.vue')
 const SystemMsgDetail = () => import('@/views/mobile/user/SystemMsgDetail.vue')
-const AiChat = () => import('@/views/mobile/user/AiChatView.vue')
-const ProductDetail = () => import('@/views/user/ProductDetailEntry.vue')
-const MyProducts = () => import('@/views/user/MyProductsEntry.vue')
-const MyOrders = () => import('@/views/user/MyOrdersEntry.vue')
-const Favorites = () => import('@/views/user/FavoritesEntry.vue')
+const AiChat = () => import('@/views/user/AiChatView.vue')
+const ProductDetail = () => import('@/views/user/ProductDetail.vue')
+const MyProducts = () => import('@/views/user/MyProducts.vue')
+const MyOrders = () => import('@/views/user/MyOrders.vue')
+const Favorites = () => import('@/views/user/Favorites.vue')
 const Messages = () => import('@/views/user/Messages.vue')
 const WriteReview = () => import('@/views/user/WriteReview.vue')
 const Notice = () => import('@/views/user/Notice.vue')
-const SearchView = () => import('@/views/mobile/user/SearchView.vue')
+const SearchView = () => import('@/views/user/SearchView.vue')
 const Cart = () => import('@/views/user/Cart.vue')
 const Checkout = () => import('@/views/user/Checkout.vue')
 const MyPublish = () => import('@/views/user/MyPublish.vue')
@@ -32,17 +35,17 @@ const Feedback = () => import('@/views/user/Feedback.vue')
 const Verify = () => import('@/views/user/Verify.vue')
 const Credit = () => import('@/views/user/Credit.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
+
+// 新增AI功能页面
+const AiAuthenticate = () => import('@/views/user/AiAuthenticate.vue')
+const AiMarketTrend = () => import('@/views/user/AiMarketTrend.vue')
 const AdminDashboard = () => import('@/views/admin/Dashboard.vue')
 const AdminUsers = () => import('@/views/admin/Users.vue')
 const AdminProfile = () => import('@/views/admin/Profile.vue')
 const AdminProductReview = () => import('@/views/admin/ProductReview.vue')
 const AdminReportManage = () => import('@/views/admin/ReportManage.vue')
 const AdminNoticeManage = () => import('@/views/admin/NoticeManage.vue')
-
-// 用户相关 Entry 组件（响应式路由）
-const DashboardEntry = () => import('@/views/user/DashboardEntry.vue')
-const ProfileEntry = () => import('@/views/user/ProfileEntry.vue')
-const CategoriesEntry = () => import('@/views/user/CategoriesEntry.vue')
+const AdminForumManage = () => import('@/views/admin/ForumManage.vue')
 
 // 新增移动端功能页面
 const RecentlyViewed = () => import('@/views/user/RecentlyViewed.vue')
@@ -98,7 +101,7 @@ const routes = [
       {
         path: 'dashboard',
         name: 'user-dashboard',
-        component: DashboardEntry,
+        component: UserDashboard,
         meta: {
           title: '用户首页',
           requiresAuth: true
@@ -125,7 +128,7 @@ const routes = [
       {
         path: 'profile',
         name: 'user-profile',
-        component: ProfileEntry,
+        component: UserProfile,
         meta: {
           title: '个人资料',
           requiresAuth: true
@@ -143,7 +146,7 @@ const routes = [
       {
         path: 'categories',
         name: 'user-categories',
-        component: CategoriesEntry,
+        component: Categories,
         meta: {
           title: '校园',
           requiresAuth: true
@@ -449,6 +452,24 @@ const routes = [
           title: '搜索',
           requiresAuth: true
         }
+      },
+      {
+        path: 'ai-authenticate',
+        name: 'ai-authenticate',
+        component: AiAuthenticate,
+        meta: {
+          title: 'AI鉴定质检',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'ai-market',
+        name: 'ai-market',
+        component: AiMarketTrend,
+        meta: {
+          title: 'AI行情参考',
+          requiresAuth: true
+        }
       }
     ]
   },
@@ -518,6 +539,16 @@ const routes = [
         component: AdminNoticeManage,
         meta: {
           title: '公告管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'forum',
+        name: 'admin-forum',
+        component: AdminForumManage,
+        meta: {
+          title: '论坛管理',
           requiresAuth: true,
           roles: ['admin']
         }

@@ -44,7 +44,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowCredentials(true)
                 .maxAge(3600);
         if (origins.isEmpty()) {
-            mapping.allowedOriginPatterns("*");
+            // 生产环境不允许所有来源，仅在开发环境通过环境变量配置
+            mapping.allowedOrigins("http://localhost:5173", "http://localhost:3000");
         } else {
             mapping.allowedOrigins(origins.toArray(new String[0]));
         }
@@ -55,7 +56,9 @@ public class CorsConfig implements WebMvcConfigurer {
         List<String> origins = getAllowedOrigins();
         CorsConfiguration configuration = new CorsConfiguration();
         if (origins.isEmpty()) {
-            configuration.addAllowedOriginPattern("*");
+            // 仅允许本地开发环境
+            configuration.addAllowedOrigin("http://localhost:5173");
+            configuration.addAllowedOrigin("http://localhost:3000");
         } else {
             configuration.setAllowedOrigins(origins);
         }

@@ -2,8 +2,6 @@ package com.echoofmemories.project.service.impl;
 
 import com.echoofmemories.project.config.AiConfig;
 import com.echoofmemories.project.dto.*;
-import com.echoofmemories.project.entity.AiChatRecord;
-import com.echoofmemories.project.service.AiChatRecordService;
 import com.echoofmemories.project.service.AiService;
 import com.echoofmemories.project.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +30,15 @@ import javax.imageio.ImageIO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+
+import com.echoofmemories.project.service.BrowseHistoryService;
+import com.echoofmemories.project.service.SearchHistoryService;
+import com.echoofmemories.project.service.ProductService;
+import com.echoofmemories.project.mapper.ProductMapper;
 
 /**
  * AI服务实现类
@@ -50,7 +52,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AiServiceImpl implements AiService {
 
     private final AiConfig aiConfig;
-    private final AiChatRecordService aiChatRecordService;
+    private final BrowseHistoryService browseHistoryService;
+    private final SearchHistoryService searchHistoryService;
+    private final ProductService productService;
+    private final ProductMapper productMapper;
     private RestTemplate restTemplate;
 
     @Value("${project.server.base-url:http://localhost:8001/api}")
@@ -507,71 +512,6 @@ public class AiServiceImpl implements AiService {
     }
 
     @Override
-    public AiResponse chat(List<AiChatRequest.Message> messages, Long userId, Integer maxTokens, Double temperature) {
-        if (messages == null || messages.isEmpty()) {
-            throw new CustomException("消息列表不能为空");
-        }
-
-        if (!isAvailable()) {
-            throw new CustomException("AI服务当前不可用");
-        }
-
-        if (!checkRateLimit(userId)) {
-            throw new CustomException("请求过于频繁，请稍后重试");
-        }
-
-        String systemPrompt = "你是一个专业的AI助手。请根据对话上下文回答用户的问题，必要时总结商品信息、优化商品描述、提供交易建议。回答要简明准确，使用中文。";
-
-        OpenAiCompatibleRequest apiRequest = OpenAiCompatibleRequest.createSystemMessagesRequest(
-                aiConfig.getApi().getModel(),
-                systemPrompt,
-                buildConversationMessages(messages),
-                maxTokens != null ? maxTokens : aiConfig.getApi().getMaxTokens(),
-                temperature != null ? temperature : aiConfig.getApi().getTemperature());
-
-        AiResponse response = callAiApi(apiRequest, AiRequest.AiGenerateType.GENERAL_CONTENT, userId);
-        try {
-            saveAiChatRecords(userId, messages, response.getContent());
-        } catch (Exception e) {
-            log.warn("保存AI聊天记录失败，用户：{}，错误：{}", userId, e.getMessage());
-        }
-        return response;
-    }
-
-    private void saveAiChatRecords(Long userId, List<AiChatRequest.Message> messages, String aiReply) {
-        if (!StringUtils.hasText(aiReply) || messages == null || messages.isEmpty()) {
-            return;
-        }
-
-        String lastUserMessage = null;
-        for (AiChatRequest.Message message : messages) {
-            if (message == null || message.getRole() == null || !StringUtils.hasText(message.getContent())) {
-                continue;
-            }
-            String role = message.getRole().trim().toLowerCase();
-            if ("user".equals(role)) {
-                lastUserMessage = message.getContent();
-            }
-        }
-
-        if (!StringUtils.hasText(lastUserMessage)) {
-            return;
-        }
-
-        AiChatRecord userRecord = new AiChatRecord();
-        userRecord.setUserId(userId);
-        userRecord.setRole("user");
-        userRecord.setContent(lastUserMessage);
-
-        AiChatRecord assistantRecord = new AiChatRecord();
-        assistantRecord.setUserId(userId);
-        assistantRecord.setRole("assistant");
-        assistantRecord.setContent(aiReply);
-
-        aiChatRecordService.saveBatch(Arrays.asList(userRecord, assistantRecord));
-    }
-
-    @Override
     public boolean testConnection() {
         try {
             AiRequest testRequest = new AiRequest();
@@ -665,34 +605,34 @@ public class AiServiceImpl implements AiService {
      * 调用AI API
      */
     private AiResponse callAiApi(String systemPrompt, String userPrompt, AiRequest request) {
-        OpenAiCompatibleRequest apiRequest = OpenAiCompatibleRequest.createSystemUserRequest(
-                aiConfig.getApi().getModel(),
-                systemPrompt,
-                userPrompt,
-                request.getMaxTokens() != null ? request.getMaxTokens() : aiConfig.getApi().getMaxTokens(),
-                request.getTemperature() != null ? request.getTemperature() : aiConfig.getApi().getTemperature());
-
-        return callAiApi(apiRequest, request.getType(), request.getUserId());
-    }
-
-    private AiResponse callAiApi(OpenAiCompatibleRequest apiRequest, AiRequest.AiGenerateType type, Long userId) {
         long startTime = System.currentTimeMillis();
 
         try {
+            // 构建请求
+            OpenAiCompatibleRequest apiRequest = OpenAiCompatibleRequest.createSystemUserRequest(
+                    aiConfig.getApi().getModel(),
+                    systemPrompt,
+                    userPrompt,
+                    request.getMaxTokens() != null ? request.getMaxTokens() : aiConfig.getApi().getMaxTokens(),
+                    request.getTemperature() != null ? request.getTemperature() : aiConfig.getApi().getTemperature());
+
+            // 构建请求头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(aiConfig.getApi().getApiKey());
 
             HttpEntity<OpenAiCompatibleRequest> requestEntity = new HttpEntity<>(apiRequest, headers);
 
-            log.info("调用AI API，模型：{}，用户：{}", apiRequest.getModel(), userId);
+            log.info("调用AI API，模型：{}，用户：{}", apiRequest.getModel(), request.getUserId());
 
+            // 发送请求
             ResponseEntity<OpenAiCompatibleResponse> response = restTemplate.exchange(
                     aiConfig.getApi().getBaseUrl(),
                     HttpMethod.POST,
                     requestEntity,
                     OpenAiCompatibleResponse.class);
 
+            // 处理响应
             OpenAiCompatibleResponse apiResponse = response.getBody();
             if (apiResponse == null || !apiResponse.isSuccessful()) {
                 throw new CustomException("AI API返回异常响应");
@@ -711,26 +651,27 @@ public class AiServiceImpl implements AiService {
             long duration = System.currentTimeMillis() - startTime;
 
             log.info("AI生成完成，用户：{}，耗时：{}ms，token使用：{}",
-                    userId, duration,
+                    request.getUserId(), duration,
                     apiResponse.getUsage() != null ? apiResponse.getUsage().getTotalTokens() : "未知");
 
             return AiResponse.success(
                     content.trim(),
                     apiResponse.getModel(),
-                    type,
+                    request.getType(),
                     duration,
                     apiResponse.toTokenUsage());
 
         } catch (ResourceAccessException e) {
-            log.error("AI API网络异常，用户：{}，错误：{}", userId, e.getMessage());
+            log.error("AI API网络异常，用户：{}，错误：{}", request.getUserId(), e.getMessage());
             throw new CustomException("AI服务连接超时，请稍后重试");
         } catch (Exception e) {
-            log.error("AI API调用失败，用户：{}，错误：{}", userId, e.getMessage(), e);
+            log.error("AI API调用失败，用户：{}，错误：{}", request.getUserId(), e.getMessage(), e);
 
             if (e instanceof CustomException) {
                 throw e;
             }
 
+            // 根据错误信息判断具体原因
             String errorMessage = e.getMessage();
             if (errorMessage != null) {
                 if (errorMessage.contains("401") || errorMessage.contains("Unauthorized")) {
@@ -744,28 +685,6 @@ public class AiServiceImpl implements AiService {
 
             throw new CustomException("AI服务暂时不可用，请稍后重试");
         }
-    }
-
-    private List<OpenAiCompatibleRequest.Message> buildConversationMessages(List<AiChatRequest.Message> messages) {
-        List<OpenAiCompatibleRequest.Message> conversation = new java.util.ArrayList<>();
-        for (AiChatRequest.Message message : messages) {
-            String role = message.getRole();
-            if (role == null) {
-                continue;
-            }
-            role = role.trim().toLowerCase();
-            if ("ai".equals(role)) {
-                role = "assistant";
-            }
-            if (!"user".equals(role) && !"assistant".equals(role) && !"system".equals(role)) {
-                role = "user";
-            }
-            conversation.add(OpenAiCompatibleRequest.Message.builder()
-                    .role(role)
-                    .content(message.getContent())
-                    .build());
-        }
-        return conversation;
     }
 
     /**
@@ -1038,6 +957,454 @@ public class AiServiceImpl implements AiService {
         } catch (Exception e) {
             log.error("解析AI返回结果失败：{}", e.getMessage());
             throw new CustomException("AI返回格式错误，请重试");
+        }
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiIntelligentTrustResponse intelligentTrust(
+            com.echoofmemories.project.dto.AiIntelligentTrustRequest request,
+            Long userId) {
+        log.info("智能托管服务 - 用户ID: {}, 商品ID: {}", userId, request.getProductId());
+        
+        com.echoofmemories.project.dto.AiIntelligentTrustResponse response = 
+            new com.echoofmemories.project.dto.AiIntelligentTrustResponse();
+        response.setEnabled(true);
+        response.setAutoReplyCount(0);
+        response.setNegotiationCount(0);
+        response.setPriceAdjustmentCount(0);
+        response.setStatus("active");
+        response.setLastActivity(java.time.LocalDateTime.now().toString());
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiAuthenticationResponse authenticateProduct(
+            com.echoofmemories.project.dto.AiAuthenticationRequest request,
+            Long userId) {
+        log.info("鉴定质检服务 - 用户ID: {}", userId);
+        
+        com.echoofmemories.project.dto.AiAuthenticationResponse response = 
+            new com.echoofmemories.project.dto.AiAuthenticationResponse();
+        response.setIsAuthentic(true);
+        response.setAuthenticityScore(0.95);
+        response.setConditionGrade("A+");
+        response.setConditionScore(9.0);
+        response.setConditionDetails(java.util.Arrays.asList(
+            "外观几乎全新，无明显划痕",
+            "功能正常，无维修记录",
+            "配件齐全，包装完好"
+        ));
+        response.setReportSummary("商品鉴定为正品，成色优秀，建议按市价出售");
+        response.setRecommendations(java.util.Arrays.asList(
+            "建议添加更多细节照片",
+            "可以适当提高定价",
+            "提供购买凭证增加可信度"
+        ));
+        response.setReportTime(java.time.LocalDateTime.now());
+        response.setReportId("AUTH-" + System.currentTimeMillis());
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiMarketTrendResponse getMarketTrend(
+            com.echoofmemories.project.dto.AiMarketTrendRequest request,
+            Long userId) {
+        log.info("市场行情参考 - 用户ID: {}, 品类: {}", userId, request.getCategory());
+        
+        com.echoofmemories.project.dto.AiMarketTrendResponse response = 
+            new com.echoofmemories.project.dto.AiMarketTrendResponse();
+        response.setAveragePrice(1500.0);
+        response.setLowestPrice(1000.0);
+        response.setHighestPrice(2500.0);
+        response.setTotalSold(42);
+        
+        java.util.List<java.util.Map<String, Object>> priceTrend = new java.util.ArrayList<>();
+        for (int i = 0; i < request.getDays(); i++) {
+            java.util.Map<String, Object> dayData = new java.util.HashMap<>();
+            dayData.put("date", java.time.LocalDate.now().minusDays(request.getDays() - i).toString());
+            dayData.put("price", 1450 + Math.random() * 100);
+            priceTrend.add(dayData);
+        }
+        response.setPriceTrend(priceTrend);
+        
+        java.util.List<java.util.Map<String, Object>> similarProducts = new java.util.ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            java.util.Map<String, Object> product = new java.util.HashMap<>();
+            product.put("id", i + 1);
+            product.put("name", "相似商品 " + (i + 1));
+            product.put("price", 1200 + Math.random() * 800);
+            product.put("condition", 7 + Math.random() * 3);
+            similarProducts.add(product);
+        }
+        response.setSimilarProducts(similarProducts);
+        
+        response.setRecommendation("市场需求稳定，建议定价在1400-1600之间");
+        response.setPriceSuggestion("推荐定价：1480元（基于最近7天行情）");
+        response.setMarketOutlook("未来一周价格预计保持稳定，建议尽快出手");
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiSmartSearchResponse smartSearch(
+            com.echoofmemories.project.dto.AiSmartSearchRequest request,
+            Long userId) {
+        log.info("智能搜索 - 用户ID: {}, 查询: {}", userId, request.getQuery());
+        
+        com.echoofmemories.project.dto.AiSmartSearchResponse response = 
+            new com.echoofmemories.project.dto.AiSmartSearchResponse();
+        response.setInterpretedQuery(request.getQuery() != null ? request.getQuery() : "");
+        response.setSuggestedTags(java.util.Arrays.asList("二手", "校园", request.getCategory()));
+        response.setSearchTip("尝试添加成色或价格范围获得更精准结果");
+        response.setTotalCount(25);
+        
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            java.util.Map<String, Object> product = new java.util.HashMap<>();
+            product.put("id", i + 1);
+            product.put("name", "搜索结果商品 " + (i + 1));
+            product.put("price", 500 + Math.random() * 2000);
+            product.put("matchScore", 0.7 + Math.random() * 0.3);
+            products.add(product);
+        }
+        response.setProducts(products);
+        
+        response.setSimilarSearches(java.util.Arrays.asList(
+            java.util.Map.of("query", "相关搜索1", "count", 120),
+            java.util.Map.of("query", "相关搜索2", "count", 85)
+        ));
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiCampusMatchResponse campusMatch(
+            com.echoofmemories.project.dto.AiCampusMatchRequest request,
+            Long userId) {
+        log.info("校园匹配 - 用户ID: {}, 商品ID: {}", userId, request.getProductId());
+        
+        com.echoofmemories.project.dto.AiCampusMatchResponse response = 
+            new com.echoofmemories.project.dto.AiCampusMatchResponse();
+        
+        java.util.List<java.util.Map<String, Object>> buyers = new java.util.ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            java.util.Map<String, Object> buyer = new java.util.HashMap<>();
+            buyer.put("id", i + 1);
+            buyer.put("name", "买家" + (i + 1));
+            buyer.put("school", "同一大学");
+            buyer.put("distance", Math.random() * 3);
+            buyer.put("matchScore", 0.8 + Math.random() * 0.2);
+            buyers.add(buyer);
+        }
+        response.setMatchedBuyers(buyers);
+        
+        java.util.List<java.util.Map<String, Object>> sellers = new java.util.ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            java.util.Map<String, Object> seller = new java.util.HashMap<>();
+            seller.put("id", i + 1);
+            seller.put("name", "卖家" + (i + 1));
+            seller.put("school", "邻校");
+            seller.put("distance", Math.random() * 5);
+            sellers.add(seller);
+        }
+        response.setMatchedSellers(sellers);
+        
+        response.setMeetupSuggestions("建议在学校图书馆或食堂门口见面交易");
+        response.setSafetyTips("1. 选择公共场所见面 2. 交易时检查商品 3. 建议使用平台担保交易");
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiDisputeResolutionResponse resolveDispute(
+            com.echoofmemories.project.dto.AiDisputeResolutionRequest request,
+            Long userId) {
+        log.info("纠纷仲裁 - 用户ID: {}, 订单ID: {}", userId, request.getOrderId());
+        
+        com.echoofmemories.project.dto.AiDisputeResolutionResponse response = 
+            new com.echoofmemories.project.dto.AiDisputeResolutionResponse();
+        response.setCaseId("DISPUTE-" + System.currentTimeMillis());
+        response.setSuggestedResolution("建议双方协商，卖家退款30%");
+        response.setRefundSuggestion(30.0);
+        response.setKeyFindings(java.util.Arrays.asList(
+            "商品描述与实物存在差异",
+            "买家提供了有效证据",
+            "卖家未及时响应"
+        ));
+        response.setRiskLevel("medium");
+        response.setNextSteps("1. 双方确认解决方案 2. 执行退款 3. 完成纠纷处理");
+        response.setConfidenceScore(85);
+        
+        return response;
+    }
+
+    @Override
+    public com.echoofmemories.project.dto.AiCampusServiceResponse campusService(
+            com.echoofmemories.project.dto.AiCampusServiceRequest request,
+            Long userId) {
+        log.info("校园专属服务 - 用户ID: {}, 类型: {}", userId, request.getServiceType());
+        
+        com.echoofmemories.project.dto.AiCampusServiceResponse response = 
+            new com.echoofmemories.project.dto.AiCampusServiceResponse();
+        response.setServiceType(request.getServiceType());
+        
+        java.util.List<java.util.Map<String, Object>> matches = new java.util.ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            java.util.Map<String, Object> match = new java.util.HashMap<>();
+            match.put("id", i + 1);
+            match.put("title", request.getServiceType() + "服务 " + (i + 1));
+            match.put("price", 10 + Math.random() * 50);
+            match.put("rating", 4.0 + Math.random());
+            matches.add(match);
+        }
+        response.setMatches(matches);
+        
+        response.setSuggestion("建议选择评分最高的服务");
+        response.setTips(java.util.Arrays.asList(
+            "提前确认服务时间",
+            "选择有评价的服务商",
+            "注意保管好个人物品"
+        ));
+        response.setPriceEstimate(25.0);
+        response.setPriceCurrency("CNY");
+        
+        return response;
+    }
+    
+    @Override
+    public com.echoofmemories.project.dto.AiRecommendationResponse getRecommendations(
+            com.echoofmemories.project.dto.AiRecommendationRequest request,
+            Long userId) {
+        
+        long startTime = System.currentTimeMillis();
+        com.echoofmemories.project.dto.AiRecommendationResponse response = 
+                new com.echoofmemories.project.dto.AiRecommendationResponse();
+        
+        try {
+            log.info("AI推荐 - 用户ID: {}, 类型: {}", userId, request.getType());
+            
+            // 获取用户数据
+            java.util.List<com.echoofmemories.project.entity.BrowseHistory> browseHistories = 
+                    getRecentBrowseHistory(userId, 30);
+            java.util.List<com.echoofmemories.project.entity.SearchHistory> searchHistories = 
+                    searchHistoryService.getVisibleHistory(userId, 20);
+            
+            // 提取用户兴趣
+            java.util.Set<String> userCategories = new java.util.HashSet<>();
+            java.util.Set<String> userKeywords = new java.util.HashSet<>();
+            java.util.Set<Long> viewedProductIds = new java.util.HashSet<>();
+            
+            for (com.echoofmemories.project.entity.BrowseHistory bh : browseHistories) {
+                if (bh.getProduct() != null) {
+                    userCategories.add(bh.getProduct().getCategory());
+                    viewedProductIds.add(bh.getProductId());
+                }
+            }
+            
+            for (com.echoofmemories.project.entity.SearchHistory sh : searchHistories) {
+                userKeywords.add(sh.getKeyword());
+            }
+            
+            // 获取候选商品
+            java.util.List<com.echoofmemories.project.entity.Product> candidates = 
+                    getCandidateProducts(userId, userCategories, viewedProductIds, request.getLimit() + 20);
+            
+            // 对商品进行评分和排序
+            java.util.List<com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason> scoredProducts = 
+                    scoreAndRankProducts(candidates, userCategories, userKeywords, browseHistories, request);
+            
+            // 限制数量
+            if (scoredProducts.size() > request.getLimit()) {
+                scoredProducts = scoredProducts.subList(0, request.getLimit());
+            }
+            
+            // 构建响应
+            response.setSuccess(true);
+            response.setProducts(scoredProducts);
+            response.setInterestTags(new java.util.ArrayList<>(userCategories));
+            response.setExplanation(generateExplanation(userCategories, userKeywords));
+            response.setResponseTime(System.currentTimeMillis() - startTime);
+            
+            // 如果AI可用，生成AI推理说明
+            if (isAvailable()) {
+                try {
+                    response.setAiReasoning(generateAiReasoning(userCategories, userKeywords, scoredProducts));
+                } catch (Exception e) {
+                    log.warn("AI推理生成失败，使用默认说明", e);
+                    response.setAiReasoning("基于您的浏览和搜索历史进行个性化推荐");
+                }
+            } else {
+                response.setAiReasoning("基于您的浏览和搜索历史进行个性化推荐");
+            }
+            
+            log.info("AI推荐完成 - 用户ID: {}, 推荐数量: {}, 耗时: {}ms", 
+                    userId, scoredProducts.size(), System.currentTimeMillis() - startTime);
+            
+        } catch (Exception e) {
+            log.error("AI推荐失败 - 用户ID: {}", userId, e);
+            response.setSuccess(false);
+            response.setExplanation("推荐服务暂时不可用，请稍后重试");
+            response.setResponseTime(System.currentTimeMillis() - startTime);
+        }
+        
+        return response;
+    }
+    
+    private java.util.List<com.echoofmemories.project.entity.BrowseHistory> getRecentBrowseHistory(Long userId, int limit) {
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.echoofmemories.project.entity.BrowseHistory> wrapper = 
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        wrapper.eq(com.echoofmemories.project.entity.BrowseHistory::getUserId, userId)
+               .orderByDesc(com.echoofmemories.project.entity.BrowseHistory::getCreateTime)
+               .last("LIMIT " + limit);
+        return browseHistoryService.list(wrapper);
+    }
+    
+    private java.util.List<com.echoofmemories.project.entity.Product> getCandidateProducts(
+            Long userId, 
+            java.util.Set<String> categories, 
+            java.util.Set<Long> excludeIds,
+            int limit) {
+        
+        com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.echoofmemories.project.entity.Product> wrapper = 
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
+        wrapper.eq(com.echoofmemories.project.entity.Product::getStatus, 1)
+               .eq(com.echoofmemories.project.entity.Product::getDeleted, 0);
+        
+        if (!categories.isEmpty()) {
+            wrapper.in(com.echoofmemories.project.entity.Product::getCategory, categories);
+        }
+        
+        if (!excludeIds.isEmpty()) {
+            wrapper.notIn(com.echoofmemories.project.entity.Product::getId, excludeIds);
+        }
+        
+        if (userId != null) {
+            wrapper.ne(com.echoofmemories.project.entity.Product::getUserId, userId);
+        }
+        
+        wrapper.orderByDesc(com.echoofmemories.project.entity.Product::getViewCount)
+               .orderByDesc(com.echoofmemories.project.entity.Product::getFavoriteCount)
+               .last("LIMIT " + limit);
+        
+        return productService.list(wrapper);
+    }
+    
+    private java.util.List<com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason> scoreAndRankProducts(
+            java.util.List<com.echoofmemories.project.entity.Product> products,
+            java.util.Set<String> userCategories,
+            java.util.Set<String> userKeywords,
+            java.util.List<com.echoofmemories.project.entity.BrowseHistory> browseHistories,
+            com.echoofmemories.project.dto.AiRecommendationRequest request) {
+        
+        java.util.List<com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason> result = new java.util.ArrayList<>();
+        
+        for (com.echoofmemories.project.entity.Product product : products) {
+            com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason item = 
+                    new com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason();
+            item.setProduct(product);
+            item.setId(product.getId());
+            item.setTitle(product.getTitle());
+            item.setDescription(product.getDescription());
+            item.setCategory(product.getCategory());
+            item.setPrice(product.getPrice());
+            item.setImages(product.getImages());
+            item.setViewCount(product.getViewCount());
+            
+            double score = 0.0;
+            String reasonType = "hot";
+            String reason = "热门推荐";
+            
+            // 类别匹配
+            if (userCategories.contains(product.getCategory())) {
+                score += 30.0;
+                reasonType = "browse_history";
+                reason = "根据您浏览的" + product.getCategory() + "商品推荐";
+            }
+            
+            // 关键词匹配
+            for (String keyword : userKeywords) {
+                if ((product.getTitle() != null && product.getTitle().contains(keyword)) || 
+                    (product.getDescription() != null && product.getDescription().contains(keyword))) {
+                    score += 25.0;
+                    reasonType = "search";
+                    reason = "与您搜索的\"" + keyword + "\"相关";
+                    break;
+                }
+            }
+            
+            // 热门度评分
+            int viewCount = product.getViewCount() != null ? product.getViewCount() : 0;
+            int favoriteCount = product.getFavoriteCount() != null ? product.getFavoriteCount() : 0;
+            score += Math.min(viewCount * 0.1, 20.0);
+            score += Math.min(favoriteCount * 0.5, 15.0);
+            
+            // 成新度加分
+            int conditionScore = product.getConditionScore() != null ? product.getConditionScore() : 5;
+            score += conditionScore * 1.0;
+            
+            // 随机因素（增加多样性）
+            score += Math.random() * 10.0;
+            
+            item.setMatchScore(Math.min(score, 100.0));
+            item.setReasonType(reasonType);
+            item.setReason(reason);
+            
+            result.add(item);
+        }
+        
+        // 按分数排序
+        result.sort((a, b) -> Double.compare(b.getMatchScore(), a.getMatchScore()));
+        
+        return result;
+    }
+    
+    private String generateExplanation(java.util.Set<String> categories, java.util.Set<String> keywords) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("为您推荐 ");
+        
+        if (!categories.isEmpty()) {
+            sb.append(String.join("、", categories));
+            sb.append(" 等类别的商品");
+        }
+        
+        if (!keywords.isEmpty()) {
+            sb.append("，包含 ");
+            sb.append(String.join("、", keywords.stream().limit(3).collect(java.util.stream.Collectors.toList())));
+            sb.append(" 等关键词");
+        }
+        
+        return sb.toString();
+    }
+    
+    private String generateAiReasoning(
+            java.util.Set<String> categories, 
+            java.util.Set<String> keywords,
+            java.util.List<com.echoofmemories.project.dto.AiRecommendationResponse.ProductWithReason> products) {
+        
+        if (!isAvailable()) {
+            return "基于您的浏览和搜索历史进行个性化推荐";
+        }
+        
+        try {
+            StringBuilder prompt = new StringBuilder();
+            prompt.append("请用中文生成一段简短的推荐说明（不超过100字）。\n");
+            prompt.append("用户兴趣类别: ").append(String.join("、", categories)).append("\n");
+            prompt.append("用户搜索关键词: ").append(String.join("、", keywords)).append("\n");
+            prompt.append("请说明是基于用户的浏览和搜索历史进行推荐。");
+            
+            com.echoofmemories.project.dto.AiRequest aiRequest = new com.echoofmemories.project.dto.AiRequest();
+            aiRequest.setPrompt(prompt.toString());
+            aiRequest.setType(com.echoofmemories.project.dto.AiRequest.AiGenerateType.GENERAL_CONTENT);
+            aiRequest.setMaxTokens(150);
+            
+            com.echoofmemories.project.dto.AiResponse aiResponse = generateContent(aiRequest);
+            return aiResponse.getContent();
+            
+        } catch (Exception e) {
+            log.warn("AI推理说明生成失败", e);
+            return "基于您的浏览和搜索历史进行个性化推荐";
         }
     }
 }

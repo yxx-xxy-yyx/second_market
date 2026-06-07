@@ -112,8 +112,8 @@
               <el-slider v-model="form.conditionScore" :min="1" :max="10" :step="1" />
             </el-form-item>
 
-            <el-form-item :label="$t('publish.form.desc')" prop="description" class="col-span-2">
-              <el-input v-model="form.description" type="textarea" :rows="4" :placeholder="$t('publish.form.descPlaceholder')" />
+            <el-form-item :label="$t('publish.form.description')" prop="description" class="col-span-2">
+              <el-input v-model="form.description" type="textarea" :rows="4" :placeholder="$t('publish.form.descriptionPlaceholder')" />
             </el-form-item>
           </div>
         </el-form>

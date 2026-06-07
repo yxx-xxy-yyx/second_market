@@ -18,15 +18,31 @@
 
         <el-divider />
 
-        <el-form ref="reviewFormRef" :model="reviewForm" :rules="reviewRules" label-width="100px" label-position="top">
+        <el-form
+          ref="reviewFormRef"
+          :model="reviewForm"
+          :rules="reviewRules"
+          label-width="100px"
+          label-position="top"
+        >
           <el-form-item :label="$t('writeReview.ratingLabel')" prop="rating">
-            <el-rate v-model="reviewForm.rating" :size="32" show-text
-              :texts="[$t('writeReview.ratingText1'), $t('writeReview.ratingText2'), $t('writeReview.ratingText3'), $t('writeReview.ratingText4'), $t('writeReview.ratingText5')]" />
+            <el-rate
+              v-model="reviewForm.rating"
+              :size="32"
+              show-text
+              :texts="[$t('writeReview.ratingText1'), $t('writeReview.ratingText2'), $t('writeReview.ratingText3'), $t('writeReview.ratingText4'), $t('writeReview.ratingText5')]"
+            />
           </el-form-item>
 
           <el-form-item :label="$t('writeReview.contentLabel')" prop="content">
-            <el-input v-model="reviewForm.content" type="textarea" :rows="6"
-              :placeholder="$t('writeReview.contentPlaceholder')" maxlength="500" show-word-limit />
+            <el-input
+              v-model="reviewForm.content"
+              type="textarea"
+              :rows="6"
+              :placeholder="$t('writeReview.contentPlaceholder')"
+              maxlength="500"
+              show-word-limit
+            />
           </el-form-item>
 
           <el-form-item>
@@ -46,10 +62,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { orderApi } from '@/api/order'
 import { reviewApi } from '@/api/review'
-import { useI18n } from 'vue-i18n' // 引入 i18n
+import { useI18n } from 'vue-i18n' // 寮曞叆 i18n
 import { DEFAULT_PRODUCT_IMAGE, formatProductImageUrl } from '@/utils/url'
 
-const { t } = useI18n() // 解构 t 函数
+const { t } = useI18n() // 瑙ｆ瀯 t 鍑芥暟
 const route = useRoute()
 const router = useRouter()
 
@@ -282,3 +298,4 @@ onMounted(() => {
   }
 }
 </style>
+

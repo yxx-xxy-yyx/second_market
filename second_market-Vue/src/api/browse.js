@@ -18,15 +18,6 @@ export const browseApi = {
     })
   },
 
-  // 获取当前用户浏览记录
-  getMine(params) {
-    return request({
-      url: '/browse/mine',
-      method: 'get',
-      params
-    })
-  },
-
   // 删除单条浏览记录
   delete(id) {
     return request({

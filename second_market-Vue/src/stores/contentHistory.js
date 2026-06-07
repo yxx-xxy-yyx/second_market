@@ -40,14 +40,9 @@ export const useContentHistoryStore = defineStore('contentHistory', () => {
       {
         id: post.id,
         title: post.title || '',
-        content: post.content || '',
-        category: post.category || '',
         images: post.images || '',
         userNickname: post.userNickname || '',
         userAvatar: post.userAvatar || '',
-        schoolName: post.schoolName || '',
-        viewCount: post.viewCount || 0,
-        likeCount: post.likeCount || 0,
         commentCount: post.commentCount || 0,
         createTime: post.createTime || '',
         viewedAt: Date.now()
@@ -111,3 +106,4 @@ export const useContentHistoryStore = defineStore('contentHistory', () => {
     clearService
   }
 })
+

@@ -88,10 +88,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productApi } from '@/api/product'
+import { useSchoolStore } from '@/stores/school'
 import { DEFAULT_PRODUCT_IMAGE, formatProductImageUrl } from '@/utils/url'
 import { CATEGORIES, categoryIdToDbValue } from '@/utils/categories'
 import CategoryGrid from '@/components/category/CategoryGrid.vue'
@@ -104,6 +105,7 @@ import {
 
 const router = useRouter()
 const { locale, t } = useI18n()
+const schoolStore = useSchoolStore()
 
 const loading = ref(false)
 const recommendProducts = ref([])
@@ -170,6 +172,7 @@ const fetchRecommendProducts = async () => {
       status: 2,
       sortBy: 'createTime'
     }
+    if (schoolStore.selectedSchool) params.schoolId = Number(schoolStore.selectedSchool)
     const res = await productApi.getProductList(params)
     if (res.code === '200') {
       recommendProducts.value = res.data.records || []
@@ -182,4 +185,12 @@ const fetchRecommendProducts = async () => {
 onMounted(() => {
   fetchRecommendProducts()
 })
+
+watch(
+  () => schoolStore.selectedSchool,
+  () => {
+    fetchRecommendProducts()
+  }
+)
 </script>
+

@@ -2,6 +2,7 @@ package com.echoofmemories.project.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.echoofmemories.project.annotation.AuditLog;
 import com.echoofmemories.project.common.Result;
 import com.echoofmemories.project.dto.ForumInteractionStatus;
 import com.echoofmemories.project.entity.ForumComment;
@@ -169,6 +170,63 @@ public class ForumController {
             if (userId == null) return Result.error("401", "请先登录");
             Page<ForumPost> page = new Page<>(current, size);
             return Result.success(forumService.getMyFavoritePage(page, userId));
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    @Operation(summary = "管理员获取所有帖子")
+    @GetMapping("/admin/all-posts")
+    public Result<IPage<ForumPost>> getAllPosts(@RequestParam(defaultValue = "1") Integer current,
+                                           @RequestParam(defaultValue = "10") Integer size,
+                                           @RequestParam(required = false) String category,
+                                           @RequestParam(required = false) Long schoolId,
+                                           @RequestParam(required = false) String keyword) {
+        try {
+            if (!SecurityUtils.isAdmin()) return Result.error("403", "无权访问");
+            Page<ForumPost> page = new Page<>(current, size);
+            return Result.success(forumService.getAllPosts(page, category, schoolId, keyword));
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    @Operation(summary = "管理员获取所有评论")
+    @GetMapping("/admin/all-comments")
+    public Result<IPage<ForumComment>> getAllComments(@RequestParam(defaultValue = "1") Integer current,
+                                                     @RequestParam(defaultValue = "10") Integer size,
+                                                     @RequestParam(required = false) Long postId,
+                                                     @RequestParam(required = false) String keyword) {
+        try {
+            if (!SecurityUtils.isAdmin()) return Result.error("403", "无权访问");
+            Page<ForumComment> page = new Page<>(current, size);
+            return Result.success(forumService.getAllComments(page, postId, keyword));
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    @Operation(summary = "管理员删除帖子")
+    @DeleteMapping("/admin/delete-post/{id}")
+    @AuditLog("管理员删除帖子")
+    public Result<String> adminDeletePost(@PathVariable Long id) {
+        try {
+            if (!SecurityUtils.isAdmin()) return Result.error("403", "无权操作");
+            boolean success = forumService.adminDeletePost(id);
+            return success ? Result.success("删除成功") : Result.error("删除失败");
+        } catch (Exception e) {
+            return Result.error("500", e.getMessage());
+        }
+    }
+
+    @Operation(summary = "管理员删除评论")
+    @DeleteMapping("/admin/delete-comment/{id}")
+    @AuditLog("管理员删除评论")
+    public Result<String> adminDeleteComment(@PathVariable Long id) {
+        try {
+            if (!SecurityUtils.isAdmin()) return Result.error("403", "无权操作");
+            boolean success = forumService.adminDeleteComment(id);
+            return success ? Result.success("删除成功") : Result.error("删除失败");
         } catch (Exception e) {
             return Result.error("500", e.getMessage());
         }

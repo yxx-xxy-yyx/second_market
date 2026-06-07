@@ -1,17 +1,15 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { showToast } from 'vant'
 import {
   ChatBubbleOvalLeftEllipsisIcon
 } from '@heroicons/vue/24/outline'
-import { Notification } from '@element-plus/icons-vue'
+import { Notification } from '@element-plus/icons-vue' // 引入系统图标
 import { useUserStore } from '@/stores/user'
 import { chatApi } from '@/api/chat'
 
 const router = useRouter()
-const { t } = useI18n()
 const userStore = useUserStore()
 const chatList = ref([])
 const loading = ref(true)
@@ -51,7 +49,7 @@ const formatTime = (timeStr) => {
 
 const handleChat = (targetUserId) => {
   if (!targetUserId) {
-    showToast(t('messages.userIdLost'));
+    showToast('用户 ID 丢失');
     return;
   }
   router.push({
@@ -61,7 +59,7 @@ const handleChat = (targetUserId) => {
 
 onMounted(() => {
   if (!userStore.isLoggedIn) {
-    showToast(t('messages.pleaseLogin'))
+    showToast('请先登录')
     router.push('/login')
     return
   }
@@ -101,12 +99,13 @@ onUnmounted(() => {
 
           <div class="flex-1 min-w-0 py-1">
             <div class="flex justify-between items-baseline mb-1.5">
-              <h3 class="font-bold text-gray-900 text-[14px] truncate group-hover:text-blue-600 transition-colors">{{ $t('messages.noticeTitle') }}</h3>
+              <h3 class="font-bold text-gray-900 text-[14px] truncate group-hover:text-blue-600 transition-colors">公告通知
+              </h3>
               <span
-                class="text-[10px] text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded flex-shrink-0">{{ $t('messages.officialTag') }}</span>
+                class="text-[10px] text-orange-600 font-bold bg-orange-50 px-1.5 py-0.5 rounded flex-shrink-0">官方</span>
             </div>
             <p class="text-sm text-gray-500 truncate leading-relaxed">
-              {{ $t('messages.noticeDesc') }}
+              点击查看平台最新公告与重要通知
             </p>
           </div>
         </div>
@@ -127,11 +126,12 @@ onUnmounted(() => {
 
           <div class="flex-1 min-w-0 py-1">
             <div class="flex justify-between items-baseline mb-1.5">
-              <h3 class="font-bold text-gray-900 text-[14px] truncate group-hover:text-blue-600 transition-colors">{{ $t('messages.systemMsgTitle') }}</h3>
-              <span class="text-[10px] text-blue-500 font-bold bg-blue-50 px-1.5 py-0.5 rounded flex-shrink-0">{{ $t('messages.officialTag') }}</span>
+              <h3 class="font-bold text-gray-900 text-[14px] truncate group-hover:text-blue-600 transition-colors">系统消息
+              </h3>
+              <span class="text-[10px] text-blue-500 font-bold bg-blue-50 px-1.5 py-0.5 rounded flex-shrink-0">官方</span>
             </div>
             <p class="text-sm text-gray-500 truncate leading-relaxed">
-              {{ $t('messages.systemMsgDesc') }}
+              点击查看系统通知、账户安全及官方公告
             </p>
           </div>
         </div>
@@ -153,12 +153,12 @@ onUnmounted(() => {
 
           <div class="flex-1 min-w-0 py-1">
             <div class="flex justify-between items-baseline mb-1.5">
-              <h3 class="font-bold text-gray-900 text-[14px] group-hover:text-purple-600 transition-colors">{{ $t('messages.aiAssistantTitle') }}</h3>
+              <h3 class="font-bold text-gray-900 text-[14px] group-hover:text-purple-600 transition-colors">AI 智能助手</h3>
               <span
-                class="text-[10px] text-purple-500 font-bold bg-purple-50 px-1.5 py-0.5 rounded flex-shrink-0">{{ $t('messages.online') }}</span>
+                class="text-[10px] text-purple-500 font-bold bg-purple-50 px-1.5 py-0.5 rounded flex-shrink-0">在线</span>
             </div>
             <p class="text-sm text-gray-500 truncate leading-relaxed">
-              {{ $t('messages.aiAssistantDesc') }}
+              我是您的智能管家，有什么可以帮您？
             </p>
           </div>
         </div>
@@ -167,8 +167,8 @@ onUnmounted(() => {
           <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <ChatBubbleOvalLeftEllipsisIcon class="w-10 h-10 text-gray-300" />
           </div>
-          <p class="text-sm font-medium text-gray-500">{{ $t('messages.noPrivateMessages') }}</p>
-          <p class="text-xs text-gray-400 mt-1">{{ $t('messages.chatWithSeller') }}</p>
+          <p class="text-sm font-medium text-gray-500">暂无个人消息</p>
+          <p class="text-xs text-gray-400 mt-1">快去和卖家聊聊吧</p>
         </div>
 
         <div v-for="chat in chatList" :key="chat.targetUserId"
@@ -197,7 +197,7 @@ onUnmounted(() => {
             </div>
             <p class="text-sm text-gray-500 truncate leading-relaxed">
               <span v-if="chat.msgType === 1" class="text-teal-600 font-medium flex items-center">
-                <span class="mr-1">📷</span> {{ $t('messages.imageTag') }}
+                <span class="mr-1">📷</span> [图片]
               </span>
               <span v-else class="group-hover:text-gray-600 transition-colors">{{ chat.lastContent }}</span>
             </p>

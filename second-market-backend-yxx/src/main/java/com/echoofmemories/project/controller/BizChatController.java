@@ -4,13 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.echoofmemories.project.common.Result;
 import com.echoofmemories.project.entity.BizChat;
 import com.echoofmemories.project.service.BizChatService;
+import com.echoofmemories.project.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-// 必须使用 javax
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
+
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import javax.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,23 +27,11 @@ public class BizChatController {
         this.bizChatService = bizChatService;
     }
 
-    // 使用 RequestContextHolder 获取 request，适配 Spring Boot 2.7.2
-    private Long getCurrentUserId() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        if (attributes == null) return null;
-        HttpServletRequest request = attributes.getRequest();
-
-        // 这里的 "userId" 必须和拦截器中 setAttribute 的 key 完全一致
-        Object userIdObj = request.getAttribute("userId");
-        if (userIdObj == null) return null;
-        return Long.valueOf(userIdObj.toString());
-    }
-
     @Operation(summary = "发送消息")
     @PostMapping("/send")
     public Result<Boolean> send(@RequestBody BizChat chat) {
-        Long userId = getCurrentUserId();
-        if (userId == null) return Result.error("未登录");
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) return Result.error("401", "未登录");
 
         chat.setSenderId(userId);
         chat.setCreateTime(LocalDateTime.now());
@@ -53,8 +42,8 @@ public class BizChatController {
     @Operation(summary = "获取聊天记录")
     @GetMapping("/history/{targetUserId}")
     public Result<List<BizChat>> history(@PathVariable Long targetUserId) {
-        Long userId = getCurrentUserId();
-        if (userId == null) return Result.error("未登录");
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) return Result.error("401", "未登录");
 
         LambdaQueryWrapper<BizChat> wrapper = new LambdaQueryWrapper<>();
         wrapper.and(w -> w
@@ -69,15 +58,15 @@ public class BizChatController {
     @Operation(summary = "获取最近聊天列表")
     @GetMapping("/list")
     public Result<List<com.echoofmemories.project.vo.ChatListVo>> list() {
-        Long userId = getCurrentUserId();
-        if (userId == null) return Result.error("未登录");
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) return Result.error("401", "未登录");
         return Result.success(bizChatService.selectRecentChats(userId));
     }
 
     @Operation(summary = "获取未读消息总数")
     @GetMapping("/unread/count")
     public Result<Integer> unreadCount() {
-        Long userId = getCurrentUserId();
+        Long userId = SecurityUtils.getCurrentUserId();
         if (userId == null) return Result.success(0);
         return Result.success(bizChatService.getTotalUnreadCount(userId));
     }
@@ -85,8 +74,8 @@ public class BizChatController {
     @Operation(summary = "标记已读")
     @PostMapping("/read/{senderId}")
     public Result<Boolean> read(@PathVariable Long senderId) {
-        Long userId = getCurrentUserId();
-        if (userId == null) return Result.error("未登录");
+        Long userId = SecurityUtils.getCurrentUserId();
+        if (userId == null) return Result.error("401", "未登录");
 
         boolean update = bizChatService.lambdaUpdate()
                 .set(BizChat::getIsRead, true)
