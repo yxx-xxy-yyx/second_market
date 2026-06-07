@@ -70,10 +70,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员修改所有商品
-            // if (!existProduct.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限修改此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以修改
+            if (!SecurityUtils.canAccessUser(existProduct.getUserId())) {
+                return Result.error("403", "无权限修改此商品");
+            }
 
             Product product = new Product();
             BeanUtils.copyProperties(request, product);
@@ -103,10 +103,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员删除所有商品
-            // if (!product.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限删除此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以删除
+            if (!SecurityUtils.canAccessUser(product.getUserId())) {
+                return Result.error("403", "无权限删除此商品");
+            }
 
             boolean success = productService.deleteProduct(id);
             if (success) {
@@ -196,10 +196,10 @@ public class ProductController {
                 return Result.error("商品不存在");
             }
 
-            // 开发模式：注释掉商品所有权检查，允许管理员修改所有商品
-            // if (!product.getUserId().equals(userId)) {
-            // return Result.error("403", "无权限修改此商品");
-            // }
+            // 检查用户权限：只有商品所有者和管理员可以修改状态
+            if (!SecurityUtils.canAccessUser(product.getUserId())) {
+                return Result.error("403", "无权限修改此商品");
+            }
 
             product.setStatus(status);
             boolean success = productService.updateById(product);

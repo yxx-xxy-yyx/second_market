@@ -64,11 +64,11 @@ knife4j:
 # 自定义配置
 project:
   jwt:
-    secret: ${JWT_SECRET:echoofmemories2025}
+    secret: ${JWT_SECRET:}
     expire-time: 86400000  # 24小时
   file:
     upload-path: ${PROJECT_FILE_UPLOAD_PATH:${user.dir}/uploads/}
-    max-size: 100MB
+    max-size: 10MB
     allowed-types: jpg,jpeg,png,gif,pdf,doc,docx,xls,xlsx,txt
   server:
     base-url: ${SERVER_BASE_URL:http://localhost:8001/api}

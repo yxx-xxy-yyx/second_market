@@ -24,9 +24,28 @@ public class JwtUtils {
     private static String resolveSecret() {
         String fromEnv = System.getenv("JWT_SECRET");
         if (fromEnv == null || fromEnv.isBlank()) {
-            return "echoofmemories2024";
+            log.warn("JWT_SECRET 环境变量未设置！请在生产环境中配置强密钥");
+            // 生成临时随机密钥，防止使用硬编码密钥
+            return generateTemporarySecret();
         }
-        return fromEnv.trim();
+        String secret = fromEnv.trim();
+        if (secret.length() < 32) {
+            log.warn("JWT_SECRET 长度不足32位，建议使用至少32位的随机字符串");
+        }
+        return secret;
+    }
+    
+    private static String generateTemporarySecret() {
+        // 仅用于开发环境，生产环境必须配置环境变量
+        try {
+            return java.util.Base64.getEncoder().encodeToString(
+                java.security.SecureRandom.getInstanceStrong().generateSeed(32)
+            );
+        } catch (Exception e) {
+            log.error("生成临时密钥失败", e);
+            // 最后的安全网
+            return "dev-mode-temp-key-" + System.currentTimeMillis();
+        }
     }
 
     /**

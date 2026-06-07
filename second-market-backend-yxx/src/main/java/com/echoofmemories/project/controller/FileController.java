@@ -67,24 +67,39 @@ public class FileController {
     }
 
     @Operation(summary = "文件下载")
-    @GetMapping("/download/{fileName}")
-    public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
+    @GetMapping("/download/{id}")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
         try {
-            // 这里简化处理，实际应该根据文件名查询数据库获取完整路径
-            File file = new File("./uploads/" + fileName);
+            // 通过ID查询文件信息，而不是直接使用文件名
+            FileInfo fileInfo = fileService.getById(id);
+            if (fileInfo == null || fileInfo.getDeleted() == 1) {
+                return ResponseEntity.notFound().build();
+            }
+
+            File file = new File(fileInfo.getFilePath());
             if (!file.exists()) {
                 return ResponseEntity.notFound().build();
             }
 
             Resource resource = new FileSystemResource(file);
 
+            String encodedFileName = URLEncoder.encode(
+                fileInfo.getOriginalName(), 
+                StandardCharsets.UTF_8
+            ).replaceAll("\\+", "%20");
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" +
-                            URLEncoder.encode(fileName, StandardCharsets.UTF_8) + "\"")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                            encodedFileName + "\"")
+                    .contentType(MediaType.parseMediaType(
+                        fileInfo.getMimeType() != null ? 
+                        fileInfo.getMimeType() : 
+                        MediaType.APPLICATION_OCTET_STREAM_VALUE
+                    ))
                     .body(resource);
 
         } catch (Exception e) {
+            log.error("文件下载失败", e);
             return ResponseEntity.internalServerError().build();
         }
     }

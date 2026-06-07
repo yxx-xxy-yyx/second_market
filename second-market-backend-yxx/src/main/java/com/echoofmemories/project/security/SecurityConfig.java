@@ -29,7 +29,7 @@ public class SecurityConfig {
         private final CorsConfigurationSource corsConfigurationSource;
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-        @Value("${project.security.permit-all:${SECURITY_PERMIT_ALL:true}}")
+        @Value("${project.security.permit-all:${SECURITY_PERMIT_ALL:false}}")
         private boolean permitAll;
 
         /**
