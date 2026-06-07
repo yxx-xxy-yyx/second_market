@@ -76,6 +76,10 @@ project:
   jwt:
     secret: ${JWT_SECRET:}
     expire-time: 86400000  # 24小时
+  data:
+    auto-init: ${PROJECT_DATA_AUTO_INIT:false}
+  ai:
+    product-analysis-controller: ${PROJECT_AI_PRODUCT_ANALYSIS_CONTROLLER:false}
   file:
     upload-path: ${PROJECT_FILE_UPLOAD_PATH:${user.dir}/uploads/}
     max-size: 10MB

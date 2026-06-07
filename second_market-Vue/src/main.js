@@ -11,8 +11,7 @@ import '@/styles/design-tokens.css'
 import '@/styles/global.css'
 import 'flag-icons/css/flag-icons.min.css'
 
-// Element Plus 按需导入（优化打包体积）
-import ElementPlus from '@/plugins/element-plus'
+import ElementPlus from '@/plugins/element-plus-plugin'
 
 // Vant 按需导入（仅导入使用的组件）
 import { Button, Field, Cell, CellGroup, Dialog, Toast, Skeleton, List, PullRefresh, Empty, Loading } from 'vant'

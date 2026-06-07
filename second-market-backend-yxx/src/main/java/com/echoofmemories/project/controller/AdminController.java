@@ -5,8 +5,6 @@ import com.echoofmemories.project.common.Result;
 import com.echoofmemories.project.dto.PageRequest;
 import com.echoofmemories.project.entity.FileInfo;
 import com.echoofmemories.project.entity.User;
-import com.echoofmemories.project.dto.AdminUserListRequest;
-import com.echoofmemories.project.dto.UserDetailDTO;
 import com.echoofmemories.project.service.FileService;
 import com.echoofmemories.project.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,47 +62,6 @@ public class AdminController {
         // 清除密码字段
         userPage.getRecords().forEach(user -> user.setPassword(null));
         return Result.success(userPage);
-    }
-
-    @Operation(summary = "查询用户详情列表")
-    @PostMapping("/user/list")
-    public Result<Page<UserDetailDTO>> getUserDetailPage(@RequestBody AdminUserListRequest request) {
-        try {
-            Page<UserDetailDTO> page = userService.getUserDetailPage(request);
-            return Result.success(page);
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
-    }
-
-    @Operation(summary = "封禁用户")
-    @PutMapping("/user/ban/{id}")
-    public Result<String> banUser(@PathVariable Long id) {
-        try {
-            boolean success = userService.banUser(id);
-            if (success) {
-                return Result.success("封禁成功");
-            } else {
-                return Result.error("封禁失败");
-            }
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
-    }
-
-    @Operation(summary = "解封用户")
-    @PutMapping("/user/unban/{id}")
-    public Result<String> unbanUser(@PathVariable Long id) {
-        try {
-            boolean success = userService.unbanUser(id);
-            if (success) {
-                return Result.success("解封成功");
-            } else {
-                return Result.error("解封失败");
-            }
-        } catch (Exception e) {
-            return Result.error("500", e.getMessage());
-        }
     }
     
     @Operation(summary = "管理员创建用户")

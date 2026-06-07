@@ -7,6 +7,7 @@ import com.echoofmemories.project.service.CampusServiceService;
 import com.echoofmemories.project.service.ForumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "project.data", name = "auto-init", havingValue = "true")
 public class DataAutoInitializer implements CommandLineRunner {
 
     private final ForumService forumService;

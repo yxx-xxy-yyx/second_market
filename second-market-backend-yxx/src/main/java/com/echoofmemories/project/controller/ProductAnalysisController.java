@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/ai")
 @RequiredArgsConstructor
+@ConditionalOnProperty(prefix = "project.ai", name = "product-analysis-controller", havingValue = "true")
 public class ProductAnalysisController {
 
     private final AiService aiService;

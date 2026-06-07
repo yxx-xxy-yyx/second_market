@@ -350,7 +350,7 @@
             <el-button type="primary" round @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }} →</el-button>
           </div>
           <div v-loading="loading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" @click="router.push(`/user/product/${p.id}')">
+            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" @click="router.push(`/user/product/${p.id}`)">
               <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                 <img :src="getProductImage(p.images)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
