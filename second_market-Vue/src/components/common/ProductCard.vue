@@ -1,73 +1,80 @@
 <template>
-  <UnifiedCard
-    :bordered="false"
-    :hover-effect="true"
-    :clickable="true"
+  <article
     class="product-card"
+    role="article"
+    :aria-label="cardAriaLabel"
+    tabindex="0"
     @click="handleClick"
+    @keydown.enter="handleClick"
+    @keydown.space.prevent="handleClick"
   >
-    <template #header>
-      <div class="product-image-wrapper">
-        <img
-          v-if="product.image"
-          :src="product.image"
-          :alt="product.title"
-          class="product-image"
-          loading="lazy"
-        />
-        <div v-else class="product-image-placeholder">
-          <el-icon :size="48" color="var(--neutral-400)"><Picture /></el-icon>
-        </div>
-        <!-- 标签 -->
-        <div v-if="product.tags?.length || product.isVerified || product.isUrgent" class="product-badges">
-          <el-tag v-if="product.isVerified" type="success" size="small" class="badge">
-            <el-icon><CircleCheckFilled /></el-icon> 正品
-          </el-tag>
-          <el-tag v-if="product.isUrgent" type="danger" size="small" class="badge">
-            急售
-          </el-tag>
-          <el-tag v-for="tag in product.tags?.slice(0, 2)" :key="tag" size="small" class="badge">
-            {{ tag }}
-          </el-tag>
-        </div>
+    <div class="product-image-wrapper">
+      <img
+        v-if="product.image"
+        :src="product.image"
+        :alt="product.title"
+        class="product-image"
+        loading="lazy"
+      />
+      <div v-else class="product-image-placeholder" role="img" :aria-label="`${product.title || '商品'}的图片占位符`">
+        <el-icon :size="48" color="var(--neutral-400)"><Picture /></el-icon>
       </div>
-    </template>
+      
+      <!-- 标签 -->
+      <div v-if="hasBadges" class="product-badges" role="group" :aria-label="badgesAriaLabel">
+        <el-tag v-if="product.isVerified" type="success" size="small" class="badge" role="status">
+          <el-icon><CircleCheckFilled /></el-icon> 
+          <span>正品认证</span>
+        </el-tag>
+        <el-tag v-if="product.isUrgent" type="danger" size="small" class="badge" role="status">
+          <span>急售</span>
+        </el-tag>
+        <el-tag v-for="tag in product.tags?.slice(0, 2)" :key="tag" size="small" class="badge">
+          {{ tag }}
+        </el-tag>
+      </div>
+    </div>
 
     <div class="product-content">
       <h3 class="product-title">{{ product.title }}</h3>
       <p v-if="product.description" class="product-desc">{{ product.description }}</p>
 
       <div class="product-meta">
-        <div class="product-price">
-          <span class="currency">¥</span>
-          <span class="amount">{{ formatPrice(product.price) }}</span>
-          <span v-if="product.originalPrice" class="original-price">¥{{ formatPrice(product.originalPrice) }}</span>
+        <div class="product-price" role="group" aria-label="价格信息">
+          <span class="currency" aria-hidden="true">¥</span>
+          <span class="amount" aria-label="现价">{{ formatPrice(product.price) }}</span>
+          <span v-if="product.originalPrice" class="original-price" aria-label="原价">
+            ¥{{ formatPrice(product.originalPrice) }}
+          </span>
         </div>
 
         <div class="product-footer">
-          <div class="seller-info">
-            <el-avatar :size="20" :src="product.sellerAvatar" />
+          <div class="seller-info" role="group" :aria-label="`卖家: ${product.sellerName || '未知'}`">
+            <el-avatar 
+              :size="20" 
+              :src="product.sellerAvatar"
+              :alt="product.sellerName"
+            />
             <span class="seller-name">{{ product.sellerName }}</span>
           </div>
           <div class="product-stats">
-            <span v-if="product.viewCount" class="stat">
-              <el-icon><View /></el-icon>
-              {{ product.viewCount }}
+            <span v-if="product.viewCount" class="stat" :aria-label="`浏览量 ${product.viewCount}`">
+              <el-icon aria-hidden="true"><View /></el-icon>
+              <span>{{ product.viewCount }}</span>
             </span>
-            <span v-if="product.likeCount" class="stat">
-              <el-icon><Heart /></el-icon>
-              {{ product.likeCount }}
+            <span v-if="product.likeCount" class="stat" :aria-label="`收藏数 ${product.likeCount}`">
+              <el-icon aria-hidden="true"><Heart /></el-icon>
+              <span>{{ product.likeCount }}</span>
             </span>
           </div>
         </div>
       </div>
     </div>
-  </UnifiedCard>
+  </article>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import UnifiedCard from './UnifiedCard.vue'
 import { Picture, CircleCheckFilled, View, Heart } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -80,12 +87,59 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
+// 计算是否有标签
+const hasBadges = computed(() => {
+  return product.tags?.length || product.isVerified || product.isUrgent
+})
+
+// 计算商品卡片的可访问标签
+const cardAriaLabel = computed(() => {
+  const parts = []
+  
+  if (props.product.title) {
+    parts.push(props.product.title)
+  }
+  
+  if (props.product.price) {
+    parts.push(`价格${props.product.price}元`)
+  }
+  
+  if (props.product.originalPrice) {
+    parts.push(`原价${props.product.originalPrice}元`)
+  }
+  
+  if (props.product.isVerified) {
+    parts.push('已认证')
+  }
+  
+  if (props.product.isUrgent) {
+    parts.push('急售')
+  }
+  
+  if (props.product.sellerName) {
+    parts.push(`卖家${props.product.sellerName}`)
+  }
+  
+  parts.push('点击查看详情')
+  
+  return parts.join('，')
+})
+
+// 标签组的无障碍标签
+const badgesAriaLabel = computed(() => {
+  const badges = []
+  if (props.product.isVerified) badges.push('正品认证标签')
+  if (props.product.isUrgent) badges.push('急售标签')
+  if (props.product.tags?.length) badges.push(`商品标签：${props.product.tags.slice(0, 2).join('、')}`)
+  return badges.join('，')
+})
+
 const formatPrice = (price) => {
   if (!price && price !== 0) return ''
   return Number(price).toFixed(2)
 }
 
-const handleClick = () => {
+const handleClick = (e) => {
   emit('click', props.product)
 }
 </script>
@@ -93,6 +147,13 @@ const handleClick = () => {
 <style scoped>
 .product-card {
   overflow: hidden;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-default);
+}
+
+.product-card:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
 }
 
 .product-image-wrapper {

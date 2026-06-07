@@ -1,4 +1,11 @@
-// 统一导出组件库
+// 组件统一导出
 export { default as UnifiedCard } from './common/UnifiedCard.vue'
 export { default as ProductCard } from './common/ProductCard.vue'
+export { default as ProductCardSkeleton } from './common/ProductCardSkeleton.vue'
+export { default as ListSkeleton } from './common/ListSkeleton.vue'
+export { default as TableSkeleton } from './common/TableSkeleton.vue'
+export { default as AppBreadcrumb } from './common/AppBreadcrumb.vue'
+export { default as AppTabs } from './common/AppTabs.vue'
+export { default as StatCard } from './common/StatCard.vue'
+export { default as LazyImage } from './common/LazyImage.vue'
 export { default as ResponsiveLayout } from './layout/ResponsiveLayout.vue'

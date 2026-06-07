@@ -10,6 +10,9 @@
     "dev": "npx vite",
     "build": "node --max-old-space-size=8192 node_modules/vite/bin/vite.js build",
     "preview": "npx vite preview",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
     "static": "node --max-old-space-size=8192 node_modules/vite/bin/vite.js build && npx cap sync",
     "app:build": "node --max-old-space-size=8192 node_modules/vite/bin/vite.js build && npx cap copy",
     "app:open": "npx cap open android"
@@ -41,6 +44,7 @@
     "postcss": "^8.5.10",
     "tailwindcss": "^3.4.19",
     "vite": "^7.3.3",
-    "vite-plugin-vue-devtools": "^8.0.0"
+    "vite-plugin-vue-devtools": "^8.0.0",
+    "vitepress": "^1.6.3"
   }
 }
