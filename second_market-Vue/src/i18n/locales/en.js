@@ -449,7 +449,11 @@ export default {
     quickTag2: 'Recommended Pricing Rules',
     quickTag3: 'How to identify scammers?',
     quickTag4: 'Help write product descriptions',
-    errorMsg: 'Sorry, I encountered a problem. Please try again later.'
+    errorMsg: 'Sorry, I encountered a problem. Please try again later.',
+    recommendations: "AI Recommendations",
+    basedOnInterest: "Based on your interests",
+    refresh: "Refresh recommendations",
+    noRecommendations: "No recommendations available"
   },
   categories: {
     electronics: "Electronics",

@@ -125,3 +125,15 @@ export const forumApi = {
     })
   }
 }
+
+// AI推荐API
+export const aiRecommendApi = {
+  // 获取AI推荐商品
+  getRecommendations(data) {
+    return request({
+      url: '/ai/recommendations',
+      method: 'post',
+      data
+    })
+  }
+}

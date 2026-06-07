@@ -91,6 +91,9 @@
           </div>
         </div>
 
+        <!-- AI推荐商品 -->
+        <AiRecommendations />
+
         <!-- 推荐商品 -->
         <div class="rounded-2xl bg-white border border-gray-100 shadow-md p-4">
           <div class="flex items-center justify-between mb-4">
@@ -209,6 +212,9 @@
             </div>
           </div>
         </div>
+
+        <!-- AI推荐商品 -->
+        <AiRecommendations />
 
         <div class="rounded-2xl bg-white border border-gray-100 shadow-md p-4">
           <div class="flex items-center justify-between mb-4">
@@ -334,6 +340,9 @@
           </div>
         </div>
 
+        <!-- AI推荐商品 -->
+        <AiRecommendations />
+
         <!-- 商品展示 -->
         <div class="space-y-6">
           <div class="flex items-center justify-between">
@@ -341,7 +350,7 @@
             <el-button type="primary" round @click="router.push('/user/products')">{{ $t('dashboard.viewMore') }} →</el-button>
           </div>
           <div v-loading="loading" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" @click="router.push(`/user/product/${p.id}`)">
+            <div v-for="p in recommendProducts" :key="p.id" class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer group" @click="router.push(`/user/product/${p.id}')">
               <div class="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                 <img :src="getProductImage(p.images)" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
               </div>
@@ -380,6 +389,7 @@ import { noticeApi } from '@/api/admin'
 import { DEFAULT_PRODUCT_IMAGE, formatProductImageUrl } from '@/utils/url'
 import { CATEGORIES } from '@/utils/categories'
 import CategoryIcon from '@/components/icons/CategoryIcon.vue'
+import AiRecommendations from '@/components/AiRecommendations.vue'
 
 const router = useRouter()
 const schoolStore = useSchoolStore()

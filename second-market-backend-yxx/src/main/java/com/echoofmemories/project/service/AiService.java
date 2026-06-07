@@ -149,4 +149,16 @@ public interface AiService {
     AiCampusServiceResponse campusService(
             AiCampusServiceRequest request,
             Long userId);
+            
+    /**
+     * AI智能推荐商品
+     * 根据用户的浏览历史和搜索历史进行个性化推荐
+     * 
+     * @param request 推荐请求
+     * @param userId 用户ID
+     * @return 推荐响应
+     */
+    AiRecommendationResponse getRecommendations(
+            AiRecommendationRequest request,
+            Long userId);
 }

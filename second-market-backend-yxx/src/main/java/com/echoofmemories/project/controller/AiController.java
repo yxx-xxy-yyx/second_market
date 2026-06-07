@@ -5,6 +5,8 @@ import com.echoofmemories.project.dto.AiRequest;
 import com.echoofmemories.project.dto.AiResponse;
 import com.echoofmemories.project.dto.ProductAnalysisDTO;
 import com.echoofmemories.project.dto.ProductAnalysisRequest;
+import com.echoofmemories.project.dto.AiRecommendationRequest;
+import com.echoofmemories.project.dto.AiRecommendationResponse;
 import com.echoofmemories.project.security.SecurityUtils;
 import com.echoofmemories.project.security.annotation.RequireRole;
 import com.echoofmemories.project.service.AiService;
@@ -20,13 +22,6 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * AI功能控制器
- * 提供AI内容生成及商品分析相关接口
- * 
- * @author echo
- * @since 2025-01-27
- */
 @Tag(name = "AI功能管理", description = "AI内容生成及商品分析相关接口")
 @Slf4j
 @RestController
@@ -48,7 +43,6 @@ public class AiController {
             
             log.info("开始处理AI商品分析请求，用户ID：{}，图片URLs：{}", userId, request.getImageUrls());
 
-            // 默认语言（防止前端不传）
             String language = request.getLanguage();
             if (language == null || language.isEmpty()) {
                 language = "zh";
@@ -74,7 +68,6 @@ public class AiController {
     @RequireRole({ "admin", "user" })
     public Result<AiResponse> generateContent(@Valid @RequestBody AiRequest request) {
         try {
-            // 自动设置当前用户ID（安全性考虑，不允许前端传递用户ID）
             Long currentUserId = SecurityUtils.getCurrentUserId();
             request.setUserId(currentUserId);
 
@@ -143,7 +136,6 @@ public class AiController {
             status.put("available", aiService.isAvailable());
             status.put("status", aiService.getServiceStatus());
 
-            // 如果是管理员，返回更详细的信息
             if (SecurityUtils.isAdmin()) {
                 status.put("connectionTest", aiService.testConnection());
             }
@@ -194,20 +186,17 @@ public class AiController {
         try {
             Map<String, Object> help = new HashMap<>();
 
-            // AI生成类型说明
             Map<String, String> generateTypes = new HashMap<>();
             generateTypes.put("POST_CONTENT", "帖子内容生成 - 根据提示词创作文章内容");
             generateTypes.put("POST_SUMMARY", "帖子摘要生成 - 为文章内容生成简洁摘要");
             generateTypes.put("POST_TAGS", "帖子标签生成 - 为文章内容生成相关标签");
             generateTypes.put("GENERAL_CONTENT", "通用内容生成 - 通用的内容创作");
 
-            // 使用示例
             Map<String, String> examples = new HashMap<>();
             examples.put("文章创作", "请帮我写一篇关于Vue 3新特性的技术文章，包含组合式API、响应式系统等内容");
             examples.put("摘要生成", "为你的长文章内容生成200字以内的摘要");
             examples.put("标签生成", "为文章内容生成3-5个相关标签，便于分类和检索");
 
-            // 使用建议
             String[] tips = {
                     "提示词要具体明确，避免过于模糊的描述",
                     "可以在提示词中指定期望的内容格式和风格",
@@ -361,6 +350,27 @@ public class AiController {
         } catch (Exception e) {
             log.error("校园服务匹配失败：{}", e.getMessage(), e);
             return Result.error("校园服务匹配失败：" + e.getMessage());
+        }
+    }
+
+    @Operation(summary = "AI智能推荐商品", description = "根据用户浏览和搜索历史进行个性化推荐")
+    @PostMapping("/recommendations")
+    public Result<AiRecommendationResponse> getRecommendations(
+            @RequestBody AiRecommendationRequest request) {
+        try {
+            Long userId = SecurityUtils.getCurrentUserId();
+            log.info("AI推荐请求 - 用户ID: {}, 类型: {}", userId, request.getType());
+            
+            AiRecommendationResponse response = aiService.getRecommendations(request, userId);
+            
+            if (response.getSuccess()) {
+                return Result.success(response);
+            } else {
+                return Result.error("500", response.getExplanation());
+            }
+        } catch (Exception e) {
+            log.error("AI推荐失败", e);
+            return Result.error("500", "推荐服务暂时不可用");
         }
     }
 }

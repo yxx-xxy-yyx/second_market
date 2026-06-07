@@ -457,7 +457,11 @@ export default {
     quickTag2: '建议定价规则',
     quickTag3: '如何识别骗子？',
     quickTag4: '帮助写商品描述',
-    errorMsg: '抱歉，我现在遇到了一点问题，请稍后再试。'
+    errorMsg: '抱歉，我现在遇到了一点问题，请稍后再试。',
+    recommendations: "AI 智能推荐",
+    basedOnInterest: "基于你的兴趣",
+    refresh: "刷新推荐",
+    noRecommendations: "暂无推荐商品"
   },
   categories: {
     electronics: "电子产品",
