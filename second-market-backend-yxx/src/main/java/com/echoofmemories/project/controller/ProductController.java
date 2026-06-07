@@ -1,6 +1,7 @@
 package com.echoofmemories.project.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.echoofmemories.project.annotation.AuditLog;
 import com.echoofmemories.project.common.Result;
 import com.echoofmemories.project.dto.ProductPageRequest;
 import com.echoofmemories.project.dto.ProductRequest;
@@ -30,6 +31,7 @@ public class ProductController {
 
     @Operation(summary = "新增商品")
     @PostMapping("/add")
+    @AuditLog("发布商品")
     public Result<String> addProduct(@Valid @RequestBody ProductRequest request) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
@@ -54,6 +56,7 @@ public class ProductController {
 
     @Operation(summary = "更新商品")
     @PutMapping("/update")
+    @AuditLog("更新商品")
     public Result<String> updateProduct(@Valid @RequestBody ProductRequest request) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();
@@ -91,6 +94,7 @@ public class ProductController {
 
     @Operation(summary = "删除商品")
     @DeleteMapping("/delete/{id}")
+    @AuditLog("删除商品")
     public Result<String> deleteProduct(@PathVariable Long id) {
         try {
             Long userId = SecurityUtils.getCurrentUserId();

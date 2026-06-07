@@ -14,11 +14,21 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:second_market}}
     password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:second_market}}
     url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://127.0.0.1:5432/second_market}}
+    # HikariCP 连接池配置
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      auto-commit: true
+      idle-timeout: 30000
+      connection-timeout: 30000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+      pool-name: SecondMarketHikariCP
     
   servlet:
     multipart:
-      max-file-size: 100MB
-      max-request-size: 100MB
+      max-file-size: 10MB
+      max-request-size: 10MB
       
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
