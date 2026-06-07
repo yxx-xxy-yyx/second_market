@@ -45,6 +45,7 @@ const AdminProfile = () => import('@/views/admin/Profile.vue')
 const AdminProductReview = () => import('@/views/admin/ProductReview.vue')
 const AdminReportManage = () => import('@/views/admin/ReportManage.vue')
 const AdminNoticeManage = () => import('@/views/admin/NoticeManage.vue')
+const AdminForumManage = () => import('@/views/admin/ForumManage.vue')
 
 // 新增移动端功能页面
 const RecentlyViewed = () => import('@/views/user/RecentlyViewed.vue')
@@ -538,6 +539,16 @@ const routes = [
         component: AdminNoticeManage,
         meta: {
           title: '公告管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'forum',
+        name: 'admin-forum',
+        component: AdminForumManage,
+        meta: {
+          title: '论坛管理',
           requiresAuth: true,
           roles: ['admin']
         }

@@ -59,4 +59,24 @@ public interface ForumService extends IService<ForumPost> {
     ForumInteractionStatus toggleFavorite(Long postId, Long userId);
 
     IPage<ForumPost> getMyFavoritePage(Page<ForumPost> page, Long userId);
+
+    /**
+     * 管理员获取所有帖子（不带权限过滤）
+     */
+    IPage<ForumPost> getAllPosts(Page<ForumPost> page, String category, Long schoolId, String keyword);
+
+    /**
+     * 管理员获取所有评论（不带权限过滤）
+     */
+    IPage<ForumComment> getAllComments(Page<ForumComment> page, Long postId, String keyword);
+
+    /**
+     * 管理员删除帖子（强制删除，绕过权限检查）
+     */
+    boolean adminDeletePost(Long id);
+
+    /**
+     * 管理员删除评论（强制删除，绕过权限检查）
+     */
+    boolean adminDeleteComment(Long id);
 }

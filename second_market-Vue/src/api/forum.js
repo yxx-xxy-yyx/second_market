@@ -89,5 +89,39 @@ export const forumApi = {
       method: 'get',
       params
     })
+  },
+
+  // 管理员获取所有帖子
+  adminGetAllPosts(params) {
+    return request({
+      url: '/forum/admin/all-posts',
+      method: 'get',
+      params
+    })
+  },
+
+  // 管理员获取所有评论
+  adminGetAllComments(params) {
+    return request({
+      url: '/forum/admin/all-comments',
+      method: 'get',
+      params
+    })
+  },
+
+  // 管理员删除帖子
+  adminDeletePost(id) {
+    return request({
+      url: `/forum/admin/delete-post/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 管理员删除评论
+  adminDeleteComment(id) {
+    return request({
+      url: `/forum/admin/delete-comment/${id}`,
+      method: 'delete'
+    })
   }
 }

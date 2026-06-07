@@ -279,4 +279,60 @@ public class ForumServiceImpl extends ServiceImpl<ForumPostMapper, ForumPost> im
     private String safe(String v) {
         return v == null ? "" : v;
     }
+
+    @Override
+    public IPage<ForumPost> getAllPosts(Page<ForumPost> page, String category, Long schoolId, String keyword) {
+        LambdaQueryWrapper<ForumPost> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ForumPost::getDeleted, 0);
+        if (category != null && !category.isEmpty()) {
+            wrapper.eq(ForumPost::getCategory, category);
+        }
+        if (schoolId != null) {
+            wrapper.eq(ForumPost::getSchoolId, schoolId);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.and(w -> w.like(ForumPost::getTitle, keyword)
+                    .or().like(ForumPost::getContent, keyword));
+        }
+        wrapper.orderByDesc(ForumPost::getCreateTime);
+        return page(page, wrapper);
+    }
+
+    @Override
+    public IPage<ForumComment> getAllComments(Page<ForumComment> page, Long postId, String keyword) {
+        LambdaQueryWrapper<ForumComment> wrapper = new LambdaQueryWrapper<>();
+        if (postId != null) {
+            wrapper.eq(ForumComment::getPostId, postId);
+        }
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.like(ForumComment::getContent, keyword);
+        }
+        wrapper.orderByDesc(ForumComment::getCreateTime);
+        return forumCommentMapper.selectPage(page, wrapper);
+    }
+
+    @Override
+    @Transactional
+    public boolean adminDeletePost(Long id) {
+        ForumPost post = getById(id);
+        if (post != null) {
+            post.setDeleted(1);
+            return updateById(post);
+        }
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public boolean adminDeleteComment(Long id) {
+        ForumComment comment = forumCommentMapper.selectById(id);
+        if (comment != null) {
+            int res = forumCommentMapper.deleteById(id);
+            if (res > 0) {
+                forumPostMapper.updateCommentCount(comment.getPostId(), -1);
+            }
+            return res > 0;
+        }
+        return false;
+    }
 }
