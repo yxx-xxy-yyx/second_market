@@ -129,15 +129,8 @@
               </div>
               <span class="text-xs text-gray-600 font-medium">聊一聊</span>
             </div>
-            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer hover:scale-105 transition-transform" @click="router.push('/user/cart')">
-              <div class="h-10 w-10 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-200 flex items-center justify-center shadow-md">
-                <el-icon :size="20" class="text-blue-600"><ShoppingCart /></el-icon>
-              </div>
-              <span class="text-xs text-gray-600 font-medium">购物车</span>
-            </div>
-            <div class="flex-1 flex gap-3">
-              <el-button type="warning" class="flex-1 !rounded-full !h-12 !font-bold !text-base shadow-lg" @click="handleAddToCart">加入购物车</el-button>
-              <el-button type="primary" class="flex-1 !rounded-full !h-12 !font-bold !text-base shadow-lg" @click="handleBuy">立即购买</el-button>
+            <div class="flex-1">
+              <el-button type="primary" class="w-full !rounded-full !h-12 !font-bold !text-base shadow-lg" @click="handleBuy">立即购买</el-button>
             </div>
           </div>
         </div>
@@ -236,7 +229,6 @@
 
                 <div class="flex flex-wrap gap-4 pt-8 border-t border-gray-200">
                   <el-button type="primary" size="large" class="flex-1 !h-14 !text-lg !font-bold !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="handleBuy">立即购买</el-button>
-                  <el-button type="warning" size="large" class="flex-1 !h-14 !text-lg !font-bold !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="handleAddToCart">加入购物车</el-button>
                   <el-button :type="isFavorited ? 'danger' : 'default'" size="large" class="!h-14 !rounded-full !shadow-lg hover:!shadow-xl transition-all" @click="toggleFavorite">
                     <el-icon class="mr-2"><component :is="isFavorited ? StarFilled : Star" /></el-icon>
                     {{ isFavorited ? '已收藏' : '收藏' }}
@@ -284,19 +276,17 @@ import { favoriteApi } from '@/api/favorite'
 import { orderApi } from '@/api/order'
 import { reportApi } from '@/api/report'
 import { useUserStore } from '@/stores/user'
-import { useCartStore } from '@/stores/cart'
 import { useDeviceType } from '@/utils/device'
 import { formatAvatarUrl, formatProductImageUrl } from '@/utils/url'
 import { 
   ArrowLeft, Share, Star, StarFilled, ChatDotRound, 
-  MagicStick, Picture, Warning, ShoppingCart, Document, CircleCheck
+  MagicStick, Picture, Warning, Document, CircleCheck
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
-const cartStore = useCartStore()
 const { isMobileScreen } = useDeviceType()
 const { locale } = useI18n()
 
@@ -394,20 +384,6 @@ const handleBuy = async () => {
   } catch {
     ElMessage.error('下单失败')
   }
-}
-
-const handleAddToCart = () => {
-  cartStore.addItem({
-    productId: product.value.id,
-    title: product.value.title,
-    price: product.value.price,
-    image: imageList.value?.[0] || '',
-    sellerId: product.value.userId,
-    schoolId: product.value.schoolId,
-    conditionScore: product.value.conditionScore,
-    conditionDesc: product.value.conditionDesc
-  })
-  ElMessage.success('已加入购物车')
 }
 
 const handleContact = () => {
