@@ -807,7 +807,7 @@ router.onError((error) => {
 // 路由守卫
 router.beforeEach((to, from, next) => {
   if (to.meta.title) {
-    document.title = `${to.meta.title} - 智能二手商城'
+    document.title = `${to.meta.title} - 智能二手商城`
   }
 
   if (to.path === '/') return next('/login')
