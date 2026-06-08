@@ -92,7 +92,6 @@ public class SecurityConfig {
                                                         "/api/user/admin/**")
                                         .hasRole("ADMIN")
 
-                                        .antMatchers(HttpMethod.GET, "/**").permitAll()
                                         .anyRequest().authenticated());
                 }
 

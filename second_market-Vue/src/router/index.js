@@ -4,7 +4,6 @@ import UserProfile from '@/views/user/Profile.vue'
 import Categories from '@/views/user/Categories.vue'
 
 // 路由配置中心
-// 引入页面组件
 const Login = () => import('@/views/auth/Login.vue')
 const Register = () => import('@/views/auth/Register.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
@@ -36,7 +35,7 @@ const Verify = () => import('@/views/user/Verify.vue')
 const Credit = () => import('@/views/user/Credit.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 
-// 新增AI功能页面
+// AI 功能页面
 const AiAuthenticate = () => import('@/views/user/AiAuthenticate.vue')
 const AiMarketTrend = () => import('@/views/user/AiMarketTrend.vue')
 const AiTrust = () => import('@/views/user/AiTrust.vue')
@@ -51,7 +50,7 @@ const AdminForumManage = () => import('@/views/admin/ForumManage.vue')
 const AdminRoleManage = () => import('@/views/admin/RoleManage.vue')
 const AdminFileManage = () => import('@/views/admin/FileManage.vue')
 
-// 新增移动端功能页面
+// 移动端新增功能页面
 const RecentlyViewed = () => import('@/views/user/RecentlyViewed.vue')
 const PopularDigital = () => import('@/views/user/PopularDigital.vue')
 const CampusNearby = () => import('@/views/user/CampusNearby.vue')
@@ -63,7 +62,7 @@ const ForumView = () => import('@/views/user/ForumView.vue')
 const ForumDetail = () => import('@/views/user/ForumDetail.vue')
 const ForumPublish = () => import('@/views/user/ForumPublish.vue')
 
-// 引入 Neo 模块路由
+// Neo 模块路由
 import { neoRoutes } from '@/neo/neo.routes.js'
 
 const routes = [
@@ -208,7 +207,7 @@ const routes = [
         name: 'AiChat',
         component: AiChat,
         meta: {
-          title: 'AI智能助手',
+          title: 'AI 智能助手',
           requiresAuth: true
         }
       },
@@ -462,7 +461,7 @@ const routes = [
         name: 'ai-authenticate',
         component: AiAuthenticate,
         meta: {
-          title: 'AI鉴定质检',
+          title: 'AI 鉴定质检',
           requiresAuth: true
         }
       },
@@ -471,7 +470,7 @@ const routes = [
         name: 'ai-market',
         component: AiMarketTrend,
         meta: {
-          title: 'AI行情参考',
+          title: 'AI 行情参考',
           requiresAuth: true
         }
       },
@@ -480,7 +479,7 @@ const routes = [
         name: 'ai-trust',
         component: AiTrust,
         meta: {
-          title: 'AI智能托管',
+          title: 'AI 智能托管',
           requiresAuth: true
         }
       },
@@ -614,9 +613,8 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
-    } else {
-      return { top: 0 }
     }
+    return { top: 0 }
   }
 })
 
@@ -626,25 +624,38 @@ router.onError((error) => {
   console.error('Router error:', error)
 })
 
-// 路由守卫
+// ========== 路由守卫 ==========
+// 从 localStorage 读取当前用户信息（路由钩子执行时 Pinia store 可能未初始化）
+const getCurrentUser = () => {
+  try {
+    const raw = localStorage.getItem('user')
+    return raw ? JSON.parse(raw) : null
+  } catch (_) {
+    return null
+  }
+}
+
 router.beforeEach((to, from, next) => {
-  if (to.meta.title) {
+  // 1. 更新页面标题
+  if (to.meta?.title) {
     document.title = `${to.meta.title} - 智能二手商城`
   }
 
-  if (to.path === '/') return next('/login')
+  // 2. 根路径 => 按登录状态跳
+  if (to.path === '/') {
+    const token = localStorage.getItem('token')
+    const user = getCurrentUser()
+    if (token && user) {
+      return next(user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+    }
+    return next('/login')
+  }
 
   const token = localStorage.getItem('token')
-  const userStr = localStorage.getItem('user')
-  let user = null
-  try {
-    user = userStr ? JSON.parse(userStr) : null
-  } catch (e) {
-    localStorage.removeItem('user')
-    localStorage.removeItem('token')
-  }
+  const user = getCurrentUser()
   const isLoggedIn = !!(token && user)
 
+  // 3. 收集 meta 信息（子路由合并父路由的 meta）
   const requiresAuth = to.matched.some((r) => r.meta && r.meta.requiresAuth)
   const hideForAuth = to.matched.some((r) => r.meta && r.meta.hideForAuth)
   const roleSet = new Set()
@@ -654,23 +665,39 @@ router.beforeEach((to, from, next) => {
   })
   const requiredRoles = Array.from(roleSet)
 
+  // 4. 已登录访问登录/注册等页 => 跳到对应首页
   if (hideForAuth && isLoggedIn) {
-    const role = user?.role
-    return next(role === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+    return next(user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard')
   }
 
+  // 5. 需要登录的路由
   if (requiresAuth && !isLoggedIn) {
-    return next('/login')
+    return next({
+      path: '/login',
+      query: { redirect: to.fullPath }
+    })
   }
 
+  // 6. 角色权限检查
   if (requiredRoles && requiredRoles.length > 0) {
     const userRole = user?.role
-    if (!requiredRoles.includes(userRole)) {
+    if (!userRole || !requiredRoles.includes(userRole)) {
+      // 角色不匹配：跳到各自身份对应的首页
       return next(userRole === 'admin' ? '/admin/dashboard' : '/user/dashboard')
     }
   }
 
-  return next()
+  next()
 })
+
+// 登录成功后解析 redirect 跳转的辅助函数
+export function resolveRedirectRoute(route) {
+  const redirect = route.query?.redirect
+  if (typeof redirect === 'string' && redirect && redirect !== '/login') {
+    return redirect
+  }
+  const user = getCurrentUser()
+  return user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard'
+}
 
 export default router

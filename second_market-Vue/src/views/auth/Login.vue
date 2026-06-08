@@ -228,12 +228,12 @@ import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 import { useSchoolStore } from '@/stores/school'
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 const schoolStore = useSchoolStore()
 
-// 为桌面端粒子效果生成随机样式
+// 桌面端粒子效果样式
 const getParticleStyle = (i) => {
   const size = Math.random() * 60 + 20
   return {
@@ -284,7 +284,7 @@ const handleLogin = async () => {
 
     const result = await userStore.login(loginForm)
 
-    if (result.success) {
+    if (result?.success) {
       if (userStore.user?.role === 'admin') {
         await router.replace('/admin/dashboard')
       } else {
@@ -292,7 +292,7 @@ const handleLogin = async () => {
       }
     }
   } catch (error) {
-
+    // 错误由 userStore/Element Plus 处理
   } finally {
     loading.value = false
   }
@@ -319,7 +319,7 @@ const handleLogin = async () => {
 }
 
 /* ================================================
-   移动端/平板端样式 (Tailwind: lg:hidden)
+   移动端/平板端样式
    ================================================ */
 .mobile-container {
   min-height: 100vh;
@@ -488,7 +488,7 @@ const handleLogin = async () => {
   border-radius: var(--radius-xl);
   padding: 12px 16px;
   box-shadow: none;
-  transition: all 0.3s ease;
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .mobile-input :deep(.el-input__wrapper:hover),
@@ -529,13 +529,13 @@ const handleLogin = async () => {
   border-radius: var(--radius-xl);
   background: var(--gradient-primary) !important;
   border: none;
-  box-shadow: 0 8px 25px rgba(54, 179, 194, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .mobile-login-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(54, 179, 194, 0.5);
+  box-shadow: var(--shadow-primary-hover);
 }
 
 .mobile-login-btn:active {
@@ -554,7 +554,7 @@ const handleLogin = async () => {
 }
 
 /* ================================================
-   桌面端样式 (Tailwind: hidden lg:block)
+   桌面端样式
    ================================================ */
 .desktop-container {
   min-height: 100vh;
@@ -815,7 +815,7 @@ const handleLogin = async () => {
   border-radius: var(--radius-2xl);
   padding: 16px 20px;
   box-shadow: none;
-  transition: all 0.4s ease;
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .desktop-input :deep(.el-input__wrapper:hover),
@@ -859,14 +859,14 @@ const handleLogin = async () => {
   border-radius: var(--radius-2xl);
   background: var(--gradient-primary) !important;
   border: none;
-  box-shadow: 0 10px 35px rgba(54, 179, 194, 0.4);
-  transition: all 0.4s ease;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--duration-normal) var(--ease-default);
   margin-top: 8px;
 }
 
 .desktop-login-btn:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 45px rgba(54, 179, 194, 0.5);
+  box-shadow: var(--shadow-primary-hover);
 }
 
 .desktop-login-btn:active {
@@ -886,7 +886,7 @@ const handleLogin = async () => {
 }
 
 /* ================================================
-   平板端适配 (Tailwind: lg = 1024px)
+   平板端适配 (lg 断点)
    ================================================ */
 @media (min-width: 1024px) and (max-width: 1280px) {
   .desktop-content {

@@ -32,6 +32,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
     public User login(String username, String password) {
@@ -53,7 +54,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 生成JWT token
-        String token = JwtUtils.generateToken(user.getId().toString(), user.getUsername());
+        String token = jwtUtils.generateToken(user.getId().toString(), user.getUsername());
         user.setToken(token);
         user.setPassword(null); // 清除密码字段
 

@@ -31,6 +31,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -41,19 +42,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String userId = null;
 
-        // 检查是否包含Bearer token
+        // 检查是否包含 Bearer token
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             try {
-                // 验证token并获取用户ID
-                if (JwtUtils.verify(token)) {
-                    userId = JwtUtils.getUserId(token);
-                    // 【核心修复】：必须将解析出的 userId 存入 request
-                    // 这样 Controller 里的 getCurrentUserId 才能拿到
+                // 验证 token 并获取用户 ID
+                if (jwtUtils.verify(token)) {
+                    userId = jwtUtils.getUserId(token);
+                    // 将解析出的 userId 存入 request，供后续 Controller/Service 使用
                     request.setAttribute("userId", userId);
                 }
             } catch (Exception e) {
-                log.error("JWT token解析失败: {}", e.getMessage());
+                log.error("JWT token 解析失败: {}", e.getMessage());
             }
         }
 

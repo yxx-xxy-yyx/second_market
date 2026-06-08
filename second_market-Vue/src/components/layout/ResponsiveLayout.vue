@@ -24,7 +24,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { useDeviceType } from '@/composables/useDevice'
+import { useDeviceType } from '@/utils/device'
 
 const { isMobile, isTablet, isDesktop, screenWidth, screenHeight } = useDeviceType()
 

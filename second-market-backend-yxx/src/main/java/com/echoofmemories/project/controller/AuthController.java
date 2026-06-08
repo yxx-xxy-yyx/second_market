@@ -27,24 +27,27 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    private final JwtUtils jwtUtils;
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody @Validated LoginRequest loginRequest) {
         try {
+            // login() 内部已完成密码校验与 token 生成，返回的 User 已包含 token 字段
             User user = userService.login(loginRequest.getUid(), loginRequest.getPassword());
 
-            // 生成JWT Token
-            String token = JwtUtils.createToken(user.getId().toString());
+            // 构造返回数据：保持 { token, user } 结构，复用 service 已生成的 token
+            String token = user.getToken();
+            // 避免在返回的 user 对象中再次包含密码/token（token 放在外层）
+            user.setToken(null);
 
-            // 构造返回数据
             Map<String, Object> data = new HashMap<>();
             data.put("token", token);
             data.put("user", user);
 
             return Result.success("登录成功", data);
         } catch (Exception e) {
-            return Result.error("用户名或密码错误");
+            return Result.error(e.getMessage() != null ? e.getMessage() : "用户名或密码错误");
         }
     }
 

@@ -2,19 +2,19 @@ server:
   address: 0.0.0.0
   port: ${PORT:8001}
   servlet:
-    context-path: /api
+    context-path: ${SERVER_CONTEXT_PATH:/api}
 
 # 数据源配置
 spring:
   application:
     name: second-market-backend
-  
+
   datasource:
-    driver-class-name: ${SPRING_DATASOURCE_DRIVER:${DB_DRIVER:org.postgresql.Driver}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:second_market}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:second_market}}
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:postgresql://127.0.0.1:5432/second_market}}
-    # HikariCP 连接池配置
+    # 数据库连接（MySQL 默认端口 3306；PostgreSQL 默认端口 5432）
+    url: ${SPRING_DATASOURCE_URL:${DB_URL:jdbc:mysql://127.0.0.1:3306/second_market?useUnicode=true&characterEncoding=utf8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}}
+    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:root}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:root}}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER:${DB_DRIVER:com.mysql.cj.jdbc.Driver}}
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -24,17 +24,17 @@ spring:
       max-lifetime: 1800000
       connection-test-query: SELECT 1
       pool-name: SecondMarketHikariCP
-    
+
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-      
+
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
     default-property-inclusion: non_null
-    
+
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
@@ -61,7 +61,7 @@ logging:
     org.springframework.web: info
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
-    
+
 # Knife4j Swagger 配置
 knife4j:
   enable: ${KNIFE4J_ENABLE:false}
@@ -70,12 +70,13 @@ knife4j:
     enable-swagger-models: true
     enable-document-manage: true
     swagger-model-name: 实体类列表
-    
+
 # 自定义配置
 project:
   jwt:
-    secret: ${JWT_SECRET:}
-    expire-time: 86400000  # 24小时
+    # 密钥（至少 32 位）。生产环境请通过环境变量 JWT_SECRET 覆盖
+    secret: ${JWT_SECRET:second-market-dev-default-secret-key-please-change-me}
+    expire-time: 604800000   # 7 天（毫秒）
   data:
     auto-init: ${PROJECT_DATA_AUTO_INIT:false}
   ai:
@@ -87,7 +88,7 @@ project:
   server:
     base-url: ${SERVER_BASE_URL:http://localhost:8001/api}
 
-# AI功能配置
+# AI 功能配置
 ai:
   enabled: ${AI_ENABLED:true}
   api:
@@ -99,5 +100,5 @@ ai:
     timeout: ${AI_TIMEOUT:6000000}
   # 功能配置
   features:
-    rate-limit: ${AI_RATE_LIMIT:3}                                # 每分钟请求限制
-    content-filter: ${AI_CONTENT_FILTER:true}                            # 内容过滤开关
+    rate-limit: ${AI_RATE_LIMIT:3}                    # 每分钟请求限制
+    content-filter: ${AI_CONTENT_FILTER:true}          # 内容过滤开关
