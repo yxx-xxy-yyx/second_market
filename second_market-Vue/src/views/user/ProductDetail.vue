@@ -273,7 +273,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { productApi } from '@/api/product'
 import { favoriteApi } from '@/api/favorite'
-import { orderApi } from '@/api/order'
 import { reportApi } from '@/api/report'
 import { useUserStore } from '@/stores/user'
 import { useDeviceType } from '@/utils/device'
@@ -357,33 +356,12 @@ const toggleFavorite = async () => {
   } catch (e) {}
 }
 
-const handleBuy = async () => {
+const handleBuy = () => {
   if (!userStore.isLoggedIn) return router.push('/login')
-  try {
-    await ElMessageBox.confirm('确认使用模拟支付立即购买吗？', '确认下单', {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消'
-    })
-  } catch {
-    return
-  }
-
-  try {
-    const createRes = await orderApi.createOrder({ productId: product.value.id })
-    if (createRes.code !== '200' || !createRes.data?.id) {
-      ElMessage.error(createRes.message || '创建订单失败')
-      return
-    }
-    const payRes = await orderApi.payOrder(createRes.data.id)
-    if (payRes.code !== '200') {
-      ElMessage.error(payRes.message || '支付失败')
-      return
-    }
-    ElMessage.success('支付成功')
-    router.push('/user/orders')
-  } catch {
-    ElMessage.error('下单失败')
-  }
+  router.push({
+    path: '/neo/checkout',
+    query: { productId: product.value.id }
+  })
 }
 
 const handleContact = () => {

@@ -57,7 +57,13 @@ const CampusNearby = () => import('@/views/user/CampusNearby.vue')
 // Neo 模块页面
 const NeoHome = () => import('@/views/user/NeoHomeEntry.vue')
 const NeoPlaceholder = () => import('@/views/user/NeoPlaceholderEntry.vue')
+const NeoCheckoutEntry = () => import('@/views/user/NeoCheckoutEntry.vue')
+const NeoAddressesEntry = () => import('@/views/user/NeoAddressesEntry.vue')
 const NeoOrdersEntry = () => import('@/views/user/orders/NeoOrdersEntry.vue')
+const NeoPayCenterSelect = () => import('@/views/user/pay/NeoPayCenterSelect.vue')
+const NeoPayCenterCountdown = () => import('@/views/user/pay/NeoPayCenterCountdown.vue')
+const NeoPayCenterSuccess = () => import('@/views/user/pay/NeoPayCenterSuccess.vue')
+const NeoPayCenterFail = () => import('@/views/user/pay/NeoPayCenterFail.vue')
 const NeoErrandsListEntry = () => import('@/views/user/errand/NeoErrandsListEntry.vue')
 const NeoErrandNewEntry = () => import('@/views/user/errand/NeoErrandNewEntry.vue')
 const NeoErrandDetailEntry = () => import('@/views/user/errand/NeoErrandDetailEntry.vue')
@@ -244,6 +250,42 @@ const routes = [
         name: 'neo-footprints',
         component: NeoPlaceholder,
         meta: { title: '浏览足迹', requiresAuth: true }
+      },
+      {
+        path: 'checkout',
+        name: 'neo-checkout',
+        component: NeoCheckoutEntry,
+        meta: { title: '确认订单', requiresAuth: true }
+      },
+      {
+        path: 'addresses',
+        name: 'neo-addresses',
+        component: NeoAddressesEntry,
+        meta: { title: '收货地址管理', requiresAuth: true }
+      },
+      {
+        path: 'pay-center',
+        name: 'neo-pay-center',
+        component: NeoPayCenterSelect,
+        meta: { title: '模拟支付中心', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/countdown',
+        name: 'neo-pay-center-countdown',
+        component: NeoPayCenterCountdown,
+        meta: { title: '支付中', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/success',
+        name: 'neo-pay-center-success',
+        component: NeoPayCenterSuccess,
+        meta: { title: '支付成功', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/fail',
+        name: 'neo-pay-center-fail',
+        component: NeoPayCenterFail,
+        meta: { title: '支付失败', requiresAuth: true }
       }
     ]
   },
