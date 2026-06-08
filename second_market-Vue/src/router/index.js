@@ -5,8 +5,8 @@ import Categories from '@/views/user/Categories.vue'
 
 // 路由配置中心
 // 引入页面组件
-const Login = () => import('@/views/auth/Login.vue')
-const Register = () => import('@/views/auth/Register.vue')
+const Login = () => import('@/views/auth/LoginEntry.vue')
+const Register = () => import('@/views/auth/RegisterEntry.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
 const UserProfileEdit = () => import('@/views/mobile/user/ProfileEditView.vue')
 const UserAddressEdit = () => import('@/views/mobile/user/AddressView.vue')

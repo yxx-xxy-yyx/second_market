@@ -4,8 +4,8 @@ import UserProfile from '@/views/user/Profile.vue'
 import Categories from '@/views/user/Categories.vue'
 import { useUserStore } from '@/stores/user'
 
-const Login = () => import('@/views/auth/Login.vue')
-const Register = () => import('@/views/auth/Register.vue')
+const Login = () => import('@/views/auth/LoginEntry.vue')
+const Register = () => import('@/views/auth/RegisterEntry.vue')
 const UserLayout = () => import('@/layouts/UserLayout.vue')
 const UserProfileEdit = () => import('@/views/mobile/user/ProfileEditView.vue')
 const UserAddressEdit = () => import('@/views/mobile/user/AddressView.vue')

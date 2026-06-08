@@ -1,129 +1,432 @@
 <template>
-  <div class="min-h-screen bg-gray-50 flex flex-col">
-    <!-- Header -->
-    <div class="px-5 pt-12 pb-4 bg-white">
-      <div>
-        <h1 class="text-2xl font-bold">{{ $t('login.title') }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ $t('login.subtitle') }}</p>
-      </div>
+  <div class="mobile-login-page">
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+      <LangSwitcher />
     </div>
 
-    <!-- Form -->
-    <div class="flex-1 px-5 py-6 space-y-4">
-      <div class="relative">
-        <input v-model="form.uid" :placeholder="$t('common.pleaseInputUid')"
-          class="w-full p-4 pl-10 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-orange-400 outline-none"
-          @blur="validateUid" />
-        <span class="absolute left-3 top-4 text-gray-400">👤</span>
-        <div v-if="uidError" class="text-red-400 text-xs mt-1 pl-10">{{ uidError }}</div>
+    <!-- 背景装饰 -->
+    <div class="mobile-background">
+      <div class="floating-circle circle-1"></div>
+      <div class="floating-circle circle-2"></div>
+      <div class="floating-circle circle-3"></div>
+    </div>
+
+    <div class="mobile-content">
+      <!-- 品牌区 -->
+      <div class="mobile-brand">
+        <div class="mobile-logo">
+          <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
+        </div>
+        <h1 class="mobile-title">{{ $t('login.appName') }}</h1>
+        <p class="mobile-subtitle">{{ $t('login.appSlogan') }}</p>
       </div>
 
-      <div class="relative">
-        <input v-model="form.password" type="password" :placeholder="$t('common.pleaseInputPassword')"
-          class="w-full p-4 pl-10 rounded-2xl border border-gray-200 focus:ring-2 focus:ring-orange-400 outline-none"
-          @blur="validatePassword" />
-        <span class="absolute left-3 top-4 text-gray-400">🔒</span>
-        <div v-if="passwordError" class="text-red-400 text-xs mt-1 pl-10">{{ passwordError }}</div>
-      </div>
+      <!-- 表单卡片 -->
+      <div class="mobile-form-wrapper">
+        <div class="mobile-form-card">
+          <h2 class="mobile-form-title">{{ $t('login.title') }}</h2>
 
-      <button :disabled="loading || !canSubmit" @click="login"
-        class="w-full py-4 rounded-2xl text-white font-semibold transition"
-        :class="canSubmit ? 'bg-orange-500 active:scale-95' : 'bg-gray-300'">
-        <span v-if="!loading">{{ $t('common.login') }}</span>
-        <span v-else>{{ $t('login.loggingIn') }}</span>
-      </button>
+          <el-form
+            ref="loginFormRef"
+            :model="loginForm"
+            :rules="loginRules"
+            class="login-form"
+            label-position="top"
+            size="large"
+          >
+            <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+              <el-input
+                v-model="loginForm.uid"
+                :placeholder="$t('common.pleaseInputUid')"
+                clearable
+                class="mobile-input"
+                @keyup.enter="handleLogin"
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-      <div v-if="error" class="text-red-500 text-sm text-center">
-        {{ error }}
-      </div>
+            <el-form-item :label="$t('common.school')">
+              <el-select
+                v-model="selectedSchool"
+                filterable
+                :placeholder="$t('nav.selectSchool')"
+                style="width: 100%;"
+                class="mobile-select"
+              >
+                <el-option
+                  v-for="item in schoolStore.schoolList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
 
-      <div class="text-center text-sm text-gray-500 mt-4">
-        {{ $t('login.noAccount') }}
-        <span class="text-orange-500" @click="goRegister">{{ $t('common.register') }}</span>
+            <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+              <el-input
+                v-model="loginForm.password"
+                type="password"
+                :placeholder="$t('common.pleaseInputPassword')"
+                show-password
+                clearable
+                class="mobile-input"
+                @keyup.enter="handleLogin"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
+
+            <el-form-item>
+              <el-button
+                type="primary"
+                class="mobile-login-btn"
+                :loading="loading"
+                @click="handleLogin"
+              >
+                {{ loading ? $t('common.loading') : $t('common.login') }}
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <div class="form-footer">
+            <span>{{ $t('login.noAccount') }}</span>
+            <el-link type="primary" :underline="false" @click="$router.push('/register')">
+              {{ $t('common.register') }}
+            </el-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-export default {
-  data() {
-    return {
-      form: {
-        uid: '',
-        password: ''
-      },
-      loading: false,
-      error: '',
-      uidError: '',
-      passwordError: ''
-    }
-  },
-  computed: {
-    canSubmit() {
-      // 仅当无表单错误且内容不为空时可提交
-      return this.form.uid && this.form.password && !this.uidError && !this.passwordError
-    }
-  },
-  methods: {
-    // 用户名校验（对齐Web端规则）
-    validateUid() {
-      if (!this.form.uid) {
-        this.uidError = this.$t('common.pleaseInputUid')
-      } else if (this.form.uid.length < 3 || this.form.uid.length > 20) {
-        this.uidError = this.$t('register.uidLength')
+import { User, Lock } from '@element-plus/icons-vue'
+import LangSwitcher from '@/components/LangSwitcher.vue'
+import { useI18n } from 'vue-i18n'
+import { useSchoolStore } from '@/stores/school'
+
+const { locale, t } = useI18n()
+const router = useRouter()
+const userStore = useUserStore()
+const schoolStore = useSchoolStore()
+
+const selectedSchool = computed({
+  get: () => schoolStore.selectedSchool,
+  set: (value) => schoolStore.setSchool(value)
+})
+
+onMounted(() => {
+  if (!schoolStore.schoolList.length) {
+    schoolStore.getSchoolList()
+  }
+})
+
+const loginFormRef = ref()
+const loading = ref(false)
+
+const loginForm = reactive({
+  uid: '',
+  password: ''
+})
+
+// 多语言校验规则
+const loginRules = {
+  uid: [
+    { required: true, message: t('common.pleaseInputUid'), trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: t('common.pleaseInputPassword'), trigger: 'blur' }
+  ]
+}
+
+const handleLogin = async () => {
+  try {
+    await loginFormRef.value.validate()
+
+    loading.value = true
+
+    const result = await userStore.login(loginForm)
+
+    if (result.success) {
+      if (userStore.user?.role === 'admin') {
+        await router.replace('/admin/dashboard')
       } else {
-        this.uidError = ''
+        await router.replace('/user/dashboard')
       }
-    },
-    // 密码校验（对齐Web端规则）
-    validatePassword() {
-      if (!this.form.password) {
-        this.passwordError = this.$t('common.pleaseInputPassword')
-      } else if (this.form.password.length < 6 || this.form.password.length > 20) {
-        this.passwordError = this.$t('register.passwordLength')
-      } else {
-        this.passwordError = ''
-      }
-    },
-    async login() {
-      // 前置校验
-      this.validateUid()
-      this.validatePassword()
-      if (!this.canSubmit) return
-
-      this.loading = true
-      this.error = ''
-
-      try {
-        // 对齐Web端：使用userStore的登录方法（而非直接调$api）
-        const userStore = useUserStore()
-        const result = await userStore.login({
-          uid: this.form.uid,
-          password: this.form.password
-        })
-
-        if (result.success) {
-          // 对齐Web端路由逻辑：区分管理员/普通用户
-          if (userStore.user?.role === 'admin') {
-            await this.$router.replace('/admin/dashboard')
-          } else {
-            await this.$router.replace('/user/dashboard')
-          }
-        } else {
-          this.error = result.message || this.$t('user.login.fail')
-        }
-      } catch (e) {
-
-        this.error = e.message || this.$t('user.login.fail')
-      } finally {
-        this.loading = false
-      }
-    },
-    goRegister() {
-      this.$router.push('/register')
     }
+  } catch (error) {
+
+  } finally {
+    loading.value = false
   }
 }
 </script>
+
+<style scoped>
+/* 基础样式 */
+* {
+  box-sizing: border-box;
+}
+
+.lang-switch {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+}
+
+.mobile-login-page {
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg, #042f3d 0%, #0a4a5e 50%, #063344 100%);
+}
+
+/* 背景装饰 */
+.mobile-background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
+}
+
+.floating-circle.circle-1 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.floating-circle.circle-2 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  top: 40%;
+  right: -30px;
+  animation-delay: 2s;
+}
+
+.floating-circle.circle-3 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  bottom: -60px;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+.mobile-content {
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 品牌区 */
+.mobile-brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.mobile-logo {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 50px rgba(6, 182, 212, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.mobile-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.mobile-title {
+  font-size: 28px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.mobile-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* 表单卡片 */
+.mobile-form-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.mobile-form-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  border-radius: 28px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+              0 0 60px rgba(6, 182, 212, 0.1);
+  animation: slide-up 0.8s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-form-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* 输入框样式 */
+.mobile-input :deep(.el-input__wrapper),
+.mobile-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+.mobile-input :deep(.el-input__wrapper:hover),
+.mobile-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.mobile-input :deep(.el-input__wrapper.is-focus),
+.mobile-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #06b6d4;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.mobile-input :deep(.el-input__inner),
+.mobile-input :deep(.el-input__prefix),
+.mobile-input :deep(.el-input__suffix),
+.mobile-select :deep(.el-input__inner) {
+  color: white;
+}
+
+.mobile-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mobile-input :deep(.el-form-item__label),
+.mobile-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* 下拉选择器箭头颜色 */
+.mobile-select :deep(.el-select__caret) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 登录按钮 */
+.mobile-login-btn {
+  width: 100%;
+  height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.mobile-login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.5);
+}
+
+.mobile-login-btn:active {
+  transform: translateY(-1px);
+}
+
+/* 表单底部 */
+.form-footer {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 20px;
+}
+
+.form-footer a {
+  color: #06b6d4;
+  font-weight: 700;
+}
+</style>

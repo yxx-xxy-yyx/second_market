@@ -1,80 +1,147 @@
 <template>
-  <div class="h-[100dvh] bg-black relative overflow-hidden">
-    <div class="absolute inset-0 hero-bg z-0" aria-hidden="true"></div>
-    <div class="absolute inset-0 hero-iso z-0" aria-hidden="true"></div>
+  <div class="mobile-register-page">
+    <!-- 语言切换 -->
+    <div class="lang-switch">
+      <LangSwitcher />
+    </div>
 
-    <div class="h-full flex flex-col items-center justify-center relative z-10 px-6 overflow-y-auto py-16">
-      <div class="text-center mb-6">
-        <h1 class="text-4xl font-bold text-white">{{ $t('register.title') }}</h1>
-        <p class="mt-2 text-white/80 text-sm">{{ $t('register.subtitle') }}</p>
+    <!-- 背景装饰 -->
+    <div class="mobile-background">
+      <div class="floating-circle circle-1"></div>
+      <div class="floating-circle circle-2"></div>
+      <div class="floating-circle circle-3"></div>
+    </div>
+
+    <div class="mobile-content">
+      <!-- 品牌区 -->
+      <div class="mobile-brand">
+        <div class="mobile-logo">
+          <img src="https://img.icons8.com/fluency/200/shop.png" alt="智能二手商城" />
+        </div>
+        <h1 class="mobile-title">{{ $t('login.appName') }}</h1>
+        <p class="mobile-subtitle">{{ $t('login.appSlogan') }}</p>
       </div>
 
-      <div class="register-glass w-full max-w-[360px]">
-        <div class="px-4 text-white text-3xl font-extrabold mb-4">{{ $t('common.register') }}</div>
-        <div class="space-y-4">
-          <div class="relative">
-            <input v-model="form.uid" :placeholder="uidError || $t('common.pleaseInputUid')"
-              class="glass-input w-full px-6 py-4 rounded-[24px] border outline-none"
-              :class="{ 'error-placeholder': uidError && !form.uid }" @blur="validateUid" @keyup.enter="register" />
-          </div>
+      <!-- 表单卡片 -->
+      <div class="mobile-form-wrapper">
+        <div class="mobile-form-card">
+          <h2 class="mobile-form-title">{{ $t('register.title') }}</h2>
 
-          <div class="relative">
-            <input v-model="form.nickname" :placeholder="nicknameError || $t('common.pleaseInputNickname')"
-              class="glass-input w-full px-6 py-4 rounded-[24px] border outline-none"
-              :class="{ 'error-placeholder': nicknameError && !form.nickname }" @blur="validateNickname"
-              @keyup.enter="register" />
-          </div>
+          <el-form
+            ref="registerFormRef"
+            :model="registerForm"
+            :rules="registerRules"
+            class="register-form"
+            label-position="top"
+            size="large"
+          >
+            <el-form-item :label="$t('common.pleaseInputUid')" prop="uid">
+              <el-input
+                v-model="registerForm.uid"
+                :placeholder="$t('common.pleaseInputUid')"
+                clearable
+                class="mobile-input"
+              >
+                <template #prefix>
+                  <el-icon><User /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <div class="relative">
-            <input v-model="form.email" :placeholder="emailError || $t('common.pleaseInputEmail')"
-              class="glass-input w-full px-6 py-4 rounded-[24px] border outline-none"
-              :class="{ 'error-placeholder': emailError && !form.email }" @blur="validateEmail"
-              @keyup.enter="register" />
-          </div>
+            <el-form-item :label="$t('common.pleaseInputNickname')" prop="nickname">
+              <el-input
+                v-model="registerForm.nickname"
+                :placeholder="$t('common.pleaseInputNickname')"
+                clearable
+                class="mobile-input"
+              >
+                <template #prefix>
+                  <el-icon><Avatar /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <div class="relative">
-            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
-              :placeholder="passwordError || $t('common.pleaseInputPassword')"
-              class="glass-input w-full px-6 py-4 pr-14 rounded-[24px] border outline-none"
-              :class="{ 'error-placeholder': passwordError && !form.password }" @blur="validatePassword"
-              @keyup.enter="register" />
-            <button v-if="form.password" type="button" class="password-eye" @click="showPassword = !showPassword">
-              <el-icon>
-                <Hide v-if="showPassword" />
-                <View v-else />
-              </el-icon>
-            </button>
-          </div>
+            <el-form-item :label="$t('common.pleaseInputEmail')" prop="email">
+              <el-input
+                v-model="registerForm.email"
+                :placeholder="$t('common.pleaseInputEmail')"
+                clearable
+                class="mobile-input"
+              >
+                <template #prefix>
+                  <el-icon><Message /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <div class="relative">
-            <input v-model="form.confirmPassword" :type="showConfirmPassword ? 'text' : 'password'"
-              :placeholder="confirmPasswordError || $t('register.confirmPasswordPlaceholder')"
-              class="glass-input w-full px-6 py-4 pr-14 rounded-[24px] border outline-none"
-              :class="{ 'error-placeholder': confirmPasswordError && !form.confirmPassword }"
-              @blur="validateConfirmPassword" @keyup.enter="register" />
-            <button v-if="form.confirmPassword" type="button" class="password-eye"
-              @click="showConfirmPassword = !showConfirmPassword">
-              <el-icon>
-                <Hide v-if="showConfirmPassword" />
-                <View v-else />
-              </el-icon>
-            </button>
-          </div>
+            <el-form-item :label="$t('common.school')" prop="schoolId">
+              <el-select
+                v-model="registerForm.schoolId"
+                :placeholder="$t('common.pleaseSelectSchool')"
+                class="mobile-select"
+                clearable
+                filterable
+              >
+                <template #prefix>
+                  <el-icon><School /></el-icon>
+                </template>
+                <el-option
+                  v-for="item in schools"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
 
-          <button :disabled="loading || !canSubmit" @click="register"
-            class="register-action w-full py-4 rounded-[24px] text-white text-xl font-bold transition active:scale-[0.99]"
-            :class="{ disabled: !canSubmit }">
-            <span v-if="!loading">{{ $t('common.register') }}</span>
-            <span v-else>{{ $t('register.registering') }}</span>
-          </button>
+            <el-form-item :label="$t('common.pleaseInputPassword')" prop="password">
+              <el-input
+                v-model="registerForm.password"
+                type="password"
+                :placeholder="$t('common.pleaseInputPassword')"
+                show-password
+                clearable
+                class="mobile-input"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <div v-if="error" class="text-red-100 text-sm text-center">
-            {{ error }}
-          </div>
+            <el-form-item :label="$t('register.confirmPassword')" prop="confirmPassword">
+              <el-input
+                v-model="registerForm.confirmPassword"
+                type="password"
+                :placeholder="$t('register.confirmPasswordPlaceholder')"
+                show-password
+                clearable
+                class="mobile-input"
+                @keyup.enter="handleRegister"
+              >
+                <template #prefix>
+                  <el-icon><Lock /></el-icon>
+                </template>
+              </el-input>
+            </el-form-item>
 
-          <div class="text-center text-base text-white/75 pt-1">
-            {{ $t('register.hasAccount') }}
-            <span class="text-white font-semibold" @click="goLogin">{{ $t('common.login') }}</span>
+            <el-form-item>
+              <el-button
+                type="primary"
+                class="mobile-register-btn"
+                :loading="loading"
+                @click="handleRegister"
+              >
+                {{ loading ? $t('register.registering') : $t('common.register') }}
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <div class="form-footer">
+            <span>{{ $t('register.hasAccount') }}</span>
+            <el-link type="primary" :underline="false" @click="$router.push('/login')">
+              {{ $t('common.login') }}
+            </el-link>
           </div>
         </div>
       </div>
@@ -82,202 +149,368 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { View, Hide } from '@element-plus/icons-vue'
+import { User, Lock, Message, Avatar, School } from '@element-plus/icons-vue'
+import { useI18n } from 'vue-i18n'
+import LangSwitcher from '@/components/LangSwitcher.vue'
+import { schoolApi } from '@/api/school'
 
-export default {
-  components: { View, Hide },
-  data() {
-    return {
-      form: {
-        uid: '',
-        nickname: '',
-        email: '',
-        password: '',
-        confirmPassword: ''
-      },
-      loading: false,
-      error: '',
-      uidError: '',
-      nicknameError: '',
-      emailError: '',
-      passwordError: '',
-      confirmPasswordError: '',
-      showPassword: false,
-      showConfirmPassword: false
+const { t, locale } = useI18n()
+const router = useRouter()
+const userStore = useUserStore()
+
+const registerFormRef = ref()
+const loading = ref(false)
+const schools = ref([])
+
+const registerForm = reactive({
+  uid: '',
+  nickname: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  schoolId: ''
+})
+
+// 获取学校列表
+const fetchSchools = async () => {
+  try {
+    const res = await schoolApi.getSchoolList({ language: locale.value })
+    if (res.code === '200' || res.code === 200) {
+      schools.value = res.data
     }
-  },
-  computed: {
-    canSubmit() {
-      // 所有字段非空且无校验错误
-      return (
-        this.form.uid && this.form.nickname && this.form.email &&
-        this.form.password && this.form.confirmPassword &&
-        !this.uidError && !this.nicknameError && !this.emailError &&
-        !this.passwordError && !this.confirmPasswordError
-      )
+  } catch (error) {
+    console.error('Failed to fetch schools:', error)
+  }
+}
+
+// 监听语言变化
+watch(locale, () => {
+  fetchSchools()
+})
+
+onMounted(() => {
+  fetchSchools()
+})
+
+// 密码校验
+const validateConfirmPassword = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error(t('register.confirmPasswordRequired')))
+  } else if (value !== registerForm.password) {
+    callback(new Error(t('register.passwordNotMatch')))
+  } else {
+    callback()
+  }
+}
+
+// 多语言校验规则
+const registerRules = {
+  uid: [
+    { required: true, message: t('common.pleaseInputUid'), trigger: 'blur' },
+    { min: 3, max: 20, message: t('register.uidLength'), trigger: 'blur' }
+  ],
+  nickname: [
+    { required: true, message: t('common.pleaseInputNickname'), trigger: 'blur' }
+  ],
+  email: [
+    { required: true, message: t('common.pleaseInputEmail'), trigger: 'blur' },
+    { type: 'email', message: t('register.emailValid'), trigger: 'blur' }
+  ],
+  schoolId: [
+    { required: true, message: t('common.pleaseSelectSchool'), trigger: 'change' }
+  ],
+  password: [
+    { required: true, message: t('common.pleaseInputPassword'), trigger: 'blur' },
+    { min: 6, max: 20, message: t('register.passwordLength'), trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, validator: validateConfirmPassword, trigger: 'blur' }
+  ]
+}
+
+const handleRegister = async () => {
+  try {
+    await registerFormRef.value.validate()
+
+    loading.value = true
+
+    const result = await userStore.register({
+      uid: registerForm.uid,
+      nickname: registerForm.nickname,
+      email: registerForm.email,
+      password: registerForm.password,
+      schoolId: registerForm.schoolId
+    })
+
+    if (result.success) {
+      router.push('/login')
     }
-  },
-  methods: {
-    // 用户名校验
-    validateUid() {
-      if (!this.form.uid) {
-        this.uidError = '! ' + this.$t('common.pleaseInputUid')
-      } else if (this.form.uid.length < 3 || this.form.uid.length > 20) {
-        this.uidError = '! ' + this.$t('register.uidLength')
-      } else {
-        this.uidError = ''
-      }
-    },
-    // 昵称校验
-    validateNickname() {
-      this.nicknameError = !this.form.nickname ? '! ' + this.$t('common.pleaseInputNickname') : ''
-    },
-    // 邮箱校验
-    validateEmail() {
-      if (!this.form.email) {
-        this.emailError = '! ' + this.$t('common.pleaseInputEmail')
-      } else {
-        const reg = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/
-        this.emailError = reg.test(this.form.email) ? '' : '! ' + this.$t('register.emailValid')
-      }
-    },
-    // 密码校验
-    validatePassword() {
-      if (!this.form.password) {
-        this.passwordError = '! ' + this.$t('common.pleaseInputPassword')
-      } else if (this.form.password.length < 6 || this.form.password.length > 20) {
-        this.passwordError = '! ' + this.$t('register.passwordLength')
-      } else {
-        this.passwordError = ''
-        // 密码变化时重新校验确认密码
-        this.validateConfirmPassword()
-      }
-    },
-    // 确认密码校验
-    validateConfirmPassword() {
-      if (!this.form.confirmPassword) {
-        this.confirmPasswordError = '! ' + this.$t('register.confirmPasswordRequired')
-      } else if (this.form.confirmPassword !== this.form.password) {
-        this.confirmPasswordError = '! ' + this.$t('register.passwordNotMatch')
-      } else {
-        this.confirmPasswordError = ''
-      }
-    },
-    async register() {
-      // 前置全量校验
-      this.validateUid()
-      this.validateNickname()
-      this.validateEmail()
-      this.validatePassword()
-      this.validateConfirmPassword()
-      if (!this.canSubmit) return
+  } catch (error) {
 
-      this.loading = true
-      this.error = ''
-
-      try {
-        // 对齐Web端：使用userStore的注册方法
-        const userStore = useUserStore()
-        const result = await userStore.register({
-          uid: this.form.uid,
-          nickname: this.form.nickname,
-          email: this.form.email,
-          password: this.form.password
-        })
-
-        if (result.success) {
-          this.$router.push('/login')
-        } else {
-          this.error = result.message || this.$t('user.register.fail')
-        }
-      } catch (e) {
-        this.error = e?.message || this.$t('user.register.fail')
-      } finally {
-        this.loading = false
-      }
-    },
-    goLogin() {
-      this.$router.push('/login')
-    }
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <style scoped>
-.hero-bg {
-  background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 60%),
-    radial-gradient(900px 520px at 85% 70%, rgba(255, 166, 0, 0.18), rgba(255, 255, 255, 0) 60%),
-    linear-gradient(135deg, rgba(186, 230, 253, 1) 0%, rgba(147, 197, 253, 1) 45%, rgba(167, 139, 250, 1) 100%);
+/* 基础样式 */
+* {
+  box-sizing: border-box;
 }
 
-.hero-iso {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='900' viewBox='0 0 1400 900'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2306B6D4' stop-opacity='0.20'/%3E%3Cstop offset='1' stop-color='%238B5CF6' stop-opacity='0.18'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1400' height='900' fill='none'/%3E%3Cg fill='url(%23g)'%3E%3Cpath d='M190 520l180-90 180 90-180 90z'/%3E%3Cpath d='M540 390l140-70 140 70-140 70z'/%3E%3Cpath d='M360 610l120-60 120 60-120 60z'/%3E%3Cpath d='M760 560l220-110 220 110-220 110z'/%3E%3C/g%3E%3Cg fill='rgba(255,255,255,0.12)'%3E%3Ccircle cx='1060' cy='210' r='5'/%3E%3Ccircle cx='1120' cy='260' r='3'/%3E%3Ccircle cx='980' cy='300' r='4'/%3E%3C/g%3E%3Cg stroke='rgba(255,255,255,0.14)' stroke-width='2' fill='none'%3E%3Cpath d='M120 780c120-90 260-110 420-60 110 35 210 20 320-30 120-55 240-65 380-25'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: cover;
-  background-position: center;
-  opacity: 1;
+.lang-switch {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
 }
 
-.register-glass {
-  padding: 24px 24px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 28px;
-  background: rgba(77, 86, 151, 0.34);
-  box-shadow: 0 18px 40px rgba(59, 60, 118, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+.mobile-register-page {
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg, #042f3d 0%, #0a4a5e 50%, #063344 100%);
 }
 
-.glass-input {
-  min-height: 56px;
-  border-color: rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  font-size: 18px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
-}
-
-.glass-input::placeholder {
-  color: white;
-  transition: color 0.3s ease;
-}
-
-.glass-input.error-placeholder::placeholder {
-  color: #ff4d4f;
-}
-
-.glass-input:focus {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.password-eye {
+/* 背景装饰 */
+.mobile-background {
   position: absolute;
-  top: 28px;
-  right: 20px;
+  inset: 0;
+  overflow: hidden;
+}
+
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: float 8s ease-in-out infinite;
+}
+
+.floating-circle.circle-1 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  top: -50px;
+  left: -50px;
+  animation-delay: 0s;
+}
+
+.floating-circle.circle-2 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+  top: 40%;
+  right: -30px;
+  animation-delay: 2s;
+}
+
+.floating-circle.circle-3 {
+  width: 180px;
+  height: 180px;
+  background: linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%);
+  bottom: -60px;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(10deg);
+  }
+}
+
+.mobile-content {
+  position: relative;
+  z-index: 1;
+  padding: 60px 20px 40px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 品牌区 */
+.mobile-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.mobile-logo {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 20px;
-  transform: translateY(-50%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+  animation: pulse-glow 3s ease-in-out infinite;
 }
 
-.password-eye:active {
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 50px rgba(6, 182, 212, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.mobile-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.mobile-title {
+  font-size: 28px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 50%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.mobile-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* 表单卡片 */
+.mobile-form-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.mobile-form-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(40px);
+  border-radius: 28px;
+  padding: 32px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
+              0 0 60px rgba(6, 182, 212, 0.1);
+  animation: slide-up 0.8s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-form-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+/* 输入框样式 */
+.mobile-input :deep(.el-input__wrapper),
+.mobile-select :deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: none;
+  transition: all 0.3s ease;
+}
+
+.mobile-input :deep(.el-input__wrapper:hover),
+.mobile-select :deep(.el-select__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(6, 182, 212, 0.5);
+}
+
+.mobile-input :deep(.el-input__wrapper.is-focus),
+.mobile-select :deep(.el-select__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #06b6d4;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.mobile-input :deep(.el-input__inner),
+.mobile-input :deep(.el-input__prefix),
+.mobile-input :deep(.el-input__suffix),
+.mobile-select :deep(.el-input__inner) {
   color: white;
 }
 
-.register-action {
-  background: linear-gradient(135deg, #19bfd3 0%, #36a8e8 50%, #7c5df1 100%);
-  box-shadow: 0 14px 28px rgba(56, 110, 230, 0.28);
+.mobile-input :deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.register-action.disabled {
-  background: rgba(255, 255, 255, 0.24);
-  box-shadow: none;
+.mobile-input :deep(.el-form-item__label),
+.mobile-select :deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+/* 下拉选择器箭头颜色 */
+.mobile-select :deep(.el-select__caret) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 注册按钮 */
+.mobile-register-btn {
+  width: 100%;
+  height: 52px;
+  font-size: 17px;
+  font-weight: 700;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+  border: none;
+  box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.mobile-register-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.5);
+}
+
+.mobile-register-btn:active {
+  transform: translateY(-1px);
+}
+
+/* 表单底部 */
+.form-footer {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 20px;
+}
+
+.form-footer a {
+  color: #06b6d4;
+  font-weight: 700;
 }
 </style>
