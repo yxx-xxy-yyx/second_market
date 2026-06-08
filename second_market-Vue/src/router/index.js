@@ -19,14 +19,11 @@ const SystemMsgDetail = () => import('@/views/mobile/user/SystemMsgDetail.vue')
 const AiChat = () => import('@/views/user/AiChatView.vue')
 const ProductDetail = () => import('@/views/user/ProductDetail.vue')
 const MyProducts = () => import('@/views/user/MyProducts.vue')
-const MyOrders = () => import('@/views/user/MyOrders.vue')
 const Favorites = () => import('@/views/user/Favorites.vue')
 const Messages = () => import('@/views/user/Messages.vue')
 const WriteReview = () => import('@/views/user/WriteReview.vue')
 const Notice = () => import('@/views/user/Notice.vue')
 const SearchView = () => import('@/views/user/SearchView.vue')
-const Cart = () => import('@/views/user/Cart.vue')
-const Checkout = () => import('@/views/user/Checkout.vue')
 const MyPublish = () => import('@/views/user/MyPublish.vue')
 const Settings = () => import('@/views/user/Settings.vue')
 const AgreementPrivacy = () => import('@/views/user/AgreementPrivacy.vue')
@@ -35,6 +32,7 @@ const Feedback = () => import('@/views/user/Feedback.vue')
 const Verify = () => import('@/views/user/Verify.vue')
 const Credit = () => import('@/views/user/Credit.vue')
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
+const NeoLayout = () => import('@/layouts/NeoLayout.vue')
 
 // 新增AI功能页面
 const AiAuthenticate = () => import('@/views/user/AiAuthenticate.vue')
@@ -55,23 +53,30 @@ const AdminFileManage = () => import('@/views/admin/FileManage.vue')
 const RecentlyViewed = () => import('@/views/user/RecentlyViewed.vue')
 const PopularDigital = () => import('@/views/user/PopularDigital.vue')
 const CampusNearby = () => import('@/views/user/CampusNearby.vue')
-const ErrandHome = () => import('@/views/user/ErrandHome.vue')
-const ErrandPublish = () => import('@/views/user/ErrandPublish.vue')
-const ErrandOrders = () => import('@/views/user/ErrandOrders.vue')
-const ErrandDetail = () => import('@/views/user/ErrandDetail.vue')
-const ForumView = () => import('@/views/user/ForumView.vue')
-const ForumDetail = () => import('@/views/user/ForumDetail.vue')
-const ForumPublish = () => import('@/views/user/ForumPublish.vue')
 
-// 引入 Neo 模块路由
-import { neoRoutes } from '@/neo/neo.routes.js'
+// Neo 模块页面
+const NeoHome = () => import('@/views/user/NeoHomeEntry.vue')
+const NeoPlaceholder = () => import('@/views/user/NeoPlaceholderEntry.vue')
+const NeoCartEntry = () => import('@/views/user/NeoCartEntry.vue')
+const NeoCheckoutEntry = () => import('@/views/user/NeoCheckoutEntry.vue')
+const NeoAddressesEntry = () => import('@/views/user/NeoAddressesEntry.vue')
+const NeoOrdersEntry = () => import('@/views/user/orders/NeoOrdersEntry.vue')
+const NeoPayCenterSelect = () => import('@/views/user/pay/NeoPayCenterSelect.vue')
+const NeoPayCenterCountdown = () => import('@/views/user/pay/NeoPayCenterCountdown.vue')
+const NeoPayCenterSuccess = () => import('@/views/user/pay/NeoPayCenterSuccess.vue')
+const NeoPayCenterFail = () => import('@/views/user/pay/NeoPayCenterFail.vue')
+const NeoErrandsListEntry = () => import('@/views/user/errand/NeoErrandsListEntry.vue')
+const NeoErrandNewEntry = () => import('@/views/user/errand/NeoErrandNewEntry.vue')
+const NeoErrandDetailEntry = () => import('@/views/user/errand/NeoErrandDetailEntry.vue')
+const NeoForumListEntry = () => import('@/views/user/forum/NeoForumListEntry.vue')
+const NeoForumNewEntry = () => import('@/views/user/forum/NeoForumNewEntry.vue')
+const NeoForumDetailEntry = () => import('@/views/user/forum/NeoForumDetailEntry.vue')
 
 const routes = [
   {
     path: '/',
     redirect: '/login'
   },
-  ...neoRoutes,
   {
     path: '/login',
     name: 'login',
@@ -91,6 +96,205 @@ const routes = [
       requiresAuth: false,
       hideForAuth: true
     }
+  },
+  // Neo 模块路由
+  {
+    path: '/neo',
+    name: 'neo',
+    component: NeoLayout,
+    redirect: '/neo/home',
+    meta: {
+      requiresAuth: true,
+      roles: ['user']
+    },
+    children: [
+      {
+        path: 'home',
+        name: 'neo-home',
+        component: NeoHome,
+        meta: { title: 'AI智能聚合首页', requiresAuth: true }
+      },
+      {
+        path: 'campus-categories',
+        name: 'neo-campus-categories',
+        component: NeoPlaceholder,
+        meta: { title: '校园专属分类', requiresAuth: true }
+      },
+      {
+        path: 'errands',
+        name: 'neo-errands',
+        component: NeoErrandsListEntry,
+        meta: { title: '跑腿交易', requiresAuth: true }
+      },
+      {
+        path: 'errands/new',
+        name: 'neo-errands-new',
+        component: NeoErrandNewEntry,
+        meta: { title: '发布跑腿', requiresAuth: true }
+      },
+      {
+        path: 'errands/:id',
+        name: 'neo-errands-detail',
+        component: NeoErrandDetailEntry,
+        meta: { title: '跑腿详情', requiresAuth: true }
+      },
+      {
+        path: 'forum',
+        name: 'neo-forum',
+        component: NeoForumListEntry,
+        meta: { title: '论坛', requiresAuth: true }
+      },
+      {
+        path: 'forum/new',
+        name: 'neo-forum-new',
+        component: NeoForumNewEntry,
+        meta: { title: '发布帖子', requiresAuth: true }
+      },
+      {
+        path: 'forum/:id',
+        name: 'neo-forum-detail',
+        component: NeoForumDetailEntry,
+        meta: { title: '帖子详情', requiresAuth: true }
+      },
+      {
+        path: 'cart',
+        name: 'neo-cart',
+        component: NeoCartEntry,
+        meta: { title: '购物车', requiresAuth: true }
+      },
+      {
+        path: 'checkout',
+        name: 'neo-checkout',
+        component: NeoCheckoutEntry,
+        meta: { title: '确认订单', requiresAuth: true }
+      },
+      {
+        path: 'orders/pending-pay',
+        name: 'neo-orders-pending-pay',
+        component: NeoOrdersEntry,
+        meta: { title: '待付款订单', requiresAuth: true }
+      },
+      {
+        path: 'orders/pending-ship',
+        name: 'neo-orders-pending-ship',
+        component: NeoOrdersEntry,
+        meta: { title: '待发货订单', requiresAuth: true }
+      },
+      {
+        path: 'orders/pending-receive',
+        name: 'neo-orders-pending-receive',
+        component: NeoOrdersEntry,
+        meta: { title: '待收货订单', requiresAuth: true }
+      },
+      {
+        path: 'orders/completed',
+        name: 'neo-orders-completed',
+        component: NeoOrdersEntry,
+        meta: { title: '已完成订单', requiresAuth: true }
+      },
+      {
+        path: 'orders/cancelled',
+        name: 'neo-orders-cancelled',
+        component: NeoOrdersEntry,
+        meta: { title: '取消订单', requiresAuth: true }
+      },
+      {
+        path: 'seller-center',
+        name: 'neo-seller-center',
+        component: NeoPlaceholder,
+        meta: { title: '卖家管理后台', requiresAuth: true }
+      },
+      {
+        path: 'chat',
+        name: 'neo-chat',
+        component: NeoPlaceholder,
+        meta: { title: '实时聊天', requiresAuth: true }
+      },
+      {
+        path: 'favorites',
+        name: 'neo-favorites',
+        component: NeoPlaceholder,
+        meta: { title: '商品收藏夹', requiresAuth: true }
+      },
+      {
+        path: 'follows',
+        name: 'neo-follows',
+        component: NeoPlaceholder,
+        meta: { title: '店铺关注列表', requiresAuth: true }
+      },
+      {
+        path: 'addresses',
+        name: 'neo-addresses',
+        component: NeoAddressesEntry,
+        meta: { title: '收货地址管理', requiresAuth: true }
+      },
+      {
+        path: 'pay-center',
+        name: 'neo-pay-center',
+        component: NeoPayCenterSelect,
+        meta: { title: '模拟支付中心', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/countdown',
+        name: 'neo-pay-center-countdown',
+        component: NeoPayCenterCountdown,
+        meta: { title: '支付倒计时', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/success',
+        name: 'neo-pay-center-success',
+        component: NeoPayCenterSuccess,
+        meta: { title: '支付成功', requiresAuth: true }
+      },
+      {
+        path: 'pay-center/fail',
+        name: 'neo-pay-center-fail',
+        component: NeoPayCenterFail,
+        meta: { title: '支付失败', requiresAuth: true }
+      },
+      {
+        path: 'review-center',
+        name: 'neo-review-center',
+        component: NeoPlaceholder,
+        meta: { title: '商品评价中心', requiresAuth: true }
+      },
+      {
+        path: 'campus-deals',
+        name: 'neo-campus-deals',
+        component: NeoPlaceholder,
+        meta: { title: '校园同城交易', requiresAuth: true }
+      },
+      {
+        path: 'notification-center',
+        name: 'neo-notification-center',
+        component: NeoPlaceholder,
+        meta: { title: '系统消息通知中心', requiresAuth: true }
+      },
+      {
+        path: 'after-sales/refund',
+        name: 'neo-after-sales-refund',
+        component: NeoPlaceholder,
+        meta: { title: '退款申请', requiresAuth: true }
+      },
+      {
+        path: 'after-sales/progress',
+        name: 'neo-after-sales-progress',
+        component: NeoPlaceholder,
+        meta: { title: '售后进度查询', requiresAuth: true }
+      },
+      {
+        path: 'after-sales/dispute',
+        name: 'neo-after-sales-dispute',
+        component: NeoPlaceholder,
+        meta: { title: '交易纠纷提交', requiresAuth: true }
+      },
+      {
+        path: 'footprints',
+        name: 'neo-footprints',
+        component: NeoPlaceholder,
+        meta: { title: '浏览足迹', requiresAuth: true }
+      }
+    ]
   },
   {
     path: '/user',
@@ -233,7 +437,7 @@ const routes = [
       {
         path: 'orders',
         name: 'user-orders',
-        component: MyOrders,
+        component: NeoOrdersEntry,
         meta: {
           title: '我的订单',
           requiresAuth: true
@@ -317,7 +521,7 @@ const routes = [
       {
         path: 'cart',
         name: 'user-cart',
-        component: Cart,
+        component: NeoCartEntry,
         meta: {
           title: '购物车',
           requiresAuth: true
@@ -326,7 +530,7 @@ const routes = [
       {
         path: 'checkout',
         name: 'user-checkout',
-        component: Checkout,
+        component: NeoCheckoutEntry,
         meta: {
           title: '确认订单',
           requiresAuth: true,
@@ -354,31 +558,31 @@ const routes = [
       {
         path: 'errand',
         name: 'user-errand',
-        component: ErrandHome,
+        component: NeoErrandsListEntry,
         meta: { title: '跑腿', requiresAuth: true }
       },
       {
         path: 'errand/publish',
         name: 'user-errand-publish',
-        component: ErrandPublish,
+        component: NeoErrandNewEntry,
         meta: { title: '发跑腿单', requiresAuth: true, hideNav: true }
       },
       {
         path: 'errand/orders',
         name: 'user-errand-orders',
-        component: ErrandOrders,
+        component: NeoOrdersEntry,
         meta: { title: '跑腿订单', requiresAuth: true, hideNav: true }
       },
       {
         path: 'errand/detail/:id',
         name: 'user-errand-detail',
-        component: ErrandDetail,
+        component: NeoErrandDetailEntry,
         meta: { title: '跑腿详情', requiresAuth: true, hideNav: true }
       },
       {
         path: 'forum',
         name: 'user-forum',
-        component: ForumView,
+        component: NeoForumListEntry,
         meta: {
           title: '校园论坛',
           requiresAuth: false
@@ -387,7 +591,7 @@ const routes = [
       {
         path: 'forum/detail/:id',
         name: 'user-forum-detail',
-        component: ForumDetail,
+        component: NeoForumDetailEntry,
         meta: {
           title: '帖子详情',
           requiresAuth: false,
@@ -397,7 +601,7 @@ const routes = [
       {
         path: 'forum/publish',
         name: 'user-forum-publish',
-        component: ForumPublish,
+        component: NeoForumNewEntry,
         meta: {
           title: '发布帖子',
           requiresAuth: true
@@ -674,3 +878,4 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
+
