@@ -63,12 +63,12 @@
             <scope>runtime</scope>
         </dependency>
         
-        <!-- Lombok -->
+        <!-- Lombok - 使用provided scope确保编译时生效 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
-            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
         
         <!-- JWT -->
@@ -173,7 +173,8 @@
                     <source>17</source>
                     <target>17</target>
                     <encoding>UTF-8</encoding>
-                    <annotationProcessorPaths>
+                    <!-- 确保Lombok注解处理器在编译时生效 -->
+                    <annotationProcessorPaths combine.self="override">
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
