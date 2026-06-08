@@ -62,7 +62,7 @@ logging:
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n'
     
-# Knife4j Swagger 配置
+# Knife4j Swagger Configuration
 knife4j:
   enable: ${KNIFE4J_ENABLE:false}
   setting:
@@ -70,6 +70,17 @@ knife4j:
     enable-swagger-models: true
     enable-document-manage: true
     swagger-model-name: 实体类列表
+
+# Flyway 数据库迁移配置
+flyway:
+  enabled: ${FLYWAY_ENABLED:true}
+  baseline-on-migrate: true
+  baseline-version: 1.0
+  clean-disabled: false
+  locations: classpath:db/migration
+  encoding: UTF-8
+  validate-on-migrate: true
+  out-of-order: false
     
 # 自定义配置
 project:
