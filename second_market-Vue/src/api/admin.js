@@ -149,3 +149,106 @@ export const reportApi = {
   }
 }
 
+// 系统管理
+export const adminSystemApi = {
+  // 获取系统信息
+  getSystemInfo() {
+    return request({
+      url: '/admin/system/info',
+      method: 'get'
+    })
+  },
+
+  // 获取管理后台Dashboard数据
+  getDashboard() {
+    return request({
+      url: '/admin/dashboard',
+      method: 'get'
+    })
+  },
+
+  // 批量删除用户
+  batchDeleteUsers(userIds) {
+    return request({
+      url: '/admin/users/batch',
+      method: 'delete',
+      data: userIds
+    })
+  },
+
+  // 重置用户密码
+  resetUserPassword(userId, newPassword) {
+    return request({
+      url: `/admin/users/${userId}/reset-password`,
+      method: 'put',
+      params: { newPassword }
+    })
+  }
+}
+
+// 管理员文件管理
+export const adminFileApi = {
+  // 获取文件列表
+  getFileList(params) {
+    return request({
+      url: '/admin/files',
+      method: 'get',
+      params
+    })
+  },
+
+  // 删除文件
+  deleteFile(fileId) {
+    return request({
+      url: `/admin/files/${fileId}`,
+      method: 'delete'
+    })
+  }
+}
+
+// 学校管理（后台）
+export const adminSchoolApi = {
+  // 新增学校
+  addSchool(data) {
+    return request({
+      url: '/school/add',
+      method: 'post',
+      data
+    })
+  },
+
+  // 更新学校
+  updateSchool(data) {
+    return request({
+      url: '/school/update',
+      method: 'put',
+      data
+    })
+  },
+
+  // 删除学校
+  deleteSchool(id) {
+    return request({
+      url: `/school/delete/${id}`,
+      method: 'delete'
+    })
+  },
+
+  // 学校分页列表
+  getSchoolPage(params) {
+    return request({
+      url: '/school/page',
+      method: 'get',
+      params
+    })
+  },
+
+  // 获取学校详情
+  getSchoolById(id) {
+    return request({
+      url: `/school/${id}`,
+      method: 'get'
+    })
+  }
+}
+

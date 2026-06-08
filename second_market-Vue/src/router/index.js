@@ -39,6 +39,8 @@ const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 // 新增AI功能页面
 const AiAuthenticate = () => import('@/views/user/AiAuthenticate.vue')
 const AiMarketTrend = () => import('@/views/user/AiMarketTrend.vue')
+const AiTrust = () => import('@/views/user/AiTrust.vue')
+const UserStatistics = () => import('@/views/user/UserStatistics.vue')
 const AdminDashboard = () => import('@/views/admin/Dashboard.vue')
 const AdminUsers = () => import('@/views/admin/Users.vue')
 const AdminProfile = () => import('@/views/admin/Profile.vue')
@@ -46,6 +48,8 @@ const AdminProductReview = () => import('@/views/admin/ProductReview.vue')
 const AdminReportManage = () => import('@/views/admin/ReportManage.vue')
 const AdminNoticeManage = () => import('@/views/admin/NoticeManage.vue')
 const AdminForumManage = () => import('@/views/admin/ForumManage.vue')
+const AdminRoleManage = () => import('@/views/admin/RoleManage.vue')
+const AdminFileManage = () => import('@/views/admin/FileManage.vue')
 
 // 新增移动端功能页面
 const RecentlyViewed = () => import('@/views/user/RecentlyViewed.vue')
@@ -470,6 +474,24 @@ const routes = [
           title: 'AI行情参考',
           requiresAuth: true
         }
+      },
+      {
+        path: 'ai-trust',
+        name: 'ai-trust',
+        component: AiTrust,
+        meta: {
+          title: 'AI智能托管',
+          requiresAuth: true
+        }
+      },
+      {
+        path: 'statistics',
+        name: 'user-statistics',
+        component: UserStatistics,
+        meta: {
+          title: '我的数据',
+          requiresAuth: true
+        }
       }
     ]
   },
@@ -549,6 +571,26 @@ const routes = [
         component: AdminForumManage,
         meta: {
           title: '论坛管理',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'roles',
+        name: 'admin-roles',
+        component: AdminRoleManage,
+        meta: {
+          title: '角色权限',
+          requiresAuth: true,
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'files',
+        name: 'admin-files',
+        component: AdminFileManage,
+        meta: {
+          title: '文件管理',
           requiresAuth: true,
           roles: ['admin']
         }

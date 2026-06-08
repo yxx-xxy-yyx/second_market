@@ -17,6 +17,12 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full active:bg-purple-50 text-gray-400"
+          @click="showHistoryPanel = true">
+          <el-icon :size="20">
+            <Clock />
+          </el-icon>
+        </div>
         <div class="w-10 h-10 flex items-center justify-center rounded-full active:bg-red-50 text-gray-400"
           @click="handleClear">
           <el-icon :size="20">
@@ -26,6 +32,45 @@
         <LangSwitcher />
       </div>
     </div>
+
+    <!-- 历史记录侧边栏 -->
+    <transition name="slide">
+      <div v-if="showHistoryPanel" class="history-panel">
+        <div class="history-header">
+          <h3>对话历史</h3>
+          <button class="close-btn" @click="showHistoryPanel = false">
+            <el-icon :size="18"><Close /></el-icon>
+          </button>
+        </div>
+        <div class="history-content">
+          <div v-if="historyLoading" class="history-loading">
+            <van-loading size="20px" />
+            <span>加载中...</span>
+          </div>
+          <div v-else-if="chatHistory.length === 0" class="history-empty">
+            <el-icon :size="32"><Document /></el-icon>
+            <p>暂无历史记录</p>
+          </div>
+          <div v-else class="history-list">
+            <div 
+              class="history-item" 
+              v-for="(record, index) in chatHistory" 
+              :key="record.id || index"
+            >
+              <div class="history-time">{{ formatHistoryTime(record.createTime) }}</div>
+              <div class="history-preview">{{ record.userMessage || '对话记录' }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="history-footer">
+          <button class="clear-history-btn" @click="handleClearHistory">
+            <el-icon :size="16"><Delete /></el-icon>
+            清空所有历史
+          </button>
+        </div>
+      </div>
+    </transition>
+    <div v-if="showHistoryPanel" class="history-overlay" @click="showHistoryPanel = false"></div>
 
     <div class="chat-body-container">
       <div class="message-list-scroll px-4 py-4 space-y-4" ref="messageContainer">
@@ -92,12 +137,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, MagicStick, Delete, Promotion } from '@element-plus/icons-vue'
+import { ArrowLeft, MagicStick, Delete, Promotion, Clock, Close, Document } from '@element-plus/icons-vue'
 import { showToast, showConfirmDialog } from 'vant'
 import request from '@/api/request'
 import LangSwitcher from '@/components/LangSwitcher.vue'
+import { aiChatRecordApi } from '@/api/ai'
 
 const router = useRouter()
 const messageContainer = ref(null)
@@ -105,6 +151,59 @@ const userInput = ref('')
 const aiLoading = ref(false)
 const messages = ref([{ role: 'ai', content: '您好！我是您的智能管家，有什么可以帮您？', time: '12:00' }])
 const quickTags = ['帮我写商品描述', '估算手机价格', '如何辨别真伪', '交易安全提醒']
+
+// 历史记录相关
+const showHistoryPanel = ref(false)
+const historyLoading = ref(false)
+const chatHistory = ref([])
+
+// 加载历史记录
+const loadChatHistory = async () => {
+  historyLoading.value = true
+  try {
+    const res = await aiChatRecordApi.getHistory()
+    if (res.code === '200' && res.data) {
+      chatHistory.value = res.data
+    }
+  } catch (e) {
+    console.error('加载历史记录失败', e)
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+// 清空历史记录
+const handleClearHistory = async () => {
+  try {
+    await showConfirmDialog({ message: '确定清空所有历史记录吗？' })
+    const res = await aiChatRecordApi.clearHistory()
+    if (res.code === '200') {
+      chatHistory.value = []
+      showToast('已清空历史记录')
+    } else {
+      showToast('清空失败')
+    }
+  } catch (e) {
+    // 用户取消
+  }
+}
+
+// 格式化历史时间
+const formatHistoryTime = (timeStr) => {
+  if (!timeStr) return ''
+  const date = new Date(timeStr)
+  const now = new Date()
+  const diff = now - date
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`
+  return `${date.getMonth() + 1}/${date.getDate()}`
+}
+
+// 监听历史面板打开
+watch(showHistoryPanel, (val) => {
+  if (val) loadChatHistory()
+})
 
 const handleSend = async () => {
   if (!userInput.value.trim() || aiLoading.value) return
@@ -226,5 +325,151 @@ onMounted(scrollToBottom)
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+/* 历史记录面板样式 */
+.history-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  background: white;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 25;
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.history-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a2e;
+}
+
+.close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: #f3f4f6;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px;
+  color: #6b7280;
+}
+
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.history-empty p {
+  font-size: 14px;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-item {
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-item:hover {
+  background: #f3f4f6;
+}
+
+.history-time {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.history-preview {
+  font-size: 14px;
+  color: #374151;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.clear-history-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+  background: #fee2e2;
+  color: #ef4444;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.clear-history-btn:hover {
+  background: #ef4444;
+  color: white;
+}
+
+.slide-enter-active, .slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from, .slide-leave-to {
+  transform: translateX(100%);
 }
 </style>

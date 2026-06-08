@@ -110,6 +110,42 @@ export const aiApi = {
       method: 'post',
       data
     })
+  },
+
+  // AI推荐商品
+  getRecommendations(data) {
+    return request({
+      url: '/ai/recommendations',
+      method: 'post',
+      data
+    })
+  },
+
+  // 获取AI帮助信息
+  getAiHelp() {
+    return request({
+      url: '/ai/help',
+      method: 'get'
+    })
+  }
+}
+
+// AI聊天记录管理API
+export const aiChatRecordApi = {
+  // 获取AI聊天历史记录
+  getHistory() {
+    return request({
+      url: '/ai/chat/history',
+      method: 'get'
+    })
+  },
+
+  // 清空AI聊天历史记录
+  clearHistory() {
+    return request({
+      url: '/ai/chat/history',
+      method: 'delete'
+    })
   }
 }
 
