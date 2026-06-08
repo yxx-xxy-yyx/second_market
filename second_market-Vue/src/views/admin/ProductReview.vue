@@ -541,9 +541,10 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: linear-gradient(135deg, #f0f7ff 0%, #fafbfc 100%);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .header-left {
@@ -552,14 +553,17 @@ onMounted(() => {
 
 .page-title {
   font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 4px 0;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
 
@@ -571,31 +575,41 @@ onMounted(() => {
 .stat-item {
   text-align: center;
   min-width: 60px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-value {
   font-size: 24px;
-  font-weight: 700;
-  color: #2c3e50;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 4px;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.6);
   line-height: 1;
 }
 
 .table-card {
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 }
 
 .product-thumb {
   width: 80px;
   height: 80px;
-  border-radius: 6px;
+  border-radius: 12px;
   cursor: pointer;
 }
 
@@ -605,15 +619,18 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  border-radius: 6px;
-  color: #c0c4cc;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .price-text {
   font-size: 16px;
-  font-weight: 600;
-  color: #f56c6c;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .publisher-info {
@@ -624,7 +641,7 @@ onMounted(() => {
 
 .publisher-name {
   font-size: 14px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .action-buttons {
@@ -636,9 +653,9 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e4e7ed;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .detail-content {
@@ -650,14 +667,28 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: #f5f7fa;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
 }
 
 :deep(.el-descriptions__label) {
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 :deep(.el-descriptions__content) {
   word-break: break-word;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+:deep(.el-table) {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(255, 255, 255, 0.05);
+  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.08);
+  --el-table-border-color: rgba(255, 255, 255, 0.1);
+  --el-table-text-color: rgba(255, 255, 255, 0.9);
+  --el-table-header-text-color: rgba(255, 255, 255, 0.7);
 }
 </style>

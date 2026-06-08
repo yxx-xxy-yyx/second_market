@@ -539,22 +539,37 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #f0f7ff 0%, #fafbfc 100%);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .page-title {
   font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0;
 }
 
-.table-card {
+.page-header :deep(.el-button--primary) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.table-card {
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
 }
 
 .type-cell {
@@ -572,8 +587,14 @@ onMounted(() => {
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 24px;
   padding: 20px 0;
+}
+
+.pagination :deep(.el-pagination) {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 8px 16px;
 }
 
 .notice-view {
@@ -582,8 +603,11 @@ onMounted(() => {
 
 .notice-title {
   font-size: 20px;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin: 0 0 16px 0;
 }
 
@@ -593,27 +617,89 @@ onMounted(() => {
   gap: 16px;
   margin-bottom: 20px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .notice-time {
   font-size: 14px;
-  color: #909399;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .notice-content {
   line-height: 1.8;
-  color: #2c3e50;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .notice-content :deep(img) {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  border-radius: 8px;
 }
 
 .notice-content :deep(p) {
   margin: 12px 0;
+}
+
+:deep(.el-table) {
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(255, 255, 255, 0.05);
+  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.08);
+  --el-table-border-color: rgba(255, 255, 255, 0.1);
+  --el-table-text-color: rgba(255, 255, 255, 0.9);
+  --el-table-header-text-color: rgba(255, 255, 255, 0.7);
+}
+
+:deep(.el-dialog) {
+  background: rgba(26, 26, 62, 0.95);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 24px;
+}
+
+:deep(.el-dialog__title) {
+  color: white;
+  font-weight: 700;
+}
+
+:deep(.el-dialog__close) {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+:deep(.el-dialog__body) {
+  padding: 24px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:deep(.el-form-item__label) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:deep(.el-input__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+:deep(.el-input__inner) {
+  color: white;
+}
+
+:deep(.el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+:deep(.el-select__wrapper) {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: none;
+  color: white;
 }
 
 @media (max-width: 768px) {
