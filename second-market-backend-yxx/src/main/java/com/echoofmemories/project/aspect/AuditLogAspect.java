@@ -1,7 +1,7 @@
 package com.echoofmemories.project.aspect;
 
 import com.echoofmemories.project.annotation.AuditLog;
-import com.echoofmemories.project.entity.AuditLogEntity;
+import com.echoofmemories.project.entity.AuditLog;
 import com.echoofmemories.project.mapper.AuditLogMapper;
 import com.echoofmemories.project.security.SecurityUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ public class AuditLogAspect {
     @Around("logPointcut()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-        AuditLogEntity auditLog = new AuditLogEntity();
+        com.echoofmemories.project.entity.AuditLog auditLog = new com.echoofmemories.project.entity.AuditLog();
         
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

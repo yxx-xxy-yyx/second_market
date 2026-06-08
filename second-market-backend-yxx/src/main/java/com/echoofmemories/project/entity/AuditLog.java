@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @TableName("audit_log")
-public class AuditLogEntity {
+public class AuditLog {
     @TableId(type = IdType.AUTO)
     private Long id;
 
