@@ -3,6 +3,7 @@ package com.echoofmemories.project.dto;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Data
 public class AiDisputeResolutionRequest {
