@@ -20,9 +20,9 @@
               <el-icon :size="18"><ChatLineRound /></el-icon>
               <span class="neo-pill-label">{{ $t('neo.tabs.forum') }}</span>
             </button>
-            <button class="neo-pill" :class="{ active: isActive('/neo/cart') }" @click="router.push('/neo/cart')">
-              <el-icon :size="18"><ShoppingCart /></el-icon>
-              <span class="neo-pill-label">{{ $t('neo.tabs.cart') }}</span>
+            <button class="neo-pill" :class="{ active: isActive('/user/favorites') }" @click="router.push('/user/favorites')">
+              <el-icon :size="18"><Star /></el-icon>
+              <span class="neo-pill-label">{{ $t('neo.tabs.favorites') }}</span>
             </button>
           </div>
         </div>
@@ -87,9 +87,9 @@
           <el-icon :size="22"><ChatLineRound /></el-icon>
           <span class="neo-tab-label">{{ $t('neo.tabs.forum') }}</span>
         </button>
-        <button class="neo-tab" :class="{ active: isActive('/neo/cart') }" @click="router.push('/neo/cart')">
-          <el-icon :size="22"><ShoppingCart /></el-icon>
-          <span class="neo-tab-label">{{ $t('neo.tabs.cart') }}</span>
+        <button class="neo-tab" :class="{ active: isActive('/user/favorites') }" @click="router.push('/user/favorites')">
+          <el-icon :size="22"><Star /></el-icon>
+          <span class="neo-tab-label">{{ $t('neo.tabs.favorites') }}</span>
         </button>
       </div>
     </nav>
@@ -103,7 +103,7 @@ import { useDeviceType } from '@/utils/device'
 import { useSchoolStore } from '@/stores/school'
 import BrandLogo from '@/components/BrandLogo.vue'
 import LangSwitcher from '@/components/LangSwitcher.vue'
-import { ChatLineRound, House, Promotion, ShoppingCart } from '@element-plus/icons-vue'
+import { ChatLineRound, House, Promotion, Star } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const route = useRoute()

@@ -89,14 +89,15 @@ const handleNav = (path) => {
   left: 12px;
   right: 12px;
   height: 72px;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   z-index: 1000;
   justify-content: space-around;
   align-items: center;
   border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .nav-item {
@@ -104,7 +105,7 @@ const handleNav = (path) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: rgba(55, 65, 81, 0.6);
+  color: rgba(255, 255, 255, 0.6);
   flex: 1;
   height: 100%;
   cursor: pointer;
@@ -113,11 +114,11 @@ const handleNav = (path) => {
 }
 
 .nav-item.active {
-  color: var(--primary-color);
+  color: #667eea;
 }
 
 .nav-item.active:not(.publish-center) {
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(102, 126, 234, 0.2);
 }
 
 .nav-icon-container {
@@ -135,13 +136,13 @@ const handleNav = (path) => {
 }
 
 .publish-center .nav-icon-container {
-  background: var(--app-header-gradient);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   width: 56px;
   height: 56px;
   border-radius: 50%;
   margin-top: -34px;
-  border: 4px solid white;
-  box-shadow: 0 8px 16px rgba(54, 179, 194, 0.28);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
 }
 </style>

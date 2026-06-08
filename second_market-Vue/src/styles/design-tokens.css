@@ -381,3 +381,32 @@ html.dark {
   --van-radio-checked-icon-color: var(--primary-400);
   --van-loading-spinner-color: var(--primary-400);
 }
+
+/* ================================================
+   20. LAYOUT BACKGROUNDS - 布局背景
+   ================================================ */
+.layout-bg {
+  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
+  min-height: 100vh;
+}
+
+/* ================================================
+   21. GRADIENT UTILITIES - 渐变工具类
+   ================================================ */
+.gradient-primary {
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-cyan {
+  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+}
+
+.gradient-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
