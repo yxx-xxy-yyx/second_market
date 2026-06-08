@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class AiAuthenticationRequest {
+    private Long productId;
     @NotEmpty(message = "图片列表不能为空")
     private List<String> imageUrls;
     private String productName;

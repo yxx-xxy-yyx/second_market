@@ -31,6 +31,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 import java.util.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -38,7 +42,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import com.echoofmemories.project.service.BrowseHistoryService;
 import com.echoofmemories.project.service.SearchHistoryService;
 import com.echoofmemories.project.service.ProductService;
+import com.echoofmemories.project.service.UserService;
 import com.echoofmemories.project.mapper.ProductMapper;
+import com.echoofmemories.project.mapper.UserMapper;
+import com.echoofmemories.project.mapper.OrdersMapper;
+import com.echoofmemories.project.mapper.MessageMapper;
+import com.echoofmemories.project.mapper.SchoolMapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 /**
  * AI服务实现类
@@ -56,6 +66,11 @@ public class AiServiceImpl implements AiService {
     private final SearchHistoryService searchHistoryService;
     private final ProductService productService;
     private final ProductMapper productMapper;
+    private final UserMapper userMapper;
+    private final OrdersMapper ordersMapper;
+    private final MessageMapper messageMapper;
+    private final SchoolMapper schoolMapper;
+    private final UserService userService;
     private RestTemplate restTemplate;
 
     @Value("${project.server.base-url:http://localhost:8001/api}")
@@ -77,6 +92,42 @@ public class AiServiceImpl implements AiService {
         return new RestTemplate(factory);
     }
 
+    private void validateImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            throw new CustomException("图片URL不能为空");
+        }
+        if (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://")) {
+            throw new CustomException("图片URL不安全：仅支持 http 或 https 协议");
+        }
+        try {
+            java.net.URL url = new java.net.URL(imageUrl);
+            String host = url.getHost();
+            if (host == null || host.isEmpty()) {
+                throw new CustomException("图片URL不安全：无法解析主机");
+            }
+            String lowerHost = host.toLowerCase();
+            if ("localhost".equals(lowerHost) || "127.0.0.1".equals(lowerHost) || "::1".equals(lowerHost)) {
+                throw new CustomException("图片URL不安全：禁止访问本地服务");
+            }
+            if (lowerHost.startsWith("10.") || lowerHost.startsWith("192.168.")
+                    || lowerHost.startsWith("127.") || lowerHost.startsWith("169.254.")) {
+                throw new CustomException("图片URL不安全：禁止访问内网地址");
+            }
+            if (lowerHost.matches("^172\\.(1[6-9]|2[0-9]|3[0-1])\\..*")) {
+                throw new CustomException("图片URL不安全：禁止访问内网地址");
+            }
+            java.net.InetAddress inet = java.net.InetAddress.getByName(host);
+            if (inet.isLoopbackAddress() || inet.isSiteLocalAddress()) {
+                throw new CustomException("图片URL不安全：禁止访问内网地址");
+            }
+        } catch (CustomException ce) {
+            throw ce;
+        } catch (Exception e) {
+            log.warn("图片URL校验失败: {}, 错误: {}", imageUrl, e.getMessage());
+            throw new CustomException("图片URL不安全");
+        }
+    }
+
     private String convertToFullUrl(String imageUrl) {
         log.debug("开始转换图片URL: {}", imageUrl);
 
@@ -86,6 +137,7 @@ public class AiServiceImpl implements AiService {
         }
 
         if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+            validateImageUrl(imageUrl);
             log.debug("图片URL是HTTP URL，尝试下载并转换为base64");
             try {
                 return downloadAndConvertToBase64(imageUrl);
@@ -164,6 +216,7 @@ public class AiServiceImpl implements AiService {
 
     private String downloadAndConvertToBase64(String imageUrl) throws IOException {
         log.debug("开始下载图片: {}", imageUrl);
+        validateImageUrl(imageUrl);
 
         URL url = new URL(imageUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -965,16 +1018,95 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiIntelligentTrustRequest request,
             Long userId) {
         log.info("智能托管服务 - 用户ID: {}, 商品ID: {}", userId, request.getProductId());
-        
-        com.echoofmemories.project.dto.AiIntelligentTrustResponse response = 
-            new com.echoofmemories.project.dto.AiIntelligentTrustResponse();
-        response.setEnabled(true);
-        response.setAutoReplyCount(0);
-        response.setNegotiationCount(0);
-        response.setPriceAdjustmentCount(0);
-        response.setStatus("active");
-        response.setLastActivity(java.time.LocalDateTime.now().toString());
-        
+
+        com.echoofmemories.project.dto.AiIntelligentTrustResponse response =
+                new com.echoofmemories.project.dto.AiIntelligentTrustResponse();
+
+        Product product = null;
+        if (request.getProductId() != null) {
+            product = productMapper.selectById(request.getProductId());
+        }
+
+        User seller = null;
+        if (product != null && product.getUserId() != null) {
+            seller = userMapper.selectById(product.getUserId());
+        } else if (userId != null) {
+            seller = userMapper.selectById(userId);
+        }
+
+        int autoReplyCount = 0;
+        try {
+            if (userId != null) {
+                QueryWrapper<com.echoofmemories.project.entity.Message> mw = new QueryWrapper<>();
+                mw.eq("receiver_id", userId);
+                mw.ge("create_time", LocalDateTime.now().minusDays(7));
+                Long c = messageMapper.selectCount(mw);
+                autoReplyCount = c == null ? 0 : c.intValue();
+            }
+        } catch (Exception e) {
+            log.warn("消息回复数统计失败: {}", e.getMessage());
+            autoReplyCount = 0;
+        }
+
+        int negotiationCount = 0;
+        try {
+            if (userId != null) {
+                QueryWrapper<Orders> ow = new QueryWrapper<>();
+                ow.eq("buyer_id", userId).eq("deleted", 0);
+                Long c = ordersMapper.selectCount(ow);
+                negotiationCount = c == null ? 0 : c.intValue();
+            }
+        } catch (Exception e) {
+            log.warn("协商次数统计失败: {}", e.getMessage());
+        }
+
+        int priceAdjustmentCount = 0;
+        try {
+            if (product != null) {
+                int vc = product.getViewCount() == null ? 0 : product.getViewCount();
+                priceAdjustmentCount = vc > 50 ? Math.min(10, vc / 20) : 0;
+            }
+        } catch (Exception e) {
+            priceAdjustmentCount = 0;
+        }
+
+        String status = "limited";
+        boolean enabled = false;
+        if (seller != null && seller.getCreditScore() != null && seller.getCreditScore() >= 90) {
+            status = "active";
+            enabled = true;
+        } else if (seller != null && seller.getCreditScore() != null && seller.getCreditScore() >= 60) {
+            status = "normal";
+            enabled = true;
+        }
+
+        String lastActivity = LocalDateTime.now().toString();
+        try {
+            if (userId != null) {
+                QueryWrapper<Orders> ow = new QueryWrapper<>();
+                ow.in("buyer_id", userId).or(w -> w.in("seller_id", userId));
+                ow.eq("deleted", 0);
+                ow.orderByDesc("create_time");
+                ow.last("LIMIT 1");
+                Orders last = ordersMapper.selectOne(ow);
+                if (last != null && last.getCreateTime() != null) {
+                    lastActivity = last.getCreateTime().toString();
+                }
+            }
+        } catch (Exception e) {
+            log.warn("最近活动时间查询失败: {}", e.getMessage());
+        }
+
+        response.setEnabled(enabled);
+        response.setAutoReplyCount(autoReplyCount);
+        response.setNegotiationCount(negotiationCount);
+        response.setPriceAdjustmentCount(priceAdjustmentCount);
+        response.setStatus(status);
+        response.setLastActivity(lastActivity);
+
+        log.info("智能托管结果 - productId={}, enabled={}, status={}, autoReply={}, negotiation={}, priceAdj={}",
+                request.getProductId(), enabled, status, autoReplyCount, negotiationCount, priceAdjustmentCount);
+
         return response;
     }
 
@@ -983,27 +1115,173 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiAuthenticationRequest request,
             Long userId) {
         log.info("鉴定质检服务 - 用户ID: {}", userId);
-        
-        com.echoofmemories.project.dto.AiAuthenticationResponse response = 
-            new com.echoofmemories.project.dto.AiAuthenticationResponse();
-        response.setIsAuthentic(true);
-        response.setAuthenticityScore(0.95);
-        response.setConditionGrade("A+");
-        response.setConditionScore(9.0);
-        response.setConditionDetails(java.util.Arrays.asList(
-            "外观几乎全新，无明显划痕",
-            "功能正常，无维修记录",
-            "配件齐全，包装完好"
-        ));
-        response.setReportSummary("商品鉴定为正品，成色优秀，建议按市价出售");
-        response.setRecommendations(java.util.Arrays.asList(
-            "建议添加更多细节照片",
-            "可以适当提高定价",
-            "提供购买凭证增加可信度"
-        ));
-        response.setReportTime(java.time.LocalDateTime.now());
+
+        com.echoofmemories.project.dto.AiAuthenticationResponse response =
+                new com.echoofmemories.project.dto.AiAuthenticationResponse();
+
+        Long productId = request.getProductId();
+        Product product = null;
+        if (productId != null) {
+            product = productMapper.selectById(productId);
+        }
+
+        if (product == null) {
+            response.setIsAuthentic(false);
+            response.setAuthenticityScore(0.3);
+            response.setConditionGrade("C");
+            response.setConditionScore(0.0);
+            response.setConditionDetails(java.util.Collections.emptyList());
+            response.setReportSummary("未查询到商品信息，无法完成鉴定");
+            response.setRecommendations(java.util.Arrays.asList("请确认商品ID是否正确", "建议补充商品详情与实拍图"));
+            response.setReportTime(LocalDateTime.now());
+            response.setReportId("AUTH-" + System.currentTimeMillis());
+            log.info("鉴定结果 - 未查询到商品, productId={}", productId);
+            return response;
+        }
+
+        String images = product.getImages();
+        int imageCount = 0;
+        if (images != null && !images.isEmpty()) {
+            String[] parts = images.split(",");
+            for (String p : parts) {
+                if (p != null && !p.trim().isEmpty()) imageCount++;
+            }
+        }
+
+        String desc = product.getDescription();
+        int descLen = desc == null ? 0 : desc.length();
+
+        Integer aiAnalyzed = product.getAiAnalyzed();
+        String aiSuggestions = product.getAiSuggestions();
+
+        Integer condScore = product.getConditionScore();
+        int condInt = condScore == null ? 0 : condScore;
+
+        double authenticityScore = 0.35;
+        if (imageCount > 2) authenticityScore += 0.15;
+        if (descLen > 100) authenticityScore += 0.10;
+        if (aiAnalyzed != null && aiAnalyzed == 1 && aiSuggestions != null && !aiSuggestions.isEmpty()) {
+            authenticityScore += 0.20;
+        }
+        if (condInt >= 8) authenticityScore += 0.15;
+
+        User seller = null;
+        if (product.getUserId() != null) {
+            seller = userMapper.selectById(product.getUserId());
+        }
+        if (seller != null && seller.getCreditScore() != null && seller.getCreditScore() >= 90) {
+            authenticityScore += 0.15;
+        }
+        if (authenticityScore > 1.0) authenticityScore = 1.0;
+
+        String grade;
+        if (authenticityScore >= 0.85) grade = "A+";
+        else if (authenticityScore >= 0.7) grade = "A";
+        else if (authenticityScore >= 0.55) grade = "B";
+        else grade = "C";
+
+        boolean isAuthentic = authenticityScore >= 0.55;
+
+        java.util.List<String> conditionDetails = new java.util.ArrayList<>();
+        if (condInt > 0) {
+            conditionDetails.add("成色评分：" + condInt + "/10");
+        }
+        if (product.getConditionDesc() != null && !product.getConditionDesc().isEmpty()) {
+            conditionDetails.add("成色描述：" + product.getConditionDesc());
+        }
+        if (imageCount > 0) {
+            conditionDetails.add("含实拍图片 " + imageCount + " 张");
+        }
+        if (descLen > 100) {
+            conditionDetails.add("商品描述详细（" + descLen + "字）");
+        }
+        if (aiAnalyzed != null && aiAnalyzed == 1) {
+            conditionDetails.add("已通过AI智能分析");
+        }
+        if (seller != null && seller.getCreditScore() != null) {
+            conditionDetails.add("卖家信用分：" + seller.getCreditScore());
+        }
+        if (conditionDetails.isEmpty()) {
+            conditionDetails.add("暂无详情信息");
+        }
+
+        BigDecimal avgPrice = null;
+        BigDecimal lowestPrice = null;
+        BigDecimal highestPrice = null;
+        int categoryCount = 0;
+        try {
+            QueryWrapper<Product> qw = new QueryWrapper<>();
+            qw.eq("deleted", 0);
+            if (product.getCategory() != null) {
+                qw.eq("category", product.getCategory());
+            }
+            qw.isNotNull("price");
+            java.util.List<Product> sameCat = productMapper.selectList(qw);
+            if (!sameCat.isEmpty()) {
+                categoryCount = sameCat.size();
+                java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal min = sameCat.get(0).getPrice();
+                java.math.BigDecimal max = sameCat.get(0).getPrice();
+                for (Product p : sameCat) {
+                    if (p.getPrice() == null) continue;
+                    total = total.add(p.getPrice());
+                    if (p.getPrice().compareTo(min) < 0) min = p.getPrice();
+                    if (p.getPrice().compareTo(max) > 0) max = p.getPrice();
+                }
+                avgPrice = total.divide(new java.math.BigDecimal(sameCat.size()), 2, java.math.RoundingMode.HALF_UP);
+                lowestPrice = min;
+                highestPrice = max;
+            }
+        } catch (Exception e) {
+            log.warn("同类商品统计失败: {}", e.getMessage());
+        }
+
+        java.util.List<String> recommendations = new java.util.ArrayList<>();
+        if (imageCount <= 2) recommendations.add("建议添加更多细节图片（至少3张）");
+        if (descLen <= 100) recommendations.add("建议补充更详细的商品描述（>100字）");
+        if (condInt < 8) recommendations.add("成色一般，可考虑如实说明细节问题");
+        if (aiAnalyzed == null || aiAnalyzed != 1) recommendations.add("建议使用AI商品分析增强可信度");
+        if (product.getPrice() != null && avgPrice != null) {
+            if (product.getPrice().compareTo(avgPrice.multiply(new java.math.BigDecimal("0.7"))) < 0) {
+                recommendations.add("当前价格低于同类均价较多，请确认商品是否存在潜在问题");
+            } else if (product.getPrice().compareTo(avgPrice.multiply(new java.math.BigDecimal("1.3"))) > 0) {
+                recommendations.add("当前价格高于同类均价，建议优化定价促进成交");
+            } else {
+                recommendations.add("当前价格接近同类均价，定价合理");
+            }
+        }
+        if (recommendations.isEmpty()) recommendations.add("商品信息完整，建议维持现状");
+
+        String summary = "鉴定完成，真实度评分 " + String.format("%.2f", authenticityScore)
+                + "，评级 " + grade + "。";
+        if (avgPrice != null) {
+            summary += " 同类商品参考均价 ¥" + avgPrice + "（共" + categoryCount + "件）。";
+        }
+        String priceSuggestion = null;
+        if (product.getPrice() != null && avgPrice != null) {
+            double diff = product.getPrice().doubleValue() - avgPrice.doubleValue();
+            if (Math.abs(diff) < 1.0) {
+                priceSuggestion = "与同类均价一致，建议保持当前价格";
+            } else if (diff > 0) {
+                priceSuggestion = "高于同类均价 ¥" + String.format("%.2f", diff) + "，建议适当下调";
+            } else {
+                priceSuggestion = "低于同类均价 ¥" + String.format("%.2f", -diff) + "，可考虑小幅上调";
+            }
+        }
+
+        response.setIsAuthentic(isAuthentic);
+        response.setAuthenticityScore(authenticityScore);
+        response.setConditionGrade(grade);
+        response.setConditionScore((double) condInt);
+        response.setConditionDetails(conditionDetails);
+        response.setReportSummary(summary);
+        response.setRecommendations(recommendations);
+        response.setReportTime(LocalDateTime.now());
         response.setReportId("AUTH-" + System.currentTimeMillis());
-        
+
+        log.info("鉴定结果 - productId={}, grade={}, score={}, avgPrice={}, 同品类数量={}",
+                productId, grade, authenticityScore, avgPrice, categoryCount);
+
         return response;
     }
 
@@ -1012,38 +1290,167 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiMarketTrendRequest request,
             Long userId) {
         log.info("市场行情参考 - 用户ID: {}, 品类: {}", userId, request.getCategory());
-        
-        com.echoofmemories.project.dto.AiMarketTrendResponse response = 
-            new com.echoofmemories.project.dto.AiMarketTrendResponse();
-        response.setAveragePrice(1500.0);
-        response.setLowestPrice(1000.0);
-        response.setHighestPrice(2500.0);
-        response.setTotalSold(42);
-        
+
+        com.echoofmemories.project.dto.AiMarketTrendResponse response =
+                new com.echoofmemories.project.dto.AiMarketTrendResponse();
+
+        String category = request.getCategory();
+        int days = request.getDays() == null || request.getDays() <= 0 ? 7 : request.getDays();
+
+        double avgPrice = 0.0;
+        double lowPrice = 0.0;
+        double highPrice = 0.0;
+        int productCount = 0;
+        try {
+            QueryWrapper<Product> pw = new QueryWrapper<>();
+            pw.eq("deleted", 0);
+            if (category != null && !category.isEmpty()) {
+                pw.eq("category", category);
+            }
+            pw.isNotNull("price");
+            java.util.List<Product> products = productMapper.selectList(pw);
+            if (!products.isEmpty()) {
+                productCount = products.size();
+                java.math.BigDecimal total = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal min = products.get(0).getPrice();
+                java.math.BigDecimal max = products.get(0).getPrice();
+                for (Product p : products) {
+                    if (p.getPrice() == null) continue;
+                    total = total.add(p.getPrice());
+                    if (p.getPrice().compareTo(min) < 0) min = p.getPrice();
+                    if (p.getPrice().compareTo(max) > 0) max = p.getPrice();
+                }
+                avgPrice = total.divide(new java.math.BigDecimal(products.size()), 2, java.math.RoundingMode.HALF_UP).doubleValue();
+                lowPrice = min.doubleValue();
+                highPrice = max.doubleValue();
+            }
+        } catch (Exception e) {
+            log.warn("品类商品价格聚合失败: {}", e.getMessage());
+        }
+        response.setAveragePrice(avgPrice);
+        response.setLowestPrice(lowPrice);
+        response.setHighestPrice(highPrice);
+
+        int totalSold = 0;
+        try {
+            QueryWrapper<Orders> ow = new QueryWrapper<>();
+            ow.eq("deleted", 0);
+            if (category != null && !category.isEmpty()) {
+                ow.inSql("product_id", "SELECT id FROM product WHERE deleted=0 AND category='"
+                        + category.replace("'", "") + "'");
+            }
+            ow.eq("status", 4);
+            Long count = ordersMapper.selectCount(ow);
+            totalSold = count == null ? 0 : count.intValue();
+        } catch (Exception e) {
+            log.warn("成交数量统计失败: {}", e.getMessage());
+        }
+        response.setTotalSold(totalSold);
+
         java.util.List<java.util.Map<String, Object>> priceTrend = new java.util.ArrayList<>();
-        for (int i = 0; i < request.getDays(); i++) {
-            java.util.Map<String, Object> dayData = new java.util.HashMap<>();
-            dayData.put("date", java.time.LocalDate.now().minusDays(request.getDays() - i).toString());
-            dayData.put("price", 1450 + Math.random() * 100);
-            priceTrend.add(dayData);
+        try {
+            LocalDate today = LocalDate.now();
+            java.util.Map<LocalDate, java.math.BigDecimal> dayTotal = new java.util.HashMap<>();
+            java.util.Map<LocalDate, Integer> dayCount = new java.util.HashMap<>();
+            QueryWrapper<Orders> ow2 = new QueryWrapper<>();
+            ow2.eq("deleted", 0).eq("status", 4);
+            if (category != null && !category.isEmpty()) {
+                ow2.inSql("product_id", "SELECT id FROM product WHERE deleted=0 AND category='"
+                        + category.replace("'", "") + "'");
+            }
+            ow2.ge("create_time", today.minusDays(days).atStartOfDay());
+            ow2.le("create_time", today.atTime(23, 59, 59));
+            java.util.List<Orders> recentOrders = ordersMapper.selectList(ow2);
+            for (Orders o : recentOrders) {
+                if (o.getCreateTime() == null || o.getAmount() == null) continue;
+                LocalDate d = o.getCreateTime().toLocalDate();
+                dayTotal.put(d, dayTotal.getOrDefault(d, java.math.BigDecimal.ZERO).add(o.getAmount()));
+                dayCount.put(d, dayCount.getOrDefault(d, 0) + 1);
+            }
+            for (int i = days - 1; i >= 0; i--) {
+                LocalDate d = today.minusDays(i);
+                java.util.Map<String, Object> row = new java.util.HashMap<>();
+                row.put("date", d.toString());
+                java.math.BigDecimal t = dayTotal.get(d);
+                Integer c = dayCount.get(d);
+                if (t != null && c != null && c > 0) {
+                    row.put("price", t.divide(new java.math.BigDecimal(c), 2, java.math.RoundingMode.HALF_UP).doubleValue());
+                    row.put("count", c);
+                } else {
+                    row.put("price", 0);
+                    row.put("count", 0);
+                }
+                priceTrend.add(row);
+            }
+        } catch (Exception e) {
+            log.warn("价格走势统计失败: {}", e.getMessage());
         }
         response.setPriceTrend(priceTrend);
-        
+
         java.util.List<java.util.Map<String, Object>> similarProducts = new java.util.ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            java.util.Map<String, Object> product = new java.util.HashMap<>();
-            product.put("id", i + 1);
-            product.put("name", "相似商品 " + (i + 1));
-            product.put("price", 1200 + Math.random() * 800);
-            product.put("condition", 7 + Math.random() * 3);
-            similarProducts.add(product);
+        try {
+            QueryWrapper<Product> pw2 = new QueryWrapper<>();
+            pw2.eq("deleted", 0);
+            if (category != null && !category.isEmpty()) {
+                pw2.eq("category", category);
+            }
+            pw2.orderByDesc("(view_count + favorite_count)");
+            pw2.last("LIMIT 5");
+            java.util.List<Product> top = productMapper.selectList(pw2);
+            for (Product p : top) {
+                java.util.Map<String, Object> m = new java.util.HashMap<>();
+                m.put("id", p.getId());
+                m.put("name", p.getTitle());
+                m.put("price", p.getPrice() == null ? 0 : p.getPrice().doubleValue());
+                m.put("condition", p.getConditionScore() == null ? 0 : p.getConditionScore());
+                m.put("viewCount", p.getViewCount() == null ? 0 : p.getViewCount());
+                m.put("favoriteCount", p.getFavoriteCount() == null ? 0 : p.getFavoriteCount());
+                similarProducts.add(m);
+            }
+        } catch (Exception e) {
+            log.warn("热门同类商品查询失败: {}", e.getMessage());
         }
         response.setSimilarProducts(similarProducts);
-        
-        response.setRecommendation("市场需求稳定，建议定价在1400-1600之间");
-        response.setPriceSuggestion("推荐定价：1480元（基于最近7天行情）");
-        response.setMarketOutlook("未来一周价格预计保持稳定，建议尽快出手");
-        
+
+        StringBuilder recommendation = new StringBuilder();
+        recommendation.append("品类").append(category == null ? "全部" : category)
+                .append(" - 当前均价 ¥").append(String.format("%.2f", avgPrice))
+                .append("（").append(productCount).append("件在售，近").append(days).append("天成交")
+                .append(totalSold).append("单）。");
+        if (avgPrice > 0) {
+            if (totalSold >= productCount * 0.3) {
+                recommendation.append(" 成交活跃，建议关注热门同类商品。");
+            } else if (totalSold >= productCount * 0.1) {
+                recommendation.append(" 需求稳定，价格可参考均价调整。");
+            } else {
+                recommendation.append(" 成交一般，建议优化商品描述或适度降价。");
+            }
+        }
+        response.setRecommendation(recommendation.toString());
+
+        String priceSuggestion;
+        if (avgPrice <= 0) {
+            priceSuggestion = "暂无同类成交数据，建议参考商品成色与市场评估定价";
+        } else {
+            priceSuggestion = "推荐定价参考同类均价 ¥" + String.format("%.2f", avgPrice)
+                    + "，区间 ¥" + String.format("%.2f", lowPrice) + " ~ ¥" + String.format("%.2f", highPrice);
+        }
+        response.setPriceSuggestion(priceSuggestion);
+
+        StringBuilder outlook = new StringBuilder();
+        outlook.append("未来").append(days).append("天");
+        if (totalSold > productCount * 0.2 && avgPrice > 0) {
+            outlook.append("市场需求旺盛，价格预计保持平稳或小幅上涨，建议尽快发布或上架");
+        } else if (totalSold > 0) {
+            outlook.append("需求一般，建议关注同类TOP商品走势并优化商品详情页");
+        } else {
+            outlook.append("近期无成交数据，建议先完善商品信息并适当降低价格以吸引买家");
+        }
+        response.setMarketOutlook(outlook.toString());
+
+        log.info("行情结果 - 品类={}, days={}, 均价={}, 最低={}, 最高={}, 成交={}, similarProducts={}",
+                category, days, avgPrice, lowPrice, highPrice, totalSold, similarProducts.size());
+
         return response;
     }
 
@@ -1052,30 +1459,116 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiSmartSearchRequest request,
             Long userId) {
         log.info("智能搜索 - 用户ID: {}, 查询: {}", userId, request.getQuery());
-        
-        com.echoofmemories.project.dto.AiSmartSearchResponse response = 
-            new com.echoofmemories.project.dto.AiSmartSearchResponse();
-        response.setInterpretedQuery(request.getQuery() != null ? request.getQuery() : "");
-        response.setSuggestedTags(java.util.Arrays.asList("二手", "校园", request.getCategory()));
-        response.setSearchTip("尝试添加成色或价格范围获得更精准结果");
-        response.setTotalCount(25);
-        
-        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            java.util.Map<String, Object> product = new java.util.HashMap<>();
-            product.put("id", i + 1);
-            product.put("name", "搜索结果商品 " + (i + 1));
-            product.put("price", 500 + Math.random() * 2000);
-            product.put("matchScore", 0.7 + Math.random() * 0.3);
-            products.add(product);
+
+        com.echoofmemories.project.dto.AiSmartSearchResponse response =
+                new com.echoofmemories.project.dto.AiSmartSearchResponse();
+
+        String keyword = request.getQuery();
+        String category = request.getCategory();
+        Long userSchoolId = null;
+        if (userId != null) {
+            User u = userMapper.selectById(userId);
+            if (u != null) userSchoolId = u.getSchoolId();
         }
-        response.setProducts(products);
-        
+
+        java.util.List<Product> hits = new java.util.ArrayList<>();
+        try {
+            QueryWrapper<Product> qw = new QueryWrapper<>();
+            qw.eq("deleted", 0);
+            if (category != null && !category.isEmpty()) {
+                qw.eq("category", category);
+            }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String kw = "%" + keyword.trim().replace("%", "\\%") + "%";
+                qw.and(w -> w.like("title", kw).or().like("description", kw));
+            }
+            if (request.getMinPrice() != null) {
+                qw.ge("price", BigDecimal.valueOf(request.getMinPrice()));
+            }
+            if (request.getMaxPrice() != null) {
+                qw.le("price", BigDecimal.valueOf(request.getMaxPrice()));
+            }
+            if (request.getConditionMin() != null) {
+                qw.ge("condition_score", request.getConditionMin());
+            }
+            if (request.getConditionMax() != null) {
+                qw.le("condition_score", request.getConditionMax());
+            }
+            qw.orderByDesc("view_count");
+            qw.last("LIMIT 200");
+            hits = productMapper.selectList(qw);
+        } catch (Exception e) {
+            log.warn("智能搜索失败: {}", e.getMessage());
+        }
+
+        java.util.List<java.util.Map<String, Object>> products = new java.util.ArrayList<>();
+        for (Product p : hits) {
+            double titleMatch = 0.0;
+            double descMatch = 0.0;
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String k = keyword.trim().toLowerCase();
+                if (p.getTitle() != null && p.getTitle().toLowerCase().contains(k)) {
+                    titleMatch = 0.5;
+                }
+                if (p.getDescription() != null && p.getDescription().toLowerCase().contains(k)) {
+                    descMatch = 0.3;
+                }
+            }
+            double schoolBonus = 0.0;
+            if (Boolean.TRUE.equals(request.getSchoolPriority())
+                    && userSchoolId != null && p.getSchoolId() != null
+                    && userSchoolId.equals(p.getSchoolId())) {
+                schoolBonus = 0.3;
+            }
+            double matchScore = Math.min(1.0, titleMatch + descMatch + schoolBonus + 0.2);
+
+            java.util.Map<String, Object> m = new java.util.HashMap<>();
+            m.put("id", p.getId());
+            m.put("title", p.getTitle());
+            m.put("price", p.getPrice() == null ? 0 : p.getPrice().doubleValue());
+            m.put("conditionScore", p.getConditionScore() == null ? 0 : p.getConditionScore());
+            m.put("schoolId", p.getSchoolId());
+            m.put("matchScore", matchScore);
+            m.put("category", p.getCategory());
+            products.add(m);
+        }
+
+        products.sort((a, b) -> Double.compare((Double) b.get("matchScore"), (Double) a.get("matchScore")));
+
+        int pageSize = request.getPageSize() == null || request.getPageSize() <= 0 ? 20 : request.getPageSize();
+        int pageNum = request.getPageNum() == null || request.getPageNum() <= 0 ? 1 : request.getPageNum();
+        int totalCount = products.size();
+        int from = Math.min(totalCount, (pageNum - 1) * pageSize);
+        int to = Math.min(totalCount, from + pageSize);
+        java.util.List<java.util.Map<String, Object>> pageList =
+                from >= to ? new java.util.ArrayList<>() : new java.util.ArrayList<>(products.subList(from, to));
+
+        java.util.Set<String> suggestedTags = new java.util.LinkedHashSet<>();
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String k = keyword.trim();
+            suggestedTags.add(k);
+            if (k.length() >= 2) {
+                suggestedTags.add(k.substring(0, Math.min(4, k.length())));
+            }
+            for (String part : k.split("[,\\s，、]+")) {
+                if (!part.isEmpty()) suggestedTags.add(part);
+            }
+        }
+        if (category != null && !category.isEmpty()) suggestedTags.add(category);
+
+        response.setInterpretedQuery(keyword == null ? "" : keyword);
+        response.setSuggestedTags(new java.util.ArrayList<>(suggestedTags));
+        response.setSearchTip(totalCount > 0 ? "共找到 " + totalCount + " 条相关商品" : "未找到相关商品，可尝试放宽筛选条件");
+        response.setProducts(pageList);
+        response.setTotalCount(totalCount);
+
         response.setSimilarSearches(java.util.Arrays.asList(
-            java.util.Map.of("query", "相关搜索1", "count", 120),
-            java.util.Map.of("query", "相关搜索2", "count", 85)
+                java.util.Map.of("query", (category == null ? "热门" : category + " 相关"), "count", totalCount),
+                java.util.Map.of("query", "校园二手", "count", totalCount)
         ));
-        
+
+        log.info("搜索结果 - keyword={}, total={}, 返回={}", keyword, totalCount, pageList.size());
+
         return response;
     }
 
@@ -1084,36 +1577,127 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiCampusMatchRequest request,
             Long userId) {
         log.info("校园匹配 - 用户ID: {}, 商品ID: {}", userId, request.getProductId());
-        
-        com.echoofmemories.project.dto.AiCampusMatchResponse response = 
-            new com.echoofmemories.project.dto.AiCampusMatchResponse();
-        
-        java.util.List<java.util.Map<String, Object>> buyers = new java.util.ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            java.util.Map<String, Object> buyer = new java.util.HashMap<>();
-            buyer.put("id", i + 1);
-            buyer.put("name", "买家" + (i + 1));
-            buyer.put("school", "同一大学");
-            buyer.put("distance", Math.random() * 3);
-            buyer.put("matchScore", 0.8 + Math.random() * 0.2);
-            buyers.add(buyer);
+
+        com.echoofmemories.project.dto.AiCampusMatchResponse response =
+                new com.echoofmemories.project.dto.AiCampusMatchResponse();
+
+        Long schoolId = null;
+        String category = null;
+        if (request.getProductId() != null) {
+            Product product = productMapper.selectById(request.getProductId());
+            if (product != null) {
+                schoolId = product.getSchoolId();
+                category = product.getCategory();
+            }
         }
-        response.setMatchedBuyers(buyers);
-        
-        java.util.List<java.util.Map<String, Object>> sellers = new java.util.ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            java.util.Map<String, Object> seller = new java.util.HashMap<>();
-            seller.put("id", i + 1);
-            seller.put("name", "卖家" + (i + 1));
-            seller.put("school", "邻校");
-            seller.put("distance", Math.random() * 5);
-            sellers.add(seller);
+        if (schoolId == null && userId != null) {
+            User u = userMapper.selectById(userId);
+            if (u != null) schoolId = u.getSchoolId();
         }
-        response.setMatchedSellers(sellers);
-        
-        response.setMeetupSuggestions("建议在学校图书馆或食堂门口见面交易");
-        response.setSafetyTips("1. 选择公共场所见面 2. 交易时检查商品 3. 建议使用平台担保交易");
-        
+
+        String schoolName = "";
+        if (schoolId != null) {
+            com.echoofmemories.project.entity.School s = schoolMapper.selectById(schoolId);
+            if (s != null) {
+                if (s.getNameZh() != null) schoolName = s.getNameZh();
+                else if (s.getNameEn() != null) schoolName = s.getNameEn();
+            }
+        }
+
+        java.util.List<java.util.Map<String, Object>> matchedBuyers = new java.util.ArrayList<>();
+        java.util.List<java.util.Map<String, Object>> matchedSellers = new java.util.ArrayList<>();
+
+        if (schoolId != null) {
+            try {
+                java.time.LocalDateTime since = java.time.LocalDateTime.now().minusDays(30);
+                java.util.Map<Long, Integer> buyerMap = new java.util.HashMap<>();
+                java.util.Map<Long, Integer> sellerMap = new java.util.HashMap<>();
+
+                QueryWrapper<Orders> ow = new QueryWrapper<>();
+                ow.eq("deleted", 0);
+                ow.ge("create_time", since);
+                if (category != null && !category.isEmpty()) {
+                    ow.inSql("product_id", "SELECT id FROM product WHERE deleted=0 AND school_id=" + schoolId
+                            + " AND category='" + category.replace("'", "") + "'");
+                } else {
+                    ow.inSql("product_id", "SELECT id FROM product WHERE deleted=0 AND school_id=" + schoolId);
+                }
+                java.util.List<Orders> orders = ordersMapper.selectList(ow);
+                for (Orders o : orders) {
+                    if (o.getBuyerId() != null) {
+                        buyerMap.put(o.getBuyerId(), buyerMap.getOrDefault(o.getBuyerId(), 0) + 1);
+                    }
+                    if (o.getSellerId() != null) {
+                        sellerMap.put(o.getSellerId(), sellerMap.getOrDefault(o.getSellerId(), 0) + 1);
+                    }
+                }
+
+                QueryWrapper<Product> pw = new QueryWrapper<>();
+                pw.eq("deleted", 0).eq("school_id", schoolId);
+                pw.isNotNull("user_id");
+                if (category != null && !category.isEmpty()) {
+                    pw.eq("category", category);
+                }
+                java.util.List<Product> prods = productMapper.selectList(pw);
+                for (Product p : prods) {
+                    if (p.getUserId() == null) continue;
+                    sellerMap.put(p.getUserId(), sellerMap.getOrDefault(p.getUserId(), 0) + 1);
+                }
+
+                java.util.List<java.util.Map.Entry<Long, Integer>> buyerList =
+                        new java.util.ArrayList<>(buyerMap.entrySet());
+                buyerList.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+                int buyerLimit = 0;
+                for (java.util.Map.Entry<Long, Integer> e : buyerList) {
+                    if (buyerLimit >= 5) break;
+                    User u = userMapper.selectById(e.getKey());
+                    if (u == null) continue;
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("id", u.getId());
+                    m.put("name", u.getNickname() == null ? "校园用户" : u.getNickname());
+                    m.put("school", schoolName);
+                    m.put("matchScore", Math.min(1.0, 0.5 + 0.1 * e.getValue()));
+                    m.put("tradeCount", e.getValue());
+                    matchedBuyers.add(m);
+                    buyerLimit++;
+                }
+
+                java.util.List<java.util.Map.Entry<Long, Integer>> sellerList =
+                        new java.util.ArrayList<>(sellerMap.entrySet());
+                sellerList.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+                int sellerLimit = 0;
+                for (java.util.Map.Entry<Long, Integer> e : sellerList) {
+                    if (sellerLimit >= 5) break;
+                    User u = userMapper.selectById(e.getKey());
+                    if (u == null) continue;
+                    java.util.Map<String, Object> m = new java.util.HashMap<>();
+                    m.put("id", u.getId());
+                    m.put("name", u.getNickname() == null ? "校园用户" : u.getNickname());
+                    m.put("school", schoolName);
+                    m.put("matchScore", Math.min(1.0, 0.5 + 0.1 * e.getValue()));
+                    m.put("tradeCount", e.getValue());
+                    matchedSellers.add(m);
+                    sellerLimit++;
+                }
+            } catch (Exception e) {
+                log.warn("校园匹配计算失败: {}", e.getMessage());
+            }
+        }
+
+        response.setMatchedBuyers(matchedBuyers);
+        response.setMatchedSellers(matchedSellers);
+
+        if (!schoolName.isEmpty()) {
+            response.setMeetupSuggestions("建议在" + schoolName + "图书馆/食堂/快递点等公开场所当面交易");
+            response.setSafetyTips("1. 选择" + schoolName + "校内公共场所见面 2. 当面检查商品后再付款 3. 建议使用平台担保交易 4. 保留聊天记录与支付凭证");
+        } else {
+            response.setMeetupSuggestions("建议在校园内或其他公共场所见面交易");
+            response.setSafetyTips("1. 选择公共场所见面 2. 交易时检查商品 3. 建议使用平台担保交易");
+        }
+
+        log.info("校园匹配结果 - schoolId={}, schoolName={}, 买家数={}, 卖家数={}",
+                schoolId, schoolName, matchedBuyers.size(), matchedSellers.size());
+
         return response;
     }
 
@@ -1122,22 +1706,109 @@ public class AiServiceImpl implements AiService {
             com.echoofmemories.project.dto.AiDisputeResolutionRequest request,
             Long userId) {
         log.info("纠纷仲裁 - 用户ID: {}, 订单ID: {}", userId, request.getOrderId());
-        
-        com.echoofmemories.project.dto.AiDisputeResolutionResponse response = 
-            new com.echoofmemories.project.dto.AiDisputeResolutionResponse();
+
+        com.echoofmemories.project.dto.AiDisputeResolutionResponse response =
+                new com.echoofmemories.project.dto.AiDisputeResolutionResponse();
+
+        Orders order = null;
+        if (request.getOrderId() != null) {
+            order = ordersMapper.selectById(request.getOrderId());
+        }
+
+        java.util.List<String> keyFindings = new java.util.ArrayList<>();
+        double refundSuggestion = 0.0;
+        String riskLevel = "low";
+        String suggestedResolution;
+        String nextSteps;
+        int confidenceScore = 80;
+
+        if (order == null) {
+            keyFindings.add("未查询到订单信息，请确认订单ID");
+            suggestedResolution = "无法自动仲裁，建议联系客服介入";
+            nextSteps = "1. 确认订单ID是否正确  2. 提供纠纷描述与证据  3. 等待客服人工处理";
+            confidenceScore = 60;
+        } else {
+            if (order.getAmount() != null) {
+                keyFindings.add("订单金额：¥" + order.getAmount());
+            }
+            if (order.getStatus() != null) {
+                keyFindings.add("订单状态：" + orderStatusText(order.getStatus()));
+            }
+            if (order.getCreateTime() != null) {
+                keyFindings.add("下单时间：" + order.getCreateTime());
+            }
+            if (request.getDisputeDescription() != null && !request.getDisputeDescription().isEmpty()) {
+                keyFindings.add("纠纷描述：" + request.getDisputeDescription());
+            }
+            if (request.getEvidenceUrls() != null && !request.getEvidenceUrls().isEmpty()) {
+                keyFindings.add("已提供 " + request.getEvidenceUrls().size() + " 条证据");
+            }
+
+            if (order.getStatus() != null && order.getStatus() >= 3) {
+                keyFindings.add("订单已进入完成/后序流程，可启动退款判断");
+            }
+
+            double amount = order.getAmount() == null ? 0.0 : order.getAmount().doubleValue();
+            if (amount > 1000) {
+                riskLevel = "high";
+                refundSuggestion = Math.min(100.0, 70.0);
+                confidenceScore = 75;
+            } else if (amount > 200) {
+                riskLevel = "medium";
+                refundSuggestion = 50.0;
+                confidenceScore = 85;
+            } else {
+                riskLevel = "low";
+                refundSuggestion = 30.0;
+                confidenceScore = 90;
+            }
+
+            String desc = request.getDisputeDescription();
+            if (desc != null) {
+                String lower = desc.toLowerCase();
+                if (lower.contains("质量") || lower.contains("假") || lower.contains("损坏")) {
+                    refundSuggestion = Math.min(100.0, refundSuggestion + 20.0);
+                    keyFindings.add("涉及商品质量/真伪问题，建议卖家提供证明");
+                }
+                if (lower.contains("未发货") || lower.contains("没收到") || lower.contains("未收到")) {
+                    refundSuggestion = 100.0;
+                    keyFindings.add("涉及物流未送达，建议优先全额退款");
+                }
+                if (lower.contains("描述不符") || lower.contains("不符")) {
+                    refundSuggestion = Math.max(refundSuggestion, 60.0);
+                    keyFindings.add("存在描述不符争议，建议双方提供图文证据");
+                }
+            }
+
+            suggestedResolution = "根据订单金额与纠纷描述，建议卖家承担 "
+                    + String.format("%.0f", refundSuggestion) + "% 退款责任，双方协商解决";
+            nextSteps = "1. 双方确认解决方案  2. 卖家执行退款操作  3. 买家确认收到退款  4. 完成纠纷处理";
+        }
+
         response.setCaseId("DISPUTE-" + System.currentTimeMillis());
-        response.setSuggestedResolution("建议双方协商，卖家退款30%");
-        response.setRefundSuggestion(30.0);
-        response.setKeyFindings(java.util.Arrays.asList(
-            "商品描述与实物存在差异",
-            "买家提供了有效证据",
-            "卖家未及时响应"
-        ));
-        response.setRiskLevel("medium");
-        response.setNextSteps("1. 双方确认解决方案 2. 执行退款 3. 完成纠纷处理");
-        response.setConfidenceScore(85);
-        
+        response.setSuggestedResolution(suggestedResolution);
+        response.setRefundSuggestion(refundSuggestion);
+        response.setKeyFindings(keyFindings);
+        response.setRiskLevel(riskLevel);
+        response.setNextSteps(nextSteps);
+        response.setConfidenceScore(confidenceScore);
+
+        log.info("纠纷仲裁结果 - orderId={}, refund={}%, risk={}, confidence={}",
+                request.getOrderId(), refundSuggestion, riskLevel, confidenceScore);
+
         return response;
+    }
+
+    private String orderStatusText(int status) {
+        switch (status) {
+            case 0: return "待支付";
+            case 1: return "已支付/待发货";
+            case 2: return "已发货/待收货";
+            case 3: return "交易完成";
+            case 4: return "已成交";
+            case -1: return "已取消";
+            default: return "状态-" + status;
+        }
     }
 
     @Override

@@ -625,7 +625,8 @@ router.onError((error) => {
 })
 
 // ========== 路由守卫 ==========
-// 从 localStorage 读取当前用户信息（路由钩子执行时 Pinia store 可能未初始化）
+// 从 localStorage 读取当前用户信息（仅作为"快速判断是否登录"的缓存，不可信）
+// 角色权限判断必须通过 Pinia store 的 isAdmin/isUser（需经过后端验证）
 const getCurrentUser = () => {
   try {
     const raw = localStorage.getItem('user')
@@ -635,27 +636,33 @@ const getCurrentUser = () => {
   }
 }
 
-router.beforeEach((to, from, next) => {
+// 从 localStorage 取缓存 role，仅用于"优化跳转方向"，不作为放行依据
+const getCachedRoleHint = () => {
+  const user = getCurrentUser()
+  return user?.role || null
+}
+
+router.beforeEach(async (to, from, next) => {
   // 1. 更新页面标题
   if (to.meta?.title) {
     document.title = `${to.meta.title} - 智能二手商城`
   }
 
-  // 2. 根路径 => 按登录状态跳
+  const token = localStorage.getItem('token')
+  const cachedUser = getCurrentUser()
+  const hasCachedUser = !!cachedUser
+  const cachedRole = getCachedRoleHint()
+
+  // 2. 根路径 => 按登录状态跳（用缓存 role 仅做跳转方向优化）
   if (to.path === '/') {
-    const token = localStorage.getItem('token')
-    const user = getCurrentUser()
-    if (token && user) {
-      return next(user.role === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+    if (token && hasCachedUser) {
+      // 这里的 role 来自 localStorage，仅用于"猜一个首页"，真正的 admin 页面仍需后端鉴权
+      return next(cachedRole === 'admin' ? '/admin/dashboard' : '/user/dashboard')
     }
     return next('/login')
   }
 
-  const token = localStorage.getItem('token')
-  const user = getCurrentUser()
-  const isLoggedIn = !!(token && user)
-
-  // 3. 收集 meta 信息（子路由合并父路由的 meta）
+  // 3. 收集 meta 信息
   const requiresAuth = to.matched.some((r) => r.meta && r.meta.requiresAuth)
   const hideForAuth = to.matched.some((r) => r.meta && r.meta.hideForAuth)
   const roleSet = new Set()
@@ -665,25 +672,56 @@ router.beforeEach((to, from, next) => {
   })
   const requiredRoles = Array.from(roleSet)
 
-  // 4. 已登录访问登录/注册等页 => 跳到对应首页
-  if (hideForAuth && isLoggedIn) {
-    return next(user?.role === 'admin' ? '/admin/dashboard' : '/user/dashboard')
-  }
-
-  // 5. 需要登录的路由
-  if (requiresAuth && !isLoggedIn) {
+  // 4. 需要登录但无 token => 直接跳到登录
+  if (requiresAuth && !token) {
     return next({
       path: '/login',
       query: { redirect: to.fullPath }
     })
   }
 
-  // 6. 角色权限检查
+  // 5. 有 token 时引入 Pinia store（延迟 import，确保 Pinia 已初始化）
+  // 注意：import 必须放在路由守卫函数内部，因为 router 在 main.js 中先于 Pinia 初始化
+  const { useUserStore } = await import('@/stores/user')
+  const userStore = useUserStore()
+
+  // 6. 已登录但 Pinia 中 userVerified 为 false，且要进入需要鉴权/角色的页面
+  //    => 尝试从 /user/me 获取可信 user 信息（页面刷新后场景）
+  if (token && !userStore.userVerified && (requiresAuth || requiredRoles.length > 0)) {
+    try {
+      await userStore.fetchCurrentUser()
+    } catch (e) {
+      // /user/me 失败不拦截，让后续逻辑继续：页面内会自行判断或由后端 401 拦截
+      console.warn('[router] fetchCurrentUser failed, continue anyway', e?.message || e)
+    }
+  }
+
+  // 7. 已登录访问登录/注册等页 => 跳到对应首页
+  if (hideForAuth && token) {
+    const isAdminNow = userStore.isAdmin || cachedRole === 'admin'
+    return next(isAdminNow ? '/admin/dashboard' : '/user/dashboard')
+  }
+
+  // 8. 角色不匹配时：
+  //    - 如果 store 已验证（userVerified），可信地重定向
+  //    - 如果 store 未验证（仅靠 localStorage 缓存），则仅做"优化跳转"
+  //      让页面进入后由 Pinia / 后端 API 真正拦截，而不是在路由层强制放行
   if (requiredRoles && requiredRoles.length > 0) {
-    const userRole = user?.role
-    if (!userRole || !requiredRoles.includes(userRole)) {
-      // 角色不匹配：跳到各自身份对应的首页
-      return next(userRole === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+    // 优先使用 store 中可信的 isAdmin/isUser 判断
+    if (userStore.userVerified) {
+      const isAdmin = userStore.isAdmin
+      const isUser = userStore.isUser
+      const userRole = isAdmin ? 'admin' : (isUser ? 'user' : null)
+      if (!userRole || !requiredRoles.includes(userRole)) {
+        return next(userRole === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+      }
+    } else {
+      // store 未验证：用缓存 role 做"优化跳转"，但不阻止进入页面
+      // 进入页面后，由页面组件内的 Pinia 检查 或 后端 API 401/403 来处理
+      // 这样即使 localStorage 被篡改 role='admin'，进入 /admin 页面后后端 API 也会 403
+      if (cachedRole && !requiredRoles.includes(cachedRole)) {
+        return next(cachedRole === 'admin' ? '/admin/dashboard' : '/user/dashboard')
+      }
     }
   }
 

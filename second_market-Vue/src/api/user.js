@@ -26,6 +26,14 @@ export const getUserInfoApi = () => {
   })
 }
 
+// 获取当前登录用户的可信信息（从 token 解析）
+export const getMeApi = () => {
+  return request({
+    url: '/user/me',
+    method: 'GET'
+  })
+}
+
 // 更新用户信息
 export const updateUserInfoApi = (data) => {
   return request({
@@ -118,6 +126,7 @@ export const userApi = {
   login: loginApi,
   register: registerApi,
   getCurrentUser: getUserInfoApi,
+  getMe: getMeApi,
   updateUserInfo: updateUserInfoApi,
   updateAvatar: updateAvatarApi,
   changePassword: changePasswordApi,

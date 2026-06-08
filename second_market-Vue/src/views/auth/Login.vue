@@ -285,7 +285,17 @@ const handleLogin = async () => {
     const result = await userStore.login(loginForm)
 
     if (result?.success) {
-      if (userStore.user?.role === 'admin') {
+      // 登录成功后再调一次 /user/me，确保从 token 解析的可信角色同步到 store
+      // 这样即使 login 接口返回的 user 被中间人篡改，/user/me 也会用服务端解析的正确信息覆盖
+      try {
+        await userStore.fetchCurrentUser()
+      } catch (e) {
+        // /user/me 失败不阻断登录（login 接口的 user 已经写入且标记为 verified）
+        console.warn('[login] fetchCurrentUser failed, continue with login user', e?.message || e)
+      }
+
+      // 用 store 中经过 verified 的 isAdmin 判断跳转方向
+      if (userStore.isAdmin) {
         await router.replace('/admin/dashboard')
       } else {
         await router.replace('/user/dashboard')
