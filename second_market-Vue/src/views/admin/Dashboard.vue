@@ -1,162 +1,185 @@
 <template>
   <div class="admin-dashboard">
+    <!-- 页面头部 -->
     <div class="page-header">
-      <h2 class="page-title">{{ $t('Dashboard.title') }}</h2>
+      <div class="header-content">
+        <div class="header-title">
+          <div class="header-icon">
+            <el-icon :size="24"><DataAnalysis /></el-icon>
+          </div>
+          <div>
+            <h2 class="page-title">{{ $t('Dashboard.title') }}</h2>
+            <p class="page-subtitle">{{ $t('Dashboard.welcome') }}</p>
+          </div>
+        </div>
+        <div class="header-time">
+          {{ currentTime }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 统计卡片区域 -->
+    <div class="stats-section">
+      <el-row :gutter="20">
+        <el-col :xs="12" :sm="12" :md="6" v-for="(stat, index) in statsCards" :key="index">
+          <div class="stat-card" :style="{ background: stat.gradient }">
+            <div class="stat-icon-wrapper" :style="{ background: stat.iconBg }">
+              <el-icon :size="28" :style="{ color: stat.iconColor }">
+                <component :is="stat.icon" />
+              </el-icon>
+            </div>
+            <div class="stat-info">
+              <div class="stat-value">{{ stat.value }}</div>
+              <div class="stat-label">{{ $t(stat.labelKey) }}</div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
     </div>
 
     <el-row :gutter="20">
-      <!-- 左侧主要内容区域 70% -->
+      <!-- 左侧主要内容区域 -->
       <el-col :xs="24" :sm="24" :md="17" :lg="17">
         <div class="main-content-area">
           <!-- 图表区域 - 2x2网格 -->
           <el-row :gutter="15">
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="chart-header">
-                    <span class="chart-title">{{ $t('Dashboard.userTrend') }}</span>
-                    <span class="chart-subtitle">{{ $t('Dashboard.last30Days') }}</span>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <div class="header-left">
+                    <span class="card-title">{{ $t('Dashboard.userTrend') }}</span>
+                    <span class="card-subtitle">{{ $t('Dashboard.last30Days') }}</span>
                   </div>
-                </template>
+                  <div class="header-badge">
+                    <span class="badge-dot"></span>
+                    <span class="badge-text">Live</span>
+                  </div>
+                </div>
                 <div ref="userTrendChartRef" class="chart-container"></div>
-              </el-card>
+              </div>
             </el-col>
 
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="chart-header">
-                    <span class="chart-title">{{ $t('Dashboard.categoryDistribution') }}</span>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <div class="header-left">
+                    <span class="card-title">{{ $t('Dashboard.categoryDistribution') }}</span>
                   </div>
-                </template>
+                </div>
                 <div ref="categoryChartRef" class="chart-container"></div>
-              </el-card>
+              </div>
             </el-col>
 
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="chart-header">
-                    <span class="chart-title">{{ $t('Dashboard.orderStatusDistribution') }}</span>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <div class="header-left">
+                    <span class="card-title">{{ $t('Dashboard.orderStatusDistribution') }}</span>
                   </div>
-                </template>
+                </div>
                 <div ref="orderStatusChartRef" class="chart-container"></div>
-              </el-card>
+              </div>
             </el-col>
 
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="chart-card">
-                <template #header>
-                  <div class="chart-header">
-                    <span class="chart-title">{{ $t('Dashboard.tradeTrend') }}</span>
-                    <span class="chart-subtitle">{{ $t('Dashboard.last30Days') }}</span>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <div class="header-left">
+                    <span class="card-title">{{ $t('Dashboard.tradeTrend') }}</span>
+                    <span class="card-subtitle">{{ $t('Dashboard.last30Days') }}</span>
                   </div>
-                </template>
+                </div>
                 <div ref="tradeTrendChartRef" class="chart-container"></div>
-              </el-card>
+              </div>
             </el-col>
           </el-row>
 
-          <!-- 表格区域 - 1x2网格 -->
-          <el-row :gutter="15" style="margin-top: 15px;">
+          <!-- 表格区域 -->
+          <el-row :gutter="15" class="table-section">
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="table-card">
-                <template #header>
-                  <div class="table-header">
-                    <span class="table-title">{{ $t('Dashboard.hotProductsTop10') }}</span>
-                  </div>
-                </template>
-                <el-table :data="hotProducts" stripe style="width: 100%" max-height="400">
-                  <el-table-column :label="$t('Dashboard.rank')" width="80">
-                    <template #default="{ $index }">
-                      <div class="rank-cell">
-                        <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
-                        <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
-                        <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
-                        <span v-else>{{ $index + 1 }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('Dashboard.productName')" prop="title" show-overflow-tooltip />
-                  <el-table-column :label="$t('Dashboard.viewCount')" prop="viewCount" width="100" />
-                </el-table>
-              </el-card>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <span class="card-title">{{ $t('Dashboard.hotProductsTop10') }}</span>
+                </div>
+                <div class="table-wrapper">
+                  <el-table :data="hotProducts" stripe class="glass-table">
+                    <el-table-column :label="$t('Dashboard.rank')" width="60" align="center">
+                      <template #default="{ $index }">
+                        <div class="rank-cell">
+                          <el-icon v-if="$index === 0" color="#FFD700" :size="18"><Medal /></el-icon>
+                          <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="18"><Medal /></el-icon>
+                          <el-icon v-else-if="$index === 2" color="#CD7F32" :size="18"><Medal /></el-icon>
+                          <span v-else class="rank-number">{{ $index + 1 }}</span>
+                        </div>
+                      </template>
+                    </el-table-column>
+                    <el-table-column :label="$t('Dashboard.productName')" prop="title" show-overflow-tooltip />
+                    <el-table-column :label="$t('Dashboard.viewCount')" prop="viewCount" width="100" align="center" />
+                  </el-table>
+                </div>
+              </div>
             </el-col>
 
             <el-col :xs="24" :sm="24" :md="12" :lg="12">
-              <el-card class="table-card">
-                <template #header>
-                  <div class="table-header">
-                    <span class="table-title">{{ $t('Dashboard.activeUsersTop10') }}</span>
-                  </div>
-                </template>
-                <el-table :data="activeUsers" stripe style="width: 100%" max-height="400">
-                  <el-table-column :label="$t('Dashboard.rank')" width="80">
-                    <template #default="{ $index }">
-                      <div class="rank-cell">
-                        <el-icon v-if="$index === 0" color="#FFD700" :size="20"><Medal /></el-icon>
-                        <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="20"><Medal /></el-icon>
-                        <el-icon v-else-if="$index === 2" color="#CD7F32" :size="20"><Medal /></el-icon>
-                        <span v-else>{{ $index + 1 }}</span>
-                      </div>
-                    </template>
-                  </el-table-column>
-                  <el-table-column :label="$t('Dashboard.username')" prop="username" show-overflow-tooltip />
-                  <el-table-column :label="$t('Dashboard.activityScore')" prop="activityScore" width="100" />
-                </el-table>
-              </el-card>
+              <div class="glass-card">
+                <div class="glass-card-header">
+                  <span class="card-title">{{ $t('Dashboard.activeUsersTop10') }}</span>
+                </div>
+                <div class="table-wrapper">
+                  <el-table :data="activeUsers" stripe class="glass-table">
+                    <el-table-column :label="$t('Dashboard.rank')" width="60" align="center">
+                      <template #default="{ $index }">
+                        <div class="rank-cell">
+                          <el-icon v-if="$index === 0" color="#FFD700" :size="18"><Medal /></el-icon>
+                          <el-icon v-else-if="$index === 1" color="#C0C0C0" :size="18"><Medal /></el-icon>
+                          <el-icon v-else-if="$index === 2" color="#CD7F32" :size="18"><Medal /></el-icon>
+                          <span v-else class="rank-number">{{ $index + 1 }}</span>
+                        </div>
+                      </template>
+                    </el-table-column>
+                    <el-table-column :label="$t('Dashboard.username')" prop="username" show-overflow-tooltip />
+                    <el-table-column :label="$t('Dashboard.activityScore')" prop="activityScore" width="100" align="center" />
+                  </el-table>
+                </div>
+              </div>
             </el-col>
           </el-row>
         </div>
       </el-col>
 
-      <!-- 右侧侧边栏 30% - 数据指标卡片网格 -->
+      <!-- 右侧侧边栏 -->
       <el-col :xs="24" :sm="24" :md="7" :lg="7">
         <div class="sidebar-area">
-          <!-- 主要指标卡片 2x2 网格 -->
-          <div class="stats-grid">
-            <div class="stat-card-grid" v-for="stat in statsCards" :key="stat.labelKey">
-              <div class="stat-info-grid">
-                <div class="stat-value-grid">{{ stat.value }}</div>
-                <div class="stat-label-grid">{{ $t(stat.labelKey) }}</div>
-              </div>
-            </div>
-          </div>
-
           <!-- 快速操作区域 -->
-          <el-card class="quick-actions-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">{{ $t('Dashboard.quickActions') }}</span>
-              </div>
-            </template>
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <span class="card-title">{{ $t('Dashboard.quickActions') }}</span>
+            </div>
             <div class="quick-actions">
-              <el-button type="primary" size="small" class="action-btn">
-                <el-icon><Plus /></el-icon>
+              <el-button type="primary" class="action-btn" @click="handleAction('addUser')">
+                <el-icon><UserPlus /></el-icon>
                 {{ $t('Dashboard.addUser') }}
               </el-button>
-              <el-button type="success" size="small" class="action-btn">
-                <el-icon><Check /></el-icon>
+              <el-button type="success" class="action-btn" @click="handleAction('audit')">
+                <el-icon><CircleCheck /></el-icon>
                 {{ $t('Dashboard.auditProduct') }}
               </el-button>
-              <el-button type="warning" size="small" class="action-btn">
+              <el-button type="warning" class="action-btn" @click="handleAction('report')">
                 <el-icon><Warning /></el-icon>
                 {{ $t('Dashboard.handleReport') }}
               </el-button>
-              <el-button type="info" size="small" class="action-btn">
+              <el-button type="info" class="action-btn" @click="handleAction('log')">
                 <el-icon><Document /></el-icon>
                 {{ $t('Dashboard.systemLog') }}
               </el-button>
             </div>
-          </el-card>
+          </div>
 
           <!-- 系统状态监控 -->
-          <el-card class="system-status-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <span class="card-title">{{ $t('Dashboard.systemStatus') }}</span>
-              </div>
-            </template>
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <span class="card-title">{{ $t('Dashboard.systemStatus') }}</span>
+            </div>
             <div class="system-status">
               <div class="status-item">
                 <div class="status-indicator online"></div>
@@ -171,7 +194,25 @@
                 <span class="status-text">{{ $t('Dashboard.storageUsage', { percent: 78 }) }}</span>
               </div>
             </div>
-          </el-card>
+          </div>
+
+          <!-- 最近活动 -->
+          <div class="glass-card">
+            <div class="glass-card-header">
+              <span class="card-title">{{ $t('Dashboard.recentActivity') }}</span>
+            </div>
+            <div class="activity-list">
+              <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+                <div class="activity-avatar">
+                  <el-avatar :size="32" :src="activity.avatar" />
+                </div>
+                <div class="activity-content">
+                  <div class="activity-text">{{ activity.text }}</div>
+                  <div class="activity-time">{{ activity.time }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </el-col>
     </el-row>
@@ -179,7 +220,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import {
@@ -188,10 +229,11 @@ import {
   ShoppingCart,
   Money,
   Medal,
-  Plus,
-  Check,
+  UserPlus,
+  CircleCheck,
   Warning,
-  Document
+  Document,
+  DataAnalysis
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { adminStatisticsApi } from '@/api/admin'
@@ -208,16 +250,37 @@ let categoryChart = null
 let orderStatusChart = null
 let tradeTrendChart = null
 
-// 统计卡片使用 labelKey 存放翻译键，模板通过 $t(stat.labelKey) 渲染
+const currentTime = computed(() => {
+  const now = new Date()
+  return now.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+})
+
 const statsCards = ref([
-  { labelKey: 'Dashboard.totalUsers', value: 0, icon: User, gradient: 'linear-gradient(135deg, #e1f0ff 0%, #f0f8ff 100%)' },
-  { labelKey: 'Dashboard.totalProducts', value: 0, icon: ShoppingBag, gradient: 'linear-gradient(135deg, #ffe1e1 0%, #fff0e6 100%)' },
-  { labelKey: 'Dashboard.totalOrders', value: 0, icon: ShoppingCart, gradient: 'linear-gradient(135deg, #e6f4ff 0%, #f0faff 100%)' },
-  { labelKey: 'Dashboard.totalAmount', value: '¥0', icon: Money, gradient: 'linear-gradient(135deg, #e8f5e8 0%, #f0faf0 100%)' }
+  { labelKey: 'Dashboard.totalUsers', value: 0, icon: User, gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff' },
+  { labelKey: 'Dashboard.totalProducts', value: 0, icon: ShoppingBag, gradient: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff' },
+  { labelKey: 'Dashboard.totalOrders', value: 0, icon: ShoppingCart, gradient: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff' },
+  { labelKey: 'Dashboard.totalAmount', value: '¥0', icon: Money, gradient: 'linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%)', iconBg: 'rgba(255,255,255,0.2)', iconColor: '#fff' }
 ])
 
 const hotProducts = ref([])
 const activeUsers = ref([])
+
+const recentActivities = ref([
+  { id: 1, avatar: 'https://i.pravatar.cc/100?img=1', text: '新用户注册', time: '2分钟前' },
+  { id: 2, avatar: 'https://i.pravatar.cc/100?img=2', text: '商品上架审核通过', time: '5分钟前' },
+  { id: 3, avatar: 'https://i.pravatar.cc/100?img=3', text: '收到违规举报', time: '10分钟前' },
+  { id: 4, avatar: 'https://i.pravatar.cc/100?img=4', text: '订单完成', time: '15分钟前' }
+])
+
+const handleAction = (type) => {
+  ElMessage.info(`操作: ${type}`)
+}
 
 const loadOverviewData = async () => {
   try {
@@ -255,21 +318,30 @@ const initUserTrendChart = () => {
 
   const option = {
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(102, 126, 234, 0.3)',
+      textStyle: { color: '#333' }
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '3%',
+      top: '10%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: dates
+      data: dates,
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
+      axisLabel: { color: 'rgba(255,255,255,0.7)' }
     },
     yAxis: {
-      type: 'value'
+      type: 'value',
+      axisLine: { show: false },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+      axisLabel: { color: 'rgba(255,255,255,0.7)' }
     },
     series: [
       {
@@ -285,14 +357,13 @@ const initUserTrendChart = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: 'rgba(64, 158, 255, 0.6)' },
-              { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+              { offset: 0, color: 'rgba(102, 126, 234, 0.5)' },
+              { offset: 1, color: 'rgba(102, 126, 234, 0.05)' }
             ]
           }
         },
-        itemStyle: {
-          color: '#409eff'
-        }
+        lineStyle: { color: '#667eea', width: 3 },
+        itemStyle: { color: '#667eea' }
       }
     ]
   }
@@ -312,33 +383,39 @@ const initCategoryChart = () => {
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b}: {c} ({d}%)'
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(102, 126, 234, 0.3)'
     },
     legend: {
       orient: 'vertical',
-      right: '10%',
-      top: 'center'
+      right: '5%',
+      top: 'center',
+      textStyle: { color: 'rgba(255,255,255,0.8)' }
     },
     series: [
       {
         name: t('Dashboard.productCategory'),
         type: 'pie',
-        radius: '70%',
+        radius: ['45%', '75%'],
         center: ['35%', '50%'],
-        data: [
-          { value: 335, name: t('Dashboard.category.digital') },
-          { value: 310, name: t('Dashboard.category.books') },
-          { value: 234, name: t('Dashboard.category.living') },
-          { value: 135, name: t('Dashboard.category.clothing') },
-          { value: 148, name: t('Dashboard.category.other') }
-        ],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 2
+        },
+        label: { show: false },
         emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
+          label: { show: true, fontSize: 16, fontWeight: 'bold', color: '#fff' }
+        },
+        labelLine: { show: false },
+        data: [
+          { value: 335, name: t('Dashboard.category.digital'), itemStyle: { color: '#667eea' } },
+          { value: 310, name: t('Dashboard.category.books'), itemStyle: { color: '#f093fb' } },
+          { value: 234, name: t('Dashboard.category.living'), itemStyle: { color: '#4facfe' } },
+          { value: 135, name: t('Dashboard.category.clothing'), itemStyle: { color: '#f5576c' } },
+          { value: 148, name: t('Dashboard.category.other'), itemStyle: { color: '#06b6d4' } }
+        ]
       }
     ]
   }
@@ -358,12 +435,14 @@ const initOrderStatusChart = () => {
   const option = {
     tooltip: {
       trigger: 'item',
-      formatter: '{a} <br/>{b}: {c} ({d}%)'
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(102, 126, 234, 0.3)'
     },
     legend: {
       orient: 'vertical',
-      right: '10%',
-      top: 'center'
+      right: '5%',
+      top: 'center',
+      textStyle: { color: 'rgba(255,255,255,0.8)' }
     },
     series: [
       {
@@ -374,27 +453,18 @@ const initOrderStatusChart = () => {
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 10,
-          borderColor: '#fff',
+          borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 2
         },
-        label: {
-          show: false,
-          position: 'center'
-        },
+        label: { show: false },
         emphasis: {
-          label: {
-            show: true,
-            fontSize: 24,
-            fontWeight: 'bold'
-          }
+          label: { show: true, fontSize: 18, fontWeight: 'bold', color: '#fff' }
         },
-        labelLine: {
-          show: false
-        },
+        labelLine: { show: false },
         data: [
-          { value: 120, name: t('Dashboard.status.pendingPayment'), itemStyle: { color: '#e6a23c' } },
-          { value: 280, name: t('Dashboard.status.paid'), itemStyle: { color: '#409eff' } },
-          { value: 450, name: t('Dashboard.status.completed'), itemStyle: { color: '#67c23a' } },
+          { value: 120, name: t('Dashboard.status.pendingPayment'), itemStyle: { color: '#f093fb' } },
+          { value: 280, name: t('Dashboard.status.paid'), itemStyle: { color: '#4facfe' } },
+          { value: 450, name: t('Dashboard.status.completed'), itemStyle: { color: '#667eea' } },
           { value: 50, name: t('Dashboard.status.cancelled'), itemStyle: { color: '#909399' } }
         ]
       }
@@ -428,33 +498,42 @@ const initTradeTrendChart = () => {
   const option = {
     tooltip: {
       trigger: 'axis',
-      axisPointer: {
-        type: 'cross'
-      }
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
+      borderColor: 'rgba(102, 126, 234, 0.3)'
     },
     legend: {
-      data: [t('Dashboard.tradeVolume'), t('Dashboard.tradeAmount')]
+      data: [t('Dashboard.tradeVolume'), t('Dashboard.tradeAmount')],
+      textStyle: { color: 'rgba(255,255,255,0.8)' }
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '3%',
+      top: '15%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
-      data: dates
+      data: dates,
+      axisLine: { lineStyle: { color: 'rgba(255,255,255,0.3)' } },
+      axisLabel: { color: 'rgba(255,255,255,0.7)' }
     },
     yAxis: [
       {
         type: 'value',
         name: t('Dashboard.tradeVolume'),
-        position: 'left'
+        position: 'left',
+        axisLine: { show: false },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+        axisLabel: { color: 'rgba(255,255,255,0.7)' }
       },
       {
         type: 'value',
         name: t('Dashboard.tradeAmountYuan'),
-        position: 'right'
+        position: 'right',
+        axisLine: { show: false },
+        splitLine: { show: false },
+        axisLabel: { color: 'rgba(255,255,255,0.7)' }
       }
     ],
     series: [
@@ -471,10 +550,11 @@ const initTradeTrendChart = () => {
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: '#409eff' },
-              { offset: 1, color: '#67c23a' }
+              { offset: 0, color: '#667eea' },
+              { offset: 1, color: '#764ba2' }
             ]
-          }
+          },
+          borderRadius: [4, 4, 0, 0]
         }
       },
       {
@@ -483,9 +563,8 @@ const initTradeTrendChart = () => {
         yAxisIndex: 1,
         smooth: true,
         data: amounts,
-        itemStyle: {
-          color: '#f5576c'
-        }
+        lineStyle: { color: '#f5576c', width: 3 },
+        itemStyle: { color: '#f5576c' }
       }
     ]
   }
@@ -495,7 +574,6 @@ const initTradeTrendChart = () => {
 
 const loadHotProducts = async () => {
   try {
-    // 模拟商品数据（可根据需要改为从接口获取，商品名称暂未国际化）
     hotProducts.value = [
       { title: '二手iPhone 13 Pro', viewCount: 1234 },
       { title: '大学物理教材', viewCount: 987 },
@@ -515,7 +593,6 @@ const loadHotProducts = async () => {
 
 const loadActiveUsers = async () => {
   try {
-    // 模拟活跃用户数据（用户名暂未国际化）
     activeUsers.value = [
       { username: 'user001', activityScore: 950 },
       { username: 'user002', activityScore: 890 },
@@ -567,52 +644,95 @@ onUnmounted(() => {
 <style scoped>
 .admin-dashboard {
   padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
 }
 
+/* 页面头部 */
 .page-header {
-  margin-bottom: 20px;
-  padding: 16px 20px;
-  background: linear-gradient(135deg, #f0f7ff 0%, #fafbfc 100%);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  margin-bottom: 24px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .page-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #303133;
+  font-size: 28px;
+  font-weight: 900;
+  color: white;
+  margin: 0 0 4px 0;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
 }
 
+.header-time {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 统计卡片区域 */
 .stats-section {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  color: #fff;
-  transition: transform 0.3s;
+  gap: 16px;
+  padding: 24px 20px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .stat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-.stat-icon {
-  width: 80px;
-  height: 80px;
+.stat-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  margin-right: 20px;
+  flex-shrink: 0;
 }
 
 .stat-info {
@@ -620,72 +740,140 @@ onUnmounted(() => {
 }
 
 .stat-value {
-  font-size: 36px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 28px;
+  font-weight: 900;
+  color: white;
+  line-height: 1.2;
 }
 
 .stat-label {
-  font-size: 14px;
-  opacity: 0.9;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 4px;
 }
 
-.charts-section {
-  margin-bottom: 20px;
+/* 玻璃态卡片 */
+.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(40px);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
 }
 
-.chart-card {
-  margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
-.chart-header {
+.glass-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.chart-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.chart-subtitle {
-  font-size: 14px;
-  color: #909399;
-}
-
-.chart-container {
-  width: 100%;
-  height: 350px;
-}
-
-.tables-section {
   margin-bottom: 20px;
 }
 
-.table-card {
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.table-header {
+.card-title {
   font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.header-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(103, 194, 58, 0.2);
+  border-radius: 20px;
+  border: 1px solid rgba(103, 194, 58, 0.3);
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background: #67c23a;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.badge-text {
+  font-size: 11px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #67c23a;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 280px;
+}
+
+/* 表格区域 */
+.table-section {
+  margin-top: 8px;
+}
+
+.table-wrapper {
+  margin-top: 16px;
+}
+
+/* 玻璃态表格 */
+.glass-table {
+  background: transparent !important;
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(255, 255, 255, 0.05);
+  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.08);
+  --el-table-border-color: rgba(255, 255, 255, 0.1);
+  --el-table-text-color: rgba(255, 255, 255, 0.9);
+  --el-table-header-text-color: rgba(255, 255, 255, 0.7);
+}
+
+.glass-table :deep(.el-table__header th) {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.glass-table :deep(.el-table__row) {
+  transition: all 0.2s ease;
+}
+
+.glass-table :deep(.el-table__row:hover) {
+  background: rgba(255, 255, 255, 0.08) !important;
 }
 
 .rank-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 16px;
 }
 
-/* 侧边栏样式 */
+.rank-number {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* 侧边栏 */
 .sidebar-area {
   position: sticky;
   top: 20px;
@@ -694,174 +882,146 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-/* 指标网格样式 */
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.stat-card-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 12px;
-  border-radius: 10px;
-  background: #ffffff;
-  border: 1px solid #e4e7ed;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s;
-  cursor: pointer;
-  text-align: center;
-  min-height: 100px;
-}
-
-.stat-card-grid:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #409eff;
-}
-
-.stat-info-grid {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.stat-value-grid {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  line-height: 1.2;
-  color: #2c3e50;
-}
-
-.stat-label-grid {
-  font-size: 12px;
-  color: #606266;
-  line-height: 1.2;
-}
-
-/* 快速操作卡片 */
-.quick-actions-card {
-  margin-bottom: 16px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
+/* 快速操作 */
 .quick-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .action-btn {
   width: 100%;
-  font-size: 12px;
-  padding: 8px 12px;
+  height: 44px;
+  border-radius: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border: none;
 }
 
-/* 系统状态卡片 */
-.system-status-card {
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
+/* 系统状态 */
 .system-status {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  margin-top: 16px;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
 .status-indicator {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .status-indicator.online {
-  background-color: #67c23a;
-  box-shadow: 0 0 6px rgba(103, 194, 58, 0.4);
+  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
+  box-shadow: 0 0 12px rgba(103, 194, 58, 0.5);
 }
 
 .status-indicator.warning {
-  background-color: #e6a23c;
-  box-shadow: 0 0 6px rgba(230, 162, 60, 0.4);
+  background: linear-gradient(135deg, #e6a23c 0%, #f5c23c 100%);
+  box-shadow: 0 0 12px rgba(230, 162, 60, 0.5);
 }
 
 .status-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 最近活动 */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+}
+
+.activity-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.activity-time {
   font-size: 12px;
-  color: #606266;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
 }
 
-.main-content-area {
-  min-height: 600px;
-}
-
+/* 响应式 */
 @media (max-width: 768px) {
   .admin-dashboard {
     padding: 16px;
   }
   
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .header-time {
+    align-self: flex-start;
+  }
+  
+  .stat-card {
+    padding: 20px 16px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+  }
+  
+  .glass-card {
+    padding: 20px;
+  }
+  
+  .chart-container {
+    height: 220px;
+  }
+  
   .sidebar-area {
     position: relative;
     top: 0;
-    margin-top: 20px;
   }
   
-  .stats-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  
-  .stat-card-grid {
-    padding: 12px 8px;
-    min-height: 80px;
-  }
-
-  .stat-value-grid {
-    font-size: 16px;
-  }
-
-  .stat-label-grid {
-    font-size: 10px;
-  }
-
   .quick-actions {
     grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .action-btn {
-    font-size: 11px;
-    padding: 6px 10px;
-  }
-
-  .chart-container {
-    height: 300px;
   }
 }
 </style>
-
