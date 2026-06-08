@@ -6,6 +6,9 @@ import router from './router'
 import i18n from './i18n/index'
 import { useThemeStore } from './stores/theme'
 
+// 导入 Tailwind CSS (必须放在最前，让设计令牌可以覆盖工具类)
+import '@/index.css'
+
 // 导入新的设计系统样式
 import '@/styles/design-tokens.css'
 import '@/styles/global.css'
