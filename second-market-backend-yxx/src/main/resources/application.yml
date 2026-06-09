@@ -88,6 +88,17 @@ project:
   server:
     base-url: ${SERVER_BASE_URL:http://localhost:8001/api}
 
+# Flyway 数据库迁移配置
+flyway:
+  enabled: ${FLYWAY_ENABLED:true}
+  baseline-on-migrate: true
+  baseline-version: 1.0
+  clean-disabled: false
+  locations: classpath:db/migration
+  encoding: UTF-8
+  validate-on-migrate: true
+  out-of-order: false
+
 # AI 功能配置
 ai:
   enabled: ${AI_ENABLED:true}

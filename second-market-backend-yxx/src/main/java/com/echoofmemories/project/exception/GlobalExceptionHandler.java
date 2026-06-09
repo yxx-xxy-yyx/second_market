@@ -1,13 +1,17 @@
 package com.echoofmemories.project.exception;
 
 import com.echoofmemories.project.common.Result;
+import com.echoofmemories.project.common.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+<<<<<<< HEAD
 
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +39,7 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+<<<<<<< HEAD
         // 返回第一个验证错误信息
         String firstError = errors.values().iterator().next();
         return Result.error("400", "参数验证失败：" + firstError);
@@ -45,6 +50,34 @@ public class GlobalExceptionHandler {
         log.error("请求体解析失败: {}", e.getMessage());
         return Result.error("400", "请求体格式错误");
     }
+
+    /**
+     * 处理请求体解析异常
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Result<Object> handleHttpMessageNotRead(HttpMessageNotReadableException e) {
+        log.error("请求体解析失败", e);
+        return Result.error(ResultCode.BAD_REQUEST);
+    }
+
+    /**
+     * 处理404异常
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public Result<Object> handleNotFound(NoHandlerFoundException e) {
+        log.error("请求资源不存在: {}", e.getRequestURL());
+        return Result.error(ResultCode.NOT_FOUND);
+    }
+
+    /**
+     * 处理请求方法不支持异常
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public Result<Object> handleMethodNotSupported(HttpRequestMethodNotSupportedException e) {
+        log.error("请求方法不支持: {}", e.getMethod());
+        return Result.error(ResultCode.METHOD_NOT_ALLOWED);
+    }
+
 
     /**
      * 处理自定义异常

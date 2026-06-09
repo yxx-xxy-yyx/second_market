@@ -30,13 +30,10 @@ public class UserController {
 
     @Operation(summary = "获取当前登录用户信息（可信身份）")
     @GetMapping("/me")
-    public Result<UserProfileDTO> getCurrentUserProfile(HttpServletRequest request) {
+    public Result<UserProfileDTO> getCurrentUserProfile() {
         try {
             // 完全依赖后端认证信息获取用户ID，不可由前端伪造
-            Long currentUserId = (Long) request.getAttribute("userId");
-            if (currentUserId == null) {
-                currentUserId = SecurityUtils.getCurrentUserId();
-            }
+            Long currentUserId = SecurityUtils.getCurrentUserId();
 
             if (currentUserId == null) {
                 return Result.error("401", "用户未认证");
@@ -67,15 +64,13 @@ public class UserController {
         }
     }
 
-    // 该接口保留，仅供管理员查看他人信息场景使用；普通用户请使用 GET /user/me
-    // 为避免前端伪造 userId，这里将原 /user/info 标注为管理员专用
-    @Operation(summary = "[管理员专用] 获取指定用户信息")
+    @Operation(summary = "获取用户信息（查自己或查他人）")
     @GetMapping("/info")
     public Result<User> getUserInfo(@RequestParam(value = "userId", required = false) Long userId) {
         try {
             // 1. 必须是管理员才能查看他人信息
-            if (!SecurityUtils.isAdmin()) {
-                return Result.error("403", "无权查看他人信息，请使用 GET /user/me 获取自己的信息");
+            if (userId != null && !SecurityUtils.isAdmin()) {
+                return Result.error("403", "无权查看他人信息");
             }
 
             // 2. 逻辑判断：如果传入了 userId 则用传入的，否则用当前登录的

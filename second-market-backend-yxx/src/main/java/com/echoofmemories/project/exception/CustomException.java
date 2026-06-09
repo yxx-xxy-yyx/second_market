@@ -1,5 +1,6 @@
 package com.echoofmemories.project.exception;
 
+import com.echoofmemories.project.common.ResultCode;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,6 +26,12 @@ public class CustomException extends RuntimeException {
         super(message);
         this.code = code;
         this.message = message;
+    }
+    
+    public CustomException(ResultCode resultCode) {
+        super(resultCode.getMessage());
+        this.code = resultCode.getCode();
+        this.message = resultCode.getMessage();
     }
     
     public CustomException(String message, Throwable cause) {
