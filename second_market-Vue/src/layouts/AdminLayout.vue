@@ -351,18 +351,16 @@ const toggleFullscreen = () => {
 .admin-layout {
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
 }
 
 .admin-header {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(40px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e4e7ed;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 60px;
 }
 
 .header-left {
@@ -373,47 +371,29 @@ const toggleFullscreen = () => {
 
 .menu-toggle {
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.7);
-  transition: all 0.3s;
-  padding: 8px;
-  border-radius: 10px;
+  color: #606266;
+  transition: color 0.3s;
 }
 
 .menu-toggle:hover {
-  color: #667eea;
-  background: rgba(255, 255, 255, 0.1);
+  color: #409eff;
 }
 
 .admin-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-size: 18px;
-  font-weight: 700;
-  color: white;
+  font-weight: 600;
+  color: #303133;
 }
 
 .title-icon {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 8px;
-  border-radius: 10px;
-  color: white;
+  color: #409eff;
 }
 
 .breadcrumb {
-  margin-left: 24px;
-}
-
-.breadcrumb :deep(.el-breadcrumb__item) {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.breadcrumb :deep(.el-breadcrumb__inner) {
-  color: rgba(255, 255, 255, 0.6) !important;
-}
-
-.breadcrumb :deep(.el-breadcrumb__separator) {
-  color: rgba(255, 255, 255, 0.4);
+  margin-left: 20px;
 }
 
 .header-right {
@@ -425,64 +405,56 @@ const toggleFullscreen = () => {
 .header-tools {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 15px;
 }
 
 .tool-icon {
   cursor: pointer;
-  color: rgba(255, 255, 255, 0.7);
-  transition: all 0.3s;
-  padding: 10px;
-  border-radius: 10px;
+  color: #606266;
+  transition: color 0.3s;
 }
 
 .tool-icon:hover {
-  color: #667eea;
-  background: rgba(255, 255, 255, 0.1);
+  color: #409eff;
 }
 
 .user-info {
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 6px 14px;
-  height: 44px;
-  border-radius: 14px;
-  transition: all 0.3s;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0 12px;
+  height: 40px;
+  border-radius: 20px;
+  transition: background-color 0.3s;
 }
 
 .user-info:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background-color: #f5f7fa;
 }
 
 .username {
   margin: 0 8px;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 500;
+  color: #606266;
 }
 
 .dropdown-icon {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #909399;
 }
 
 .main-container {
-  height: calc(100vh - 64px - 50px);
+  height: calc(100vh - 60px - 50px);
 }
 
 .admin-sidebar {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(40px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  background: #001529;
   transition: width 0.3s;
 }
 
 .sidebar-menu {
   border-right: none;
-  background: transparent;
+  background: #001529;
   height: 100%;
 }
 
@@ -490,51 +462,45 @@ const toggleFullscreen = () => {
 .sidebar-menu :deep(.el-sub-menu .el-sub-menu__title) {
   color: rgba(255, 255, 255, 0.75);
   background: transparent;
-  margin: 4px 8px;
-  border-radius: 12px;
 }
 
+/* 子菜单项样式 */
 .sidebar-menu :deep(.el-sub-menu .el-menu) {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  margin: 4px 8px;
+  background: #000c17;
 }
 
 .sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item) {
   color: rgba(255, 255, 255, 0.65);
   background: transparent;
-  margin: 2px 0;
 }
 
 .sidebar-menu :deep(.el-menu-item:hover),
 .sidebar-menu :deep(.el-sub-menu .el-sub-menu__title:hover),
 .sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item:hover) {
   color: #fff;
-  background: rgba(102, 126, 234, 0.3) !important;
+  background: #1890ff;
 }
 
 .sidebar-menu :deep(.el-menu-item.is-active),
 .sidebar-menu :deep(.el-sub-menu .el-menu .el-menu-item.is-active) {
   color: #fff;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  background: #1890ff;
 }
 
 .admin-main {
-  background: transparent;
-  padding: 24px;
+  background: #f0f2f5;
+  padding: 20px;
   overflow-y: auto;
 }
 
 .main-content {
-  min-height: calc(100vh - 64px - 50px - 48px);
+  min-height: calc(100vh - 140px);
 }
 
 .admin-footer {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0 24px;
+  background: #fff;
+  border-top: 1px solid #e4e7ed;
+  padding: 0 20px;
   height: 50px;
 }
 
@@ -543,14 +509,14 @@ const toggleFullscreen = () => {
   align-items: center;
   justify-content: space-between;
   height: 100%;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  color: #909399;
 }
 
 .status-indicator {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .status-icon {
@@ -568,31 +534,14 @@ const toggleFullscreen = () => {
   opacity: 0;
 }
 
-/* 下拉菜单样式 */
-.sidebar-menu :deep(.el-dropdown-menu) {
-  background: rgba(26, 26, 62, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-}
-
-.sidebar-menu :deep(.el-dropdown-menu__item) {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.sidebar-menu :deep(.el-dropdown-menu__item:hover) {
-  background: rgba(102, 126, 234, 0.2);
-  color: #fff;
-}
-
 /* 响应式设计 */
 @media (max-width: 768px) {
   .admin-header {
-    padding: 0 16px;
+    padding: 0 15px;
   }
   
   .header-left {
-    gap: 12px;
+    gap: 15px;
   }
   
   .breadcrumb {
@@ -600,10 +549,11 @@ const toggleFullscreen = () => {
   }
   
   .admin-main {
-    padding: 16px;
+    padding: 15px;
   }
   
   .sidebar-menu {
     width: 200px;
   }
-}</style>
+}
+</style>

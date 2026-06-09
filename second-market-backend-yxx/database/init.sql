@@ -185,4 +185,5 @@ CREATE TABLE `biz_chat` (
     PRIMARY KEY (`id`)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
--- 鎭㈠澶栭敭妫€鏌?SET FOREIGN_KEY_CHECKS = 1;
+-- 恢复外键检查
+SET FOREIGN_KEY_CHECKS = 1;

@@ -18,7 +18,7 @@ public class CustomException extends RuntimeException {
     
     public CustomException(String message) {
         super(message);
-        this.code = ResultCode.INTERNAL_ERROR.getCode();
+        this.code = "500";
         this.message = message;
     }
     
@@ -36,7 +36,7 @@ public class CustomException extends RuntimeException {
     
     public CustomException(String message, Throwable cause) {
         super(message, cause);
-        this.code = ResultCode.INTERNAL_ERROR.getCode();
+        this.code = "500";
         this.message = message;
     }
     

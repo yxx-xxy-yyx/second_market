@@ -53,7 +53,6 @@
         :data="userList"
         stripe
         style="width: 100%"
-        class="glass-table"
       >
         <el-table-column prop="id" :label="$t('adminUsers.table.id')" width="80" />
         
@@ -494,198 +493,40 @@ onMounted(() => {
   padding: 20px;
 }
 
-/* 页面头部 - 玻璃态 */
 .page-header {
   margin-bottom: 20px;
-  padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(40px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #f0f7ff 0%, #fafbfc 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .page-title {
   font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  color: #303133;
   margin: 0;
 }
 
-/* 搜索卡片 - 玻璃态 */
 .search-card,
 .table-card {
   margin-bottom: 20px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-}
-
-.search-card :deep(.el-card__body),
-.table-card :deep(.el-card__body) {
-  padding: 24px;
-}
-
-/* 表单样式覆盖 */
-.search-card :deep(.el-form-item__label) {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-}
-
-.search-card :deep(.el-input__wrapper) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
-  box-shadow: none;
-}
-
-.search-card :deep(.el-input__inner) {
-  color: white;
-}
-
-.search-card :deep(.el-input__inner::placeholder) {
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.search-card :deep(.el-select__wrapper) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  box-shadow: none;
-  color: white;
-}
-
-.search-card :deep(.el-button) {
-  border-radius: 12px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.search-card :deep(.el-button--primary) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.search-card :deep(.el-button--primary:hover) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-}
-
-.search-card :deep(.el-button:not(.is-text):not(.is-link):not(.is-ghost)) {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.search-card :deep(.el-button:not(.is-text):not(.is-link):not(.is-ghost):hover) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-/* 表格样式覆盖 */
-.glass-table {
-  background: transparent !important;
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: rgba(255, 255, 255, 0.05);
-  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.08);
-  --el-table-border-color: rgba(255, 255, 255, 0.1);
-  --el-table-text-color: rgba(255, 255, 255, 0.9);
-  --el-table-header-text-color: rgba(255, 255, 255, 0.7);
-}
-
-.glass-table :deep(.el-table__header th) {
-  font-weight: 600;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.05) !important;
-}
-
-.glass-table :deep(.el-table__row) {
-  transition: all 0.2s ease;
-}
-
-.glass-table :deep(.el-table__row:hover) {
-  background: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stat-number {
-  font-weight: 700;
-  color: #667eea;
+  font-weight: 600;
+  color: #409eff;
 }
 
-/* 分页器样式 */
 .pagination {
   display: flex;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 20px;
   padding: 20px 0;
 }
 
-.pagination :deep(.el-pagination) {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 8px 16px;
-}
-
-.pagination :deep(.el-pagination__total) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.pagination :deep(.el-pager li) {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  margin: 0 3px;
-  min-width: 36px;
-  height: 36px;
-  line-height: 36px;
-}
-
-.pagination :deep(.el-pager li:hover) {
-  background: rgba(102, 126, 234, 0.3);
-  color: white;
-}
-
-.pagination :deep(.el-pager li.is-active) {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-}
-
-.pagination :deep(.btn-prev),
-.pagination :deep(.btn-next) {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  min-width: 36px;
-  height: 36px;
-}
-
-.pagination :deep(.btn-prev:hover),
-.pagination :deep(.btn-next:hover) {
-  background: rgba(102, 126, 234, 0.3);
-  color: white;
-}
-
-.pagination :deep(.el-pagination__sizes) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.pagination :deep(.el-select__wrapper) {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  box-shadow: none;
-  color: white;
-}
-
-/* 用户详情对话框 */
 .user-detail {
   padding: 20px 0;
 }
@@ -693,80 +534,66 @@ onMounted(() => {
 .user-header {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-  margin-bottom: 24px;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20px;
 }
 
 .user-name h3 {
-  margin: 0 0 12px 0;
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin: 0 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .user-info,
 .user-stats {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .user-info h4,
 .user-stats h4 {
-  margin: 0 0 16px 0;
+  margin: 0 0 12px 0;
   font-size: 16px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  color: #2c3e50;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  padding: 20px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  border-radius: 8px;
+  background: #f9f9f9;
   margin-bottom: 12px;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateY(-2px);
 }
 
 .stat-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: 16px;
+  margin-right: 12px;
   color: #fff;
 }
 
 .stat-icon.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  background: #409eff;
 }
 
 .stat-icon.success {
-  background: linear-gradient(135deg, #67c23a 0%, #85ce61 100%);
-  box-shadow: 0 4px 15px rgba(103, 194, 58, 0.4);
+  background: #67c23a;
 }
 
 .stat-icon.warning {
-  background: linear-gradient(135deg, #e6a23c 0%, #f5c23c 100%);
-  box-shadow: 0 4px 15px rgba(230, 162, 60, 0.4);
+  background: #e6a23c;
 }
 
 .stat-icon.danger {
-  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
-  box-shadow: 0 4px 15px rgba(245, 108, 108, 0.4);
+  background: #f56c6c;
 }
 
 .stat-content {
@@ -774,68 +601,15 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 28px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2c3e50;
   margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* 对话框样式覆盖 */
-:deep(.el-dialog) {
-  background: rgba(26, 26, 62, 0.95);
-  backdrop-filter: blur(40px);
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-:deep(.el-dialog__header) {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px 24px;
-}
-
-:deep(.el-dialog__title) {
-  color: white;
-  font-weight: 700;
-  font-size: 18px;
-}
-
-:deep(.el-dialog__close) {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-:deep(.el-dialog__close:hover) {
-  color: white;
-}
-
-:deep(.el-dialog__body) {
-  padding: 24px;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-:deep(.el-descriptions) {
-  --el-descriptions-table-border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-:deep(.el-descriptions__label) {
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-:deep(.el-descriptions__content) {
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-:deep(.el-tag) {
-  border-radius: 8px;
+  font-size: 14px;
+  color: #909399;
 }
 
 @media (max-width: 768px) {
@@ -847,4 +621,5 @@ onMounted(() => {
     flex-direction: column;
     text-align: center;
   }
-}</style>
+}
+</style>

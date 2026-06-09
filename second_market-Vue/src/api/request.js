@@ -20,7 +20,7 @@ const startGlobalLoading = () => {
       text: t('common.loading'),
       background: 'rgba(255, 255, 255, 0.55)'
     })
-  }, 150)
+  }, 200)
 }
 
 const stopGlobalLoading = () => {
@@ -38,10 +38,38 @@ const stopGlobalLoading = () => {
   }
 }
 
-// 创建axios实例
+/**
+ * 获取当前可用的 token
+ * 优先从 Pinia store 读取，其次从 localStorage 兜底（刷新页面后 store 为空的场景）
+ */
+const getAuthToken = () => {
+  try {
+    const userStore = useUserStore()
+    if (userStore && userStore.token) return userStore.token
+  } catch (_) {
+    // Pinia 未初始化时忽略
+  }
+  return localStorage.getItem('token') || ''
+}
+
+const clearAuthAndRedirect = () => {
+  try {
+    const userStore = useUserStore()
+    userStore.logout()
+  } catch (_) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  }
+  if (router.currentRoute.value.path !== '/login') {
+    ElMessage.error(t('common.authExpired'))
+    router.replace('/login')
+  }
+}
+
+// 创建 axios 实例
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 10000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -50,15 +78,12 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    startGlobalLoading()
-    // 从 pinia store 获取 token
-    try {
-      const userStore = useUserStore()
-      if (userStore.token) {
-        config.headers.Authorization = `Bearer ${userStore.token}`
-      }
-    } catch (e) {
-      // 防止在 store 初始化前调用报错
+    // 跳过不需要 loading 的请求
+    if (!config._silent) startGlobalLoading()
+
+    const token = getAuthToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
     return config
   },
@@ -77,53 +102,33 @@ request.interceptors.response.use(
     stopGlobalLoading()
     const { data } = response
 
-    // 统一处理响应数据结构 - 后端返回格式：{code, message, data, success}
-    if (data.success !== undefined) {
-      const normalized = { ...data }
-      if (normalized.code !== undefined) {
-        normalized.code = String(normalized.code)
-      } else {
-        normalized.code = normalized.success ? '200' : '500'
+    // 后端统一返回格式: { code, message, data, success }
+    if (data && typeof data === 'object' && (data.code !== undefined || data.success !== undefined)) {
+      // 兼容后端新老两种返回字段命名
+      const code = String(data.code ?? (data.success ? '200' : '500'))
+      const normalized = { ...data, code }
+
+      // 401: 未登录 / token 过期
+      if (code === '401') {
+        clearAuthAndRedirect()
+        return Promise.reject(new Error(data.message || t('common.authExpired')))
       }
 
-      if (normalized.code == '401') {
-        const userStore = useUserStore()
-        userStore.logout()
-        if (router.currentRoute.value.path !== '/login') {
-          ElMessage.error(t('common.authExpired'))
-          router.replace('/login')
-        }
-        return Promise.reject(new Error(normalized.message || '登录失效'))
+      // 业务成功: code === '200' 或 success === true
+      const isBizSuccess = code === '200' || data.success === true
+      if (!isBizSuccess) {
+        ElMessage.error(data.message || t('common.requestFailed'))
       }
 
       return normalized
     }
 
-    // 兼容旧格式：如果有code字段，转换为success格式
-    if (data.code !== undefined) {
-      if (data.code === '401') {
-        const userStore = useUserStore()
-        userStore.logout()
-        if (router.currentRoute.value.path !== '/login') {
-          ElMessage.error(t('common.authExpired'))
-          router.replace('/login')
-        }
-        return Promise.reject(new Error(data.message || '登录失效'))
-      }
-
-      return {
-        success: data.code === '200',
-        message: data.message || t('common.success'),
-        data: data.data,
-        code: data.code
-      }
-    }
-
-    // 如果没有标准字段，默认认为请求成功
+    // 非标准返回：直接透传，默认视为成功
     return {
       success: true,
-      data: data,
-      message: t('common.success')
+      code: '200',
+      message: t('common.success'),
+      data: data
     }
   },
   (error) => {
@@ -136,42 +141,59 @@ request.interceptors.response.use(
 
       // 处理 401 登录失效
       if (status === 401) {
-        try {
-          const userStore = useUserStore()
-          userStore.logout()
-          if (router.currentRoute.value.path !== '/login') {
-            ElMessage.error(t('common.authExpired'))
-            router.replace('/login')
-          }
-        } catch (e) { }
+        clearAuthAndRedirect()
         return Promise.reject(error)
       }
 
       if (!isSilent) {
-        switch (status) {
-          case 403:
-            ElMessage.error(t('common.noPermission'))
-            break
-          case 404:
-            ElMessage.error(t('common.resourceNotFound'))
-            break
-          case 500:
-            ElMessage.error(data?.message || t('common.serverError'))
-            break
-          default:
-            ElMessage.error(data?.message || t('common.requestFailedWithStatus', { status }))
-        }
+        const errorMsg = (data && (data.message || data.msg)) ||
+          (status === 403 && t('common.noPermission')) ||
+          (status === 404 && t('common.resourceNotFound')) ||
+          (status === 500 && t('common.serverError')) ||
+          t('common.requestFailedWithStatus', { status })
+        ElMessage.error(errorMsg)
       }
-    } else if (message.includes('timeout')) {
+    } else if (message && message.toLowerCase().includes('timeout')) {
       if (!isSilent) ElMessage.error(t('common.requestTimeout'))
-    } else if (message.includes('Network Error')) {
+    } else if (message && message.toLowerCase().includes('network error')) {
       if (!isSilent) ElMessage.error(t('common.networkError'))
     } else {
-      if (!isSilent) ElMessage.error(t('common.requestFailed'))
+      if (!isSilent) ElMessage.error(message || t('common.requestFailed'))
     }
 
     return Promise.reject(error)
   }
 )
+
+/**
+ * 通用 GET 请求
+ * @param {string} url
+ * @param {object} params
+ * @param {object} options - axios 额外配置（如 _silent: true）
+ */
+export const getRequest = (url, params = {}, options = {}) => {
+  return request({ url, method: 'GET', params, ...options })
+}
+
+/**
+ * 通用 POST 请求
+ */
+export const postRequest = (url, data = {}, options = {}) => {
+  return request({ url, method: 'POST', data, ...options })
+}
+
+/**
+ * 通用 PUT 请求
+ */
+export const putRequest = (url, data = {}, options = {}) => {
+  return request({ url, method: 'PUT', data, ...options })
+}
+
+/**
+ * 通用 DELETE 请求
+ */
+export const deleteRequest = (url, params = {}, options = {}) => {
+  return request({ url, method: 'DELETE', params, ...options })
+}
 
 export default request

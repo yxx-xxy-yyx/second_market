@@ -12,7 +12,7 @@
         <div class="floating-circle circle-2"></div>
         <div class="floating-circle circle-3"></div>
       </div>
-      
+
       <div class="mobile-content">
         <div class="mobile-brand">
           <div class="mobile-logo">
@@ -25,7 +25,7 @@
         <div class="mobile-form-wrapper">
           <div class="mobile-form-card">
             <h2 class="mobile-form-title">{{ $t('login.title') }}</h2>
-            
+
             <el-form
               ref="loginFormRef"
               :model="loginForm"
@@ -124,27 +124,6 @@
           </div>
           <h1 class="desktop-title">{{ $t('login.appName') }}</h1>
           <p class="desktop-slogan">{{ $t('login.appSlogan') }}</p>
-          
-          <div class="desktop-features">
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><MagicStick /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('login.feature1') }}</span>
-            </div>
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><ShoppingCart /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('login.feature2') }}</span>
-            </div>
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><Star /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('login.feature3') }}</span>
-            </div>
-          </div>
         </div>
 
         <div class="desktop-form-wrapper">
@@ -154,7 +133,7 @@
               <div class="decoration-circle dec-2"></div>
               <div class="decoration-circle dec-3"></div>
             </div>
-            
+
             <div class="form-card-content">
               <h2 class="desktop-form-title">{{ $t('login.title') }}</h2>
               <p class="desktop-form-subtitle">{{ $t('login.subtitle') }}</p>
@@ -244,17 +223,17 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { User, Lock, MagicStick, ShoppingCart, Star } from '@element-plus/icons-vue'
+import { User, Lock } from '@element-plus/icons-vue'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { useI18n } from 'vue-i18n'
 import { useSchoolStore } from '@/stores/school'
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
 const router = useRouter()
 const userStore = useUserStore()
 const schoolStore = useSchoolStore()
 
-// 为桌面端粒子效果生成随机样式
+// 桌面端粒子效果样式
 const getParticleStyle = (i) => {
   const size = Math.random() * 60 + 20
   return {
@@ -300,20 +279,30 @@ const loginRules = {
 const handleLogin = async () => {
   try {
     await loginFormRef.value.validate()
-    
+
     loading.value = true
-    
+
     const result = await userStore.login(loginForm)
-    
-    if (result.success) {
-      if (userStore.user?.role === 'admin') {
+
+    if (result?.success) {
+      // 登录成功后再调一次 /user/me，确保从 token 解析的可信角色同步到 store
+      // 这样即使 login 接口返回的 user 被中间人篡改，/user/me 也会用服务端解析的正确信息覆盖
+      try {
+        await userStore.fetchCurrentUser()
+      } catch (e) {
+        // /user/me 失败不阻断登录（login 接口的 user 已经写入且标记为 verified）
+        console.warn('[login] fetchCurrentUser failed, continue with login user', e?.message || e)
+      }
+
+      // 用 store 中经过 verified 的 isAdmin 判断跳转方向
+      if (userStore.isAdmin) {
         await router.replace('/admin/dashboard')
       } else {
         await router.replace('/user/dashboard')
       }
     }
   } catch (error) {
-    
+    // 错误由 userStore/Element Plus 处理
   } finally {
     loading.value = false
   }
@@ -321,7 +310,7 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-/* 基础样式 */
+/* ===== 基础样式 ===== */
 * {
   box-sizing: border-box;
 }
@@ -330,7 +319,7 @@ const handleLogin = async () => {
   position: fixed;
   top: 20px;
   right: 24px;
-  z-index: 9999;
+  z-index: var(--z-overlay);
 }
 
 .login-page {
@@ -339,10 +328,12 @@ const handleLogin = async () => {
   position: relative;
 }
 
-/* 移动端/平板端样式 */
+/* ================================================
+   移动端/平板端样式
+   ================================================ */
 .mobile-container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(180deg, var(--primary-900) 0%, var(--primary-800) 50%, var(--secondary-900) 100%);
   position: relative;
 }
 
@@ -362,7 +353,7 @@ const handleLogin = async () => {
 .floating-circle.circle-1 {
   width: 200px;
   height: 200px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
   top: -50px;
   left: -50px;
   animation-delay: 0s;
@@ -371,7 +362,7 @@ const handleLogin = async () => {
 .floating-circle.circle-2 {
   width: 150px;
   height: 150px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-700) 100%);
   top: 40%;
   right: -30px;
   animation-delay: 2s;
@@ -380,7 +371,7 @@ const handleLogin = async () => {
 .floating-circle.circle-3 {
   width: 180px;
   height: 180px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--primary-500) 100%);
   bottom: -60px;
   left: 30%;
   animation-delay: 4s;
@@ -415,7 +406,8 @@ const handleLogin = async () => {
   margin: 0 auto 24px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
-  border-radius: 30px;
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -430,7 +422,7 @@ const handleLogin = async () => {
                 inset 0 0 20px rgba(255, 255, 255, 0.1);
   }
   50% {
-    box-shadow: 0 8px 50px rgba(102, 126, 234, 0.4),
+    box-shadow: 0 8px 50px rgba(54, 179, 194, 0.4),
                 inset 0 0 30px rgba(255, 255, 255, 0.2);
   }
 }
@@ -443,8 +435,8 @@ const handleLogin = async () => {
 
 .mobile-title {
   font-size: 32px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  font-weight: var(--font-bold);
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--accent-400) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -453,9 +445,9 @@ const handleLogin = async () => {
 }
 
 .mobile-subtitle {
-  font-size: 16px;
+  font-size: var(--font-md);
   color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
+  font-weight: var(--font-medium);
 }
 
 .mobile-form-wrapper {
@@ -470,11 +462,12 @@ const handleLogin = async () => {
   max-width: 400px;
   background: rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(40px);
-  border-radius: 32px;
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: var(--radius-2xl);
   padding: 40px 28px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3),
-              0 0 60px rgba(102, 126, 234, 0.1);
+              0 0 60px rgba(54, 179, 194, 0.1);
   animation: slide-up 0.8s ease-out;
 }
 
@@ -490,34 +483,35 @@ const handleLogin = async () => {
 }
 
 .mobile-form-title {
-  font-size: 26px;
-  font-weight: 800;
+  font-size: var(--font-3xl);
+  font-weight: var(--font-bold);
   color: white;
   text-align: center;
   margin-bottom: 32px;
 }
 
+/* ===== Element Plus 组件覆盖 - 移动端 ===== */
 .mobile-input :deep(.el-input__wrapper),
 .mobile-select :deep(.el-select__wrapper) {
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   padding: 12px 16px;
   box-shadow: none;
-  transition: all 0.3s ease;
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .mobile-input :deep(.el-input__wrapper:hover),
 .mobile-select :deep(.el-select__wrapper:hover) {
   background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(102, 126, 234, 0.5);
+  border-color: rgba(54, 179, 194, 0.5);
 }
 
 .mobile-input :deep(.el-input__wrapper.is-focus),
 .mobile-select :deep(.el-select__wrapper.is-focus) {
   background: rgba(255, 255, 255, 0.25);
-  border-color: #667eea;
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 20px rgba(54, 179, 194, 0.3);
 }
 
 .mobile-input :deep(.el-input__inner),
@@ -534,24 +528,24 @@ const handleLogin = async () => {
 .mobile-input :deep(.el-form-item__label),
 .mobile-select :deep(.el-form-item__label) {
   color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
+  font-weight: var(--font-semibold);
 }
 
 .mobile-login-btn {
   width: 100%;
   height: 54px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: var(--font-lg);
+  font-weight: var(--font-bold);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-primary) !important;
   border: none;
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .mobile-login-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+  box-shadow: var(--shadow-primary-hover);
 }
 
 .mobile-login-btn:active {
@@ -560,19 +554,21 @@ const handleLogin = async () => {
 
 .form-footer {
   text-align: center;
-  font-size: 15px;
+  font-size: var(--font-md);
   color: rgba(255, 255, 255, 0.8);
 }
 
 .form-footer a {
-  color: #667eea;
-  font-weight: 700;
+  color: var(--primary-300);
+  font-weight: var(--font-bold);
 }
 
-/* 桌面端样式 */
+/* ================================================
+   桌面端样式
+   ================================================ */
 .desktop-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
+  background: linear-gradient(135deg, var(--primary-950) 0%, var(--primary-900) 50%, var(--secondary-900) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -587,23 +583,23 @@ const handleLogin = async () => {
   position: absolute;
   width: 800px;
   height: 800px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.35) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(54, 179, 194, 0.35) 0%, transparent 70%);
   top: -200px;
   left: -200px;
-  animation: pulse 15s ease-in-out infinite;
+  animation: pulse-bg 15s ease-in-out infinite;
 }
 
 .bg-gradient-2 {
   position: absolute;
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(240, 147, 251, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
   bottom: -100px;
   right: -100px;
-  animation: pulse 12s ease-in-out infinite reverse;
+  animation: pulse-bg 12s ease-in-out infinite reverse;
 }
 
-@keyframes pulse {
+@keyframes pulse-bg {
   0%, 100% {
     transform: scale(1);
     opacity: 0.8;
@@ -622,7 +618,7 @@ const handleLogin = async () => {
 .particle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-400) 0%, var(--primary-600) 100%);
   animation: float-particle 20s linear infinite;
 }
 
@@ -670,7 +666,8 @@ const handleLogin = async () => {
   height: 180px;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(30px);
-  border-radius: 40px;
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: var(--radius-3xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -698,7 +695,7 @@ const handleLogin = async () => {
 .logo-glow {
   position: absolute;
   inset: -20px;
-  background: radial-gradient(circle, rgba(102, 126, 234, 0.6) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(54, 179, 194, 0.6) 0%, transparent 70%);
   z-index: 1;
   animation: glow-pulse 4s ease-in-out infinite;
   filter: blur(30px);
@@ -717,8 +714,8 @@ const handleLogin = async () => {
 
 .desktop-title {
   font-size: 64px;
-  font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 40%, #f093fb 80%, #f5576c 100%);
+  font-weight: var(--font-black);
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--accent-400) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -728,50 +725,10 @@ const handleLogin = async () => {
 }
 
 .desktop-slogan {
-  font-size: 24px;
+  font-size: var(--font-2xl);
   color: rgba(255, 255, 255, 0.75);
-  font-weight: 500;
-  margin-bottom: 60px;
-}
-
-.desktop-features {
-  display: flex;
-  gap: 32px;
-}
-
-.desktop-feature-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 28px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.4s ease;
-}
-
-.desktop-feature-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-}
-
-.feature-icon {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.feature-text {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  font-size: 16px;
+  font-weight: var(--font-medium);
+  margin-bottom: 40px;
 }
 
 .desktop-form-wrapper {
@@ -785,7 +742,8 @@ const handleLogin = async () => {
   width: 100%;
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(50px);
-  border-radius: 40px;
+  -webkit-backdrop-filter: blur(50px);
+  border-radius: var(--radius-3xl);
   border: 1px solid rgba(255, 255, 255, 0.15);
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
   position: relative;
@@ -813,7 +771,7 @@ const handleLogin = async () => {
 .decoration-circle {
   position: absolute;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
   opacity: 0.1;
 }
 
@@ -829,7 +787,7 @@ const handleLogin = async () => {
   height: 200px;
   bottom: -100px;
   left: -50px;
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-700) 100%);
 }
 
 .decoration-circle.dec-3 {
@@ -837,7 +795,7 @@ const handleLogin = async () => {
   height: 100px;
   top: 50%;
   right: -30px;
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: linear-gradient(135deg, var(--primary-300) 0%, var(--primary-500) 100%);
 }
 
 .form-card-content {
@@ -848,38 +806,39 @@ const handleLogin = async () => {
 
 .desktop-form-title {
   font-size: 36px;
-  font-weight: 900;
+  font-weight: var(--font-bold);
   color: white;
   margin-bottom: 8px;
 }
 
 .desktop-form-subtitle {
-  font-size: 16px;
+  font-size: var(--font-md);
   color: rgba(255, 255, 255, 0.65);
   margin-bottom: 40px;
 }
 
+/* ===== Element Plus 组件覆盖 - 桌面端 ===== */
 .desktop-input :deep(.el-input__wrapper),
 .desktop-select :deep(.el-select__wrapper) {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl);
   padding: 16px 20px;
   box-shadow: none;
-  transition: all 0.4s ease;
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .desktop-input :deep(.el-input__wrapper:hover),
 .desktop-select :deep(.el-select__wrapper:hover) {
   background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(102, 126, 234, 0.5);
+  border-color: rgba(54, 179, 194, 0.5);
 }
 
 .desktop-input :deep(.el-input__wrapper.is-focus),
 .desktop-select :deep(.el-select__wrapper.is-focus) {
   background: rgba(255, 255, 255, 0.2);
-  border-color: #667eea;
-  box-shadow: 0 0 30px rgba(102, 126, 234, 0.25);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 30px rgba(54, 179, 194, 0.25);
 }
 
 .desktop-input :deep(.el-input__inner),
@@ -887,7 +846,7 @@ const handleLogin = async () => {
 .desktop-input :deep(.el-input__suffix),
 .desktop-select :deep(.el-input__inner) {
   color: white;
-  font-size: 16px;
+  font-size: var(--font-lg);
 }
 
 .desktop-input :deep(.el-input__inner::placeholder) {
@@ -897,27 +856,27 @@ const handleLogin = async () => {
 .desktop-input :deep(.el-form-item__label),
 .desktop-select :deep(.el-form-item__label) {
   color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: var(--font-semibold);
+  font-size: var(--font-md);
   margin-bottom: 8px;
 }
 
 .desktop-login-btn {
   width: 100%;
   height: 60px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: var(--font-lg);
+  font-weight: var(--font-bold);
+  border-radius: var(--radius-2xl);
+  background: var(--gradient-primary) !important;
   border: none;
-  box-shadow: 0 10px 35px rgba(102, 126, 234, 0.4);
-  transition: all 0.4s ease;
+  box-shadow: var(--shadow-primary);
+  transition: all var(--duration-normal) var(--ease-default);
   margin-top: 8px;
 }
 
 .desktop-login-btn:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 15px 45px rgba(102, 126, 234, 0.5);
+  box-shadow: var(--shadow-primary-hover);
 }
 
 .desktop-login-btn:active {
@@ -926,35 +885,37 @@ const handleLogin = async () => {
 
 .desktop-form-footer {
   text-align: center;
-  font-size: 16px;
+  font-size: var(--font-lg);
   color: rgba(255, 255, 255, 0.8);
   margin-top: 8px;
 }
 
 .desktop-form-footer a {
-  color: #667eea;
-  font-weight: 700;
+  color: var(--primary-400);
+  font-weight: var(--font-bold);
 }
 
-/* 平板端适配 */
-@media (min-width: 768px) and (max-width: 1024px) {
+/* ================================================
+   平板端适配 (lg 断点)
+   ================================================ */
+@media (min-width: 1024px) and (max-width: 1280px) {
   .desktop-content {
     padding: 40px;
     gap: 40px;
   }
-  
+
   .desktop-title {
     font-size: 48px;
   }
-  
+
   .desktop-slogan {
-    font-size: 20px;
+    font-size: var(--font-xl);
   }
-  
+
   .desktop-form-wrapper {
     flex-basis: 420px;
   }
-  
+
   .form-card-content {
     padding: 48px 36px;
   }

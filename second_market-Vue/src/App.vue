@@ -14,7 +14,7 @@
 <script setup>
 import { computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useDeviceType } from '@/composables/useDevice'
+import { useDeviceType } from '@/utils/device'
 import { useI18n } from 'vue-i18n'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import en from 'element-plus/es/locale/lang/en'

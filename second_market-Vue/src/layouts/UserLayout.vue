@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-[100dvh] layout-bg">
+  <div class="min-h-[100dvh] bg-gray-50">
     <UserHeader v-if="isDesktopScreen" />
 
     <!-- 🔴 移除了移动端的导航栏 -->

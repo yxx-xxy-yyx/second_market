@@ -37,7 +37,7 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue'
-import { useDeviceType } from '@/composables/useDevice'
+import { useDeviceType } from '@/utils/device'
 
 const props = defineProps({
   modelValue: {

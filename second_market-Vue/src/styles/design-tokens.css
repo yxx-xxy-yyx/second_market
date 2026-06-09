@@ -6,20 +6,20 @@
    1. COLOR SYSTEM - 色彩系统
    ================================================ */
 :root {
-  /* Primary - 主色调 */
+  /* Primary - 主色调 (青蓝系 - 二手商城品牌色) */
   --primary-50: #edfafb;
   --primary-100: #d1f1f4;
   --primary-200: #a3e2e9;
   --primary-300: #74d2de;
   --primary-400: #46c3d3;
-  --primary-500: #36b3c2; /* Main Primary */
+  --primary-500: #36b3c2;
   --primary-600: #268f9c;
   --primary-700: #1e737d;
   --primary-800: #185860;
   --primary-900: #103c41;
   --primary-950: #0a2529;
 
-  /* Secondary - 辅助色 */
+  /* Secondary - 辅助色 (深蓝色) */
   --secondary-50: #f0f3f7;
   --secondary-100: #dde4ee;
   --secondary-200: #b9c7dc;
@@ -32,18 +32,18 @@
   --secondary-900: #182739;
   --secondary-950: #0f1724;
 
-  /* Accent - 强调色 */
-  --accent-50: #fdf2ff;
-  --accent-100: #f9e4ff;
-  --accent-200: #f3c8ff;
-  --accent-300: #ea9eff;
-  --accent-400: #de67ff;
-  --accent-500: #cf33ff;
-  --accent-600: #b218e0;
-  --accent-700: #8f12b2;
-  --accent-800: #72118d;
-  --accent-900: #5d1172;
-  --accent-950: #3e044d;
+  /* Accent - 强调色 (紫色 - 用于登录页装饰) */
+  --accent-50: #f5f3ff;
+  --accent-100: #ede9fe;
+  --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd;
+  --accent-400: #a78bfa;
+  --accent-500: #8b5cf6;
+  --accent-600: #7c3aed;
+  --accent-700: #6d28d9;
+  --accent-800: #5b21b6;
+  --accent-900: #4c1d95;
+  --accent-950: #2e1065;
 
   /* Success - 成功色 */
   --success-50: #ecfdf3;
@@ -142,6 +142,8 @@
   --shadow-2xl: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
   --shadow-primary: 0 4px 20px rgba(54, 179, 194, 0.25);
   --shadow-primary-hover: 0 8px 30px rgba(54, 179, 194, 0.35);
+  --shadow-accent: 0 4px 20px rgba(139, 92, 246, 0.25);
+  --shadow-accent-hover: 0 8px 30px rgba(139, 92, 246, 0.4);
 
   /* ================================================
      5. TYPOGRAPHY - 字体系统
@@ -149,7 +151,6 @@
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
 
-  /* Font Sizes */
   --font-xs: 11px;
   --font-sm: 12px;
   --font-md: 14px;
@@ -162,22 +163,20 @@
   --font-6xl: 40px;
   --font-7xl: 48px;
 
-  /* Line Heights */
   --leading-tight: 1.25;
   --leading-snug: 1.375;
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
   --leading-loose: 2;
 
-  /* Font Weights */
   --font-thin: 100;
   --font-light: 300;
   --font-normal: 400;
   --font-medium: 500;
   --font-semibold: 600;
   --font-bold: 700;
+  --font-black: 900;
 
-  /* Letter Spacing */
   --tracking-tighter: -0.05em;
   --tracking-tight: -0.025em;
   --tracking-normal: 0em;
@@ -217,31 +216,39 @@
   --bg-tertiary: var(--neutral-50);
   --bg-card: #ffffff;
   --bg-elevated: #ffffff;
-  
+
   --text-primary: var(--neutral-900);
   --text-secondary: var(--neutral-600);
   --text-tertiary: var(--neutral-500);
   --text-placeholder: var(--neutral-400);
   --text-disabled: var(--neutral-300);
-  
+
   --border-primary: var(--neutral-200);
   --border-secondary: var(--neutral-200);
   --border-tertiary: var(--neutral-100);
-  
+
   --icon-primary: var(--neutral-700);
   --icon-secondary: var(--neutral-500);
   --icon-tertiary: var(--neutral-400);
-  
-  /* Primary semantic */
+
   --primary: var(--primary-500);
   --primary-hover: var(--primary-600);
   --primary-active: var(--primary-700);
   --primary-bg: var(--primary-50);
   --primary-bg-hover: var(--primary-100);
   --primary-border: var(--primary-200);
-  
-  /* Header gradient */
-  --header-gradient: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+
+  --accent: var(--accent-500);
+  --accent-hover: var(--accent-600);
+  --accent-bg: var(--accent-50);
+  --accent-border: var(--accent-200);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent-500) 0%, var(--accent-700) 100%);
+  --gradient-primary-accent: linear-gradient(135deg, var(--primary-400) 0%, var(--accent-500) 100%);
+  --gradient-dark: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
+  --header-gradient: var(--gradient-primary);
 }
 
 /* ================================================
@@ -253,31 +260,35 @@ html.dark {
   --bg-tertiary: var(--neutral-800);
   --bg-card: var(--neutral-900);
   --bg-elevated: var(--neutral-800);
-  
+
   --text-primary: var(--neutral-50);
   --text-secondary: var(--neutral-400);
   --text-tertiary: var(--neutral-500);
   --text-placeholder: var(--neutral-600);
   --text-disabled: var(--neutral-700);
-  
+
   --border-primary: var(--neutral-700);
   --border-secondary: var(--neutral-800);
   --border-tertiary: var(--neutral-800);
-  
+
   --icon-primary: var(--neutral-200);
   --icon-secondary: var(--neutral-400);
   --icon-tertiary: var(--neutral-500);
-  
+
   --primary: var(--primary-400);
   --primary-hover: var(--primary-300);
   --primary-active: var(--primary-200);
   --primary-bg: rgba(77, 208, 225, 0.15);
   --primary-bg-hover: rgba(77, 208, 225, 0.25);
   --primary-border: rgba(77, 208, 225, 0.3);
-  
+
+  --accent: var(--accent-400);
+  --accent-hover: var(--accent-300);
+  --accent-bg: rgba(139, 92, 246, 0.15);
+  --accent-border: rgba(139, 92, 246, 0.3);
+
   --header-gradient: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
-  
-  /* Shadows for dark mode */
+
   --shadow-xs: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 1px 3px 0px rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
@@ -286,13 +297,14 @@ html.dark {
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   --shadow-primary: 0 4px 20px rgba(77, 208, 225, 0.25);
   --shadow-primary-hover: 0 8px 30px rgba(77, 208, 225, 0.35);
+  --shadow-accent: 0 4px 20px rgba(167, 139, 250, 0.25);
+  --shadow-accent-hover: 0 8px 30px rgba(167, 139, 250, 0.4);
 }
 
 /* ================================================
-   LEGACY VARIABLES COMPATIBILITY - 兼容旧变量
+   LEGACY VARIABLES + UI LIBRARY COMPATIBILITY
    ================================================ */
 :root {
-  /* For backwards compatibility */
   --primary-color: var(--primary-500);
   --primary-color-light: var(--primary-400);
   --primary-color-dark: var(--primary-600);
@@ -301,47 +313,99 @@ html.dark {
   --warning-color: var(--warning-500);
   --danger-color: var(--error-500);
   --info-color: var(--neutral-500);
-  
+
   --bg-color: var(--bg-primary);
   --bg-white: var(--bg-card);
-  --bg-secondary: var(--bg-secondary);
   --bg-ivory: var(--neutral-50);
   --bg-cyan-soft: var(--primary-bg);
-  
+
   --card-radius: var(--radius-lg);
   --button-radius: var(--radius-md);
   --input-radius: var(--radius-md);
-  
+
   --card-shadow: var(--shadow-md);
   --card-shadow-hover: var(--shadow-lg);
-  
+
   --spacing-xs: var(--space-1);
   --spacing-sm: var(--space-2);
   --spacing-md: var(--space-3);
   --spacing-lg: var(--space-4);
   --spacing-xl: var(--space-5);
   --spacing-xxl: var(--space-6);
-  
+
   --font-size-xs: var(--font-sm);
   --font-size-sm: var(--font-md);
   --font-size-md: var(--font-lg);
   --font-size-lg: var(--font-xl);
   --font-size-xl: var(--font-2xl);
   --font-size-xxl: var(--font-3xl);
-  
+
   --transition-fast: var(--duration-fast);
   --transition-base: var(--duration-normal);
   --transition-slow: var(--duration-slow);
-  
+
   --app-header-gradient: var(--header-gradient);
-  
-  /* Element Plus & Vant compatibility */
+
+  /* ===== Element Plus Overrides ===== */
   --el-color-primary: var(--primary-500);
   --el-color-primary-light-3: var(--primary-300);
   --el-color-primary-light-5: var(--primary-200);
   --el-color-primary-light-7: var(--primary-100);
+  --el-color-primary-light-8: var(--primary-100);
   --el-color-primary-light-9: var(--primary-50);
-  
+  --el-color-primary-dark-2: var(--primary-700);
+  --el-color-success: var(--success-500);
+  --el-color-success-light-3: var(--success-300);
+  --el-color-success-light-5: var(--success-200);
+  --el-color-success-light-7: var(--success-100);
+  --el-color-success-light-9: var(--success-50);
+  --el-color-warning: var(--warning-500);
+  --el-color-warning-light-3: var(--warning-300);
+  --el-color-warning-light-5: var(--warning-200);
+  --el-color-warning-light-7: var(--warning-100);
+  --el-color-warning-light-9: var(--warning-50);
+  --el-color-danger: var(--error-500);
+  --el-color-danger-light-3: var(--error-300);
+  --el-color-danger-light-5: var(--error-200);
+  --el-color-danger-light-7: var(--error-100);
+  --el-color-danger-light-9: var(--error-50);
+  --el-color-info: var(--neutral-500);
+  --el-color-info-light-3: var(--neutral-300);
+  --el-color-info-light-5: var(--neutral-200);
+  --el-color-info-light-7: var(--neutral-100);
+  --el-color-info-light-9: var(--neutral-50);
+
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-primary);
+  --el-text-color-secondary: var(--text-secondary);
+  --el-text-color-placeholder: var(--text-placeholder);
+  --el-text-color-disabled: var(--text-disabled);
+
+  --el-border-color: var(--border-primary);
+  --el-border-color-light: var(--border-secondary);
+  --el-border-color-lighter: var(--border-tertiary);
+  --el-border-color-extra-light: var(--neutral-100);
+  --el-border-color-dark: var(--neutral-400);
+
+  --el-fill-color: var(--neutral-100);
+  --el-fill-color-light: var(--neutral-50);
+  --el-fill-color-lighter: var(--neutral-100);
+  --el-fill-color-blank: #ffffff;
+
+  --el-bg-color: var(--bg-primary);
+  --el-bg-color-page: var(--bg-secondary);
+  --el-bg-color-overlay: #ffffff;
+
+  --el-border-radius-base: var(--radius-md);
+  --el-border-radius-small: var(--radius-sm);
+  --el-border-radius-large: var(--radius-lg);
+
+  --el-box-shadow: var(--shadow-md);
+  --el-box-shadow-light: var(--shadow-sm);
+  --el-box-shadow-lighter: var(--shadow-xs);
+  --el-box-shadow-dark: var(--shadow-lg);
+
+  /* ===== Vant Overrides ===== */
   --van-primary-color: var(--primary-500);
   --van-button-primary-background: var(--primary-500);
   --van-button-primary-border-color: var(--primary-500);
@@ -349,6 +413,24 @@ html.dark {
   --van-checkbox-checked-icon-color: var(--primary-500);
   --van-radio-checked-icon-color: var(--primary-500);
   --van-loading-spinner-color: var(--primary-500);
+  --van-success-color: var(--success-500);
+  --van-warning-color: var(--warning-500);
+  --van-danger-color: var(--error-500);
+  --van-text-color: var(--text-primary);
+  --van-text-color-2: var(--text-secondary);
+  --van-text-color-3: var(--text-tertiary);
+  --van-background: var(--bg-primary);
+  --van-background-2: var(--bg-secondary);
+  --van-cell-background: var(--bg-card);
+  --van-nav-bar-background: var(--bg-card);
+  --van-active-color: var(--neutral-100);
+  --van-active-opacity: 0.7;
+  --van-disabled-opacity: 0.5;
+  --van-border-color: var(--border-primary);
+  --van-radius-sm: var(--radius-sm);
+  --van-radius-md: var(--radius-md);
+  --van-radius-lg: var(--radius-lg);
+  --van-radius-max: var(--radius-full);
 }
 
 html.dark {
@@ -360,19 +442,50 @@ html.dark {
   --warning-color: var(--warning-400);
   --danger-color: var(--error-400);
   --info-color: var(--neutral-400);
-  
+
   --bg-color: var(--bg-primary);
   --bg-white: var(--bg-card);
-  --bg-secondary: var(--bg-secondary);
   --bg-ivory: var(--bg-card);
   --bg-cyan-soft: var(--primary-bg);
-  
+
   --el-color-primary: var(--primary-400);
   --el-color-primary-light-3: rgba(77, 208, 225, 0.7);
   --el-color-primary-light-5: rgba(77, 208, 225, 0.45);
   --el-color-primary-light-7: rgba(77, 208, 225, 0.24);
+  --el-color-primary-light-8: rgba(77, 208, 225, 0.18);
   --el-color-primary-light-9: rgba(77, 208, 225, 0.1);
-  
+  --el-color-primary-dark-2: rgba(77, 208, 225, 0.9);
+  --el-color-success: var(--success-400);
+  --el-color-warning: var(--warning-400);
+  --el-color-danger: var(--error-400);
+  --el-color-info: var(--neutral-400);
+
+  --el-text-color-primary: var(--neutral-50);
+  --el-text-color-regular: var(--neutral-100);
+  --el-text-color-secondary: var(--neutral-400);
+  --el-text-color-placeholder: var(--neutral-500);
+  --el-text-color-disabled: var(--neutral-600);
+
+  --el-border-color: var(--neutral-700);
+  --el-border-color-light: var(--neutral-700);
+  --el-border-color-lighter: var(--neutral-800);
+  --el-border-color-extra-light: var(--neutral-800);
+  --el-border-color-dark: var(--neutral-500);
+
+  --el-fill-color: var(--neutral-800);
+  --el-fill-color-light: var(--neutral-900);
+  --el-fill-color-lighter: var(--neutral-800);
+  --el-fill-color-blank: var(--neutral-900);
+
+  --el-bg-color: var(--neutral-950);
+  --el-bg-color-page: var(--neutral-900);
+  --el-bg-color-overlay: var(--neutral-800);
+
+  --el-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --el-box-shadow-light: 0 1px 3px 0px rgba(0, 0, 0, 0.4);
+  --el-box-shadow-lighter: 0 1px 2px 0px rgba(0, 0, 0, 0.3);
+  --el-box-shadow-dark: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
   --van-primary-color: var(--primary-400);
   --van-button-primary-background: var(--primary-400);
   --van-button-primary-border-color: var(--primary-400);
@@ -380,33 +493,103 @@ html.dark {
   --van-checkbox-checked-icon-color: var(--primary-400);
   --van-radio-checked-icon-color: var(--primary-400);
   --van-loading-spinner-color: var(--primary-400);
+  --van-text-color: var(--neutral-100);
+  --van-text-color-2: var(--neutral-400);
+  --van-text-color-3: var(--neutral-500);
+  --van-background: var(--neutral-950);
+  --van-background-2: var(--neutral-900);
+  --van-cell-background: var(--neutral-900);
+  --van-nav-bar-background: var(--neutral-900);
+  --van-active-color: var(--neutral-800);
+  --van-border-color: var(--neutral-700);
 }
 
 /* ================================================
-   20. LAYOUT BACKGROUNDS - 布局背景
+   GLOBAL RESET
    ================================================ */
-.layout-bg {
-  background: linear-gradient(135deg, #0c0c1e 0%, #1a1a3e 50%, #0d1b2a 100%);
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  font-size: var(--font-md);
+  line-height: var(--leading-normal);
+  transition: background-color var(--duration-normal) var(--ease-default),
+              color var(--duration-normal) var(--ease-default);
+}
+
+#app {
   min-height: 100vh;
 }
 
+::selection {
+  background-color: var(--primary-200);
+  color: var(--text-primary);
+}
+
+html.dark ::selection {
+  background-color: var(--primary-800);
+  color: var(--text-primary);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--neutral-300);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-normal) var(--ease-default);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-400);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: var(--neutral-600);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--neutral-500);
+}
+
 /* ================================================
-   21. GRADIENT UTILITIES - 渐变工具类
+   RESPONSIVE UTILITIES
    ================================================ */
-.gradient-primary {
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
-}
-
-.gradient-purple {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.gradient-cyan {
-  background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
-}
-
-.gradient-glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

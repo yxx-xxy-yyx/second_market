@@ -541,10 +541,9 @@ onMounted(() => {
   align-items: center;
   margin-bottom: 20px;
   padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(40px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, #f0f7ff 0%, #fafbfc 100%);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .header-left {
@@ -553,17 +552,14 @@ onMounted(() => {
 
 .page-title {
   font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  color: #303133;
   margin: 0 0 4px 0;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #909399;
   margin: 0;
 }
 
@@ -575,41 +571,31 @@ onMounted(() => {
 .stat-item {
   text-align: center;
   min-width: 60px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-value {
   font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 700;
+  color: #2c3e50;
   margin-bottom: 4px;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #606266;
   line-height: 1;
 }
 
 .table-card {
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(40px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-thumb {
   width: 80px;
   height: 80px;
-  border-radius: 12px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
@@ -619,18 +605,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: rgba(255, 255, 255, 0.5);
+  background: #f5f7fa;
+  border-radius: 6px;
+  color: #c0c4cc;
 }
 
 .price-text {
   font-size: 16px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #f56c6c 0%, #f78989 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-weight: 600;
+  color: #f56c6c;
 }
 
 .publisher-info {
@@ -641,7 +624,7 @@ onMounted(() => {
 
 .publisher-name {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #606266;
 }
 
 .action-buttons {
@@ -653,9 +636,9 @@ onMounted(() => {
 .pagination-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 24px;
+  margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #e4e7ed;
 }
 
 .detail-content {
@@ -667,28 +650,14 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: #f5f7fa;
 }
 
 :deep(.el-descriptions__label) {
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  background: rgba(255, 255, 255, 0.05) !important;
 }
 
 :deep(.el-descriptions__content) {
   word-break: break-word;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-:deep(.el-table) {
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: rgba(255, 255, 255, 0.05);
-  --el-table-row-hover-bg-color: rgba(255, 255, 255, 0.08);
-  --el-table-border-color: rgba(255, 255, 255, 0.1);
-  --el-table-text-color: rgba(255, 255, 255, 0.9);
-  --el-table-header-text-color: rgba(255, 255, 255, 0.7);
 }
 </style>

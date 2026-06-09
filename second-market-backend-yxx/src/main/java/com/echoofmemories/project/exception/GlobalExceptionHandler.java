@@ -7,6 +7,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+<<<<<<< HEAD
+
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -37,9 +39,16 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
+<<<<<<< HEAD
+        // 返回第一个验证错误信息
         String firstError = errors.values().iterator().next();
-        return Result.error(ResultCode.VALIDATION_ERROR.getCode(), 
-                           ResultCode.VALIDATION_ERROR.getMessage() + "：" + firstError);
+        return Result.error("400", "参数验证失败：" + firstError);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Result<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+        log.error("请求体解析失败: {}", e.getMessage());
+        return Result.error("400", "请求体格式错误");
     }
 
     /**
@@ -69,12 +78,13 @@ public class GlobalExceptionHandler {
         return Result.error(ResultCode.METHOD_NOT_ALLOWED);
     }
 
+
     /**
      * 处理自定义异常
      */
     @ExceptionHandler(CustomException.class)
     public Result<Object> handleCustomException(CustomException e) {
-        log.error("业务异常: {}", e.getMessage());
+        log.error("自定义异常: {}", e.getMessage(), e);
         return Result.error(e.getCode(), e.getMessage());
     }
 
@@ -83,8 +93,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public Result<Object> handleRuntimeException(RuntimeException e) {
-        log.error("运行时异常", e);
-        return Result.error(ResultCode.INTERNAL_ERROR);
+        log.error("运行时异常: {}", e.getMessage(), e);
+        return Result.error("运行时异常: " + e.getMessage());
     }
 
     /**
@@ -92,8 +102,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public Result<Object> handleException(Exception e) {
-        log.error("系统异常", e);
-        return Result.error(ResultCode.INTERNAL_ERROR);
+        log.error("系统异常: {}", e.getMessage(), e);
+        return Result.error("系统异常，请联系管理员");
     }
 
 }

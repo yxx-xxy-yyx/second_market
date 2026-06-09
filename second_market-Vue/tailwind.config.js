@@ -1,4 +1,4 @@
-/* @type {import('tailwindcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -6,9 +6,8 @@ export default {
   ],
   theme: {
     extend: {
-      /* Colors System */
+      /* Primary - 主色调 (青蓝色 #36b3c2 系列) */
       colors: {
-        /* Primary - 主色调 */
         primary: {
           50: '#edfafb',
           100: '#d1f1f4',
@@ -23,7 +22,7 @@ export default {
           950: '#0a2529',
           DEFAULT: '#36b3c2',
         },
-        /* Secondary - 辅助色 */
+        /* Secondary - 辅助色 (深蓝色) */
         secondary: {
           50: '#f0f3f7',
           100: '#dde4ee',
@@ -38,20 +37,20 @@ export default {
           950: '#0f1724',
           DEFAULT: '#3b6391',
         },
-        /* Accent - 强调色 */
+        /* Accent - 强调色 (紫色系) */
         accent: {
-          50: '#fdf2ff',
-          100: '#f9e4ff',
-          200: '#f3c8ff',
-          300: '#ea9eff',
-          400: '#de67ff',
-          500: '#cf33ff',
-          600: '#b218e0',
-          700: '#8f12b2',
-          800: '#72118d',
-          900: '#5d1172',
-          950: '#3e044d',
-          DEFAULT: '#cf33ff',
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#8b5cf6',
+          600: '#7c3aed',
+          700: '#6d28d9',
+          800: '#5b21b6',
+          900: '#4c1d95',
+          950: '#2e1065',
+          DEFAULT: '#8b5cf6',
         },
         /* Success */
         success: {
@@ -81,8 +80,8 @@ export default {
           900: '#78350f',
           DEFAULT: '#f59e0b',
         },
-        /* Error */
-        error: {
+        /* Error / Danger */
+        danger: {
           50: '#fef2f2',
           100: '#fee2e2',
           200: '#fecaca',
@@ -95,7 +94,7 @@ export default {
           900: '#7f1d1d',
           DEFAULT: '#ef4444',
         },
-        /* Neutral - 中性色 */
+        /* Neutral - 中性色 (与 design-tokens 保持一致) */
         neutral: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -109,14 +108,16 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
-        /* Legacy colors for compatibility */
+        /* Legacy colors */
         primaryDark: '#268f9c',
-        primaryLight: '#62c6d2',
+        primaryLight: '#74d2de',
         ivory: '#faf9f6',
       },
-      /* Box Shadows */
+      /* Box Shadows - 与设计令牌一致 */
       boxShadow: {
         'cyan-soft': '0 1px 12px rgba(54, 179, 194, 0.14)',
+        'card': '0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1)',
+        'card-hover': '0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -4px rgba(15, 23, 42, 0.1)',
         'xs': '0 1px 2px 0px rgba(15, 23, 42, 0.05)',
         'sm': '0 1px 3px 0px rgba(15, 23, 42, 0.1), 0 1px 2px -1px rgba(15, 23, 42, 0.1)',
         'md': '0 4px 6px -1px rgba(15, 23, 42, 0.1), 0 2px 4px -2px rgba(15, 23, 42, 0.1)',
@@ -125,8 +126,10 @@ export default {
         '2xl': '0 25px 50px -12px rgba(15, 23, 42, 0.25)',
         'primary': '0 4px 20px rgba(54, 179, 194, 0.25)',
         'primary-hover': '0 8px 30px rgba(54, 179, 194, 0.35)',
+        'accent': '0 4px 20px rgba(139, 92, 246, 0.25)',
+        'accent-hover': '0 8px 30px rgba(139, 92, 246, 0.35)',
       },
-      /* Border Radius */
+      /* Border Radius - 与设计令牌一致 */
       borderRadius: {
         'xs': '4px',
         'sm': '6px',
@@ -136,7 +139,7 @@ export default {
         '2xl': '20px',
         '3xl': '24px',
       },
-      /* Spacing */
+      /* Spacing - 扩展间距 */
       spacing: {
         '4.5': '18px',
         '5.5': '22px',
@@ -153,7 +156,7 @@ export default {
         '26': '104px',
         '30': '120px',
       },
-      /* Typography */
+      /* Typography - 与设计令牌一致 */
       fontFamily: {
         sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
         mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
@@ -192,9 +195,14 @@ export default {
         'normal': '300ms',
         'slow': '500ms',
       },
+      /* Background gradients */
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(135deg, #36b3c2 0%, #268f9c 100%)',
+        'gradient-accent': 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+        'gradient-primary-accent': 'linear-gradient(135deg, #46c3d3 0%, #8b5cf6 100%)',
+      },
     },
   },
   darkMode: 'class',
   plugins: [],
 }
-

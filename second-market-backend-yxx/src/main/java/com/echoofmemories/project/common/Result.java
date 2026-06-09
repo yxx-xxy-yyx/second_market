@@ -89,6 +89,7 @@ public class Result<T> {
     }
 
     /**
+    /**
      * 失败返回结果（通过ResultCode枚举）
      */
     public static <T> Result<T> error(ResultCode resultCode) {

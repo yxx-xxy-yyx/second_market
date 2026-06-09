@@ -167,27 +167,6 @@
           </div>
           <h1 class="desktop-title">{{ $t('login.appName') }}</h1>
           <p class="desktop-slogan">{{ $t('login.appSlogan') }}</p>
-          
-          <div class="desktop-features">
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><Shop /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('register.feature1') }}</span>
-            </div>
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><PriceTag /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('register.feature2') }}</span>
-            </div>
-            <div class="desktop-feature-item">
-              <div class="feature-icon">
-                <el-icon :size="28"><User /></el-icon>
-              </div>
-              <span class="feature-text">{{ $t('register.feature3') }}</span>
-            </div>
-          </div>
         </div>
 
         <div class="desktop-form-wrapper">
@@ -330,7 +309,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { User, Lock, Message, Avatar, School, Shop, PriceTag } from '@element-plus/icons-vue'
+import { User, Lock, Message, Avatar, School } from '@element-plus/icons-vue'
 import { useI18n } from 'vue-i18n'
 import LangSwitcher from '@/components/LangSwitcher.vue'
 import { schoolApi } from '@/api/school'
@@ -859,47 +838,7 @@ const handleRegister = async () => {
   font-size: 24px;
   color: rgba(255, 255, 255, 0.75);
   font-weight: 500;
-  margin-bottom: 60px;
-}
-
-.desktop-features {
-  display: flex;
-  gap: 32px;
-}
-
-.desktop-feature-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 28px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  transition: all 0.4s ease;
-}
-
-.desktop-feature-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-5px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-}
-
-.feature-icon {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.feature-text {
-  color: rgba(255, 255, 255, 0.9);
-  font-weight: 600;
-  font-size: 16px;
+  margin-bottom: 40px;
 }
 
 .desktop-form-wrapper {
